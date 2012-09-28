@@ -1,0 +1,5 @@
+[2012-09-28 19-09-20][ServiceFactory::serve] URL recieved: /UserService/getNearbyUsers/1
+[2012-09-28 20-09-28][ServiceFactory][serve] URL recieved: /UserService/getNearbyUsers/1
+[2012-09-28 20-09-40][ServiceFactory][serve] URL recieved: /UserService/getNearbyUsers/1
+[2012-09-28 20-09-35][ServiceFactory][serve] URL recieved: /UserService/getNearbyUsers/1
+[2012-09-28 20-09-12][ServiceFactory][serve] URL recieved: /UserService/getNearbyUsers/1

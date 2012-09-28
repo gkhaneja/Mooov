@@ -1,5 +1,5 @@
 <?php
-require_once("/home/gourav/server/trunk/Server/autoload.php");
+require_once("/home/gourav/Mooov/trunk/autoload.php");
 
 foreach ($_REQUEST as $key=>$val) {
 	${$key}=$val;

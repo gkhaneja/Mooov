@@ -1,5 +1,5 @@
 <?php
-require_once("/home/gourav/server/trunk/Server/autoload.php");
+require_once("/home/gourav/Mooov/trunk/autoload.php");
 
 class ServiceFactory {
 	public $uri;
@@ -9,6 +9,8 @@ class ServiceFactory {
 	}
 
 	public function serve(){
+		Logger::bootup();
+		Logger::do_log("URL recieved: " . $this->uri);
 		$parts=explode('/',$this->uri);
 		if(count($parts)<3 || class_exists($parts[1],true)==false){
 			echo "Error: Service " . $parts[1] . " Not Found.";
