@@ -1,5 +1,6 @@
 <?php
 require_once("/home/gourav/Mooov/trunk/autoload.php");
+require_once('../objects/exception.php');
 
 class ServiceFactory {
 	public $uri;
@@ -13,23 +14,39 @@ class ServiceFactory {
 		Logger::do_log("URL recieved: " . $this->uri);
 		$parts=explode('/',$this->uri);
 		if(count($parts)<3 || class_exists($parts[1],true)==false){
-			echo "Error: Service " . $parts[1] . " Not Found.";
+			$error_m = new ExceptionHandler(array("code" =>"1" , 'error' => 'Service not Found'));
+			echo $error_m->m_error->getMessage();
 			return;
 		}    
 		$service = new $parts[1]();
 		$method = $parts[2];
 		if(method_exists($service,$method)==false){
-			echo "Method " . $method . " Not Found.";
+			$error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Method not Found'));
+			echo $error_m->m_error->getMessage();
 			return;
 		}
-		$arguments = array();
-		for($i=3;$i<count($parts);$i++){
-			$arguments[] = $parts[$i];
+// 		$arguments = array();
+// 		for($i=3;$i<count($parts);$i++){
+// 			$arguments[] = $parts[$i];
+// 		}
+		
+		$method = $_SERVER['REQUEST_METHOD'];
+		switch ($method) {
+			case 'GET':
+			case 'HEAD':
+				$arguments = $_GET;
+				break;
+			case 'POST':
+				$arguments = $_POST;
+				break;
+			case 'PUT':
+			case 'DELETE':
+				parse_str(file_get_contents('php://input'), $arguments);
 		}
-		call_user_func_array(array($service,$method),$arguments);
+
+		call_user_func(array($service,$method),$arguments);
 		return;
 	}
-
 }
 
 

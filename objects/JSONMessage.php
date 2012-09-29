@@ -1,3 +1,5 @@
+
+<?php
 /*
 
 This class will define the message sent in reply to API calls
@@ -8,7 +10,6 @@ It is a Json array with 3 parts
 
 */
 
-<?php
 class JSONMessage{
 	
 	private $m_header;
