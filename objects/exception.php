@@ -1,6 +1,5 @@
 <?php
-require_once("/home/gourav/Mooov/trunk/autoload.php");
-require_once('JSONMessage.php');
+require_once("JSONMessage.php");
 
 class ExceptionHandler {
 	public $m_error; 

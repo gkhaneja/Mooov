@@ -1,6 +1,10 @@
 <?php
-require_once("/home/gourav/Mooov/trunk/autoload.php");
-require_once('../objects/exception.php');
+//require_once("/home/gourav/Mooov/trunk/autoload.php");
+require_once('objects/dbclass.php');
+require_once("objects/logger.php");
+require_once("Rest/UserService.php");
+require_once("objects/exception.php");
+
 
 class ServiceFactory {
 	public $uri;
@@ -12,6 +16,8 @@ class ServiceFactory {
 	public function serve(){
 		Logger::bootup();
 		Logger::do_log("URL recieved: " . $this->uri);
+		$dbobject = new dbclass();
+		$dbobject->connect();
 		$parts=explode('/',$this->uri);
 		if(count($parts)<3 || class_exists($parts[1],true)==false){
 			$error_m = new ExceptionHandler(array("code" =>"1" , 'error' => 'Service not Found'));
@@ -19,8 +25,8 @@ class ServiceFactory {
 			return;
 		}    
 		$service = new $parts[1]();
-		$method = $parts[2];
-		if(method_exists($service,$method)==false){
+		$function = $parts[2];
+		if(method_exists($service,$function)==false){
 			$error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Method not Found'));
 			echo $error_m->m_error->getMessage();
 			return;
@@ -44,7 +50,7 @@ class ServiceFactory {
 				parse_str(file_get_contents('php://input'), $arguments);
 		}
 
-		call_user_func(array($service,$method),$arguments);
+		call_user_func(array($service,$function),$arguments);
 		return;
 	}
 }
