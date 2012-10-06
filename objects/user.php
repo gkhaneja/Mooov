@@ -23,14 +23,22 @@ class User extends dbclass {
 			echo $error_m->m_error->getMessage();
 			return;
 		}
+		$result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
+		if(isset($result[0]['id'])){
+			$json_msg = new JSONMessage();
+			$json_msg->setBody(array("user_id" => $result[0]['id']));
+			echo $json_msg->getMessage();
+			return;
+		}	
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){
 				$this->fields[$field->name]->value = $arguments[$field->name];
 			}
 		}
-		$id = parent::insert('user',$this->fields);
+		parent::insert('user',$this->fields);
+		$result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
 		$json_msg = new JSONMessage();
-		$json_msg->setBody(array("user_id" => $id));
+		$json_msg->setBody(array("user_id" => $result[0]['id']));
 		echo $json_msg->getMessage();
 	}	
 
