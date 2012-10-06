@@ -27,6 +27,7 @@ class ServiceFactory {
 		$service = new $parts[1]();
 		$function = $parts[2];
 		if(method_exists($service,$function)==false){
+			Logger::do_log("Method not found: " . $function);
 			$error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Method not Found'));
 			echo $error_m->m_error->getMessage();
 			return;
@@ -43,7 +44,7 @@ class ServiceFactory {
 				$arguments = $_GET;
 				break;
 			case 'POST':
-				$arguments = getPostArguments();
+				$arguments = $this->getPostArguments();
 				break;
 			case 'PUT':
 			case 'DELETE':
@@ -60,7 +61,7 @@ class ServiceFactory {
 		
 		if(preg_match('/json/', $request_type) != 0)
 		{	
-			return json_decode(file_get_contents('php://input'));
+			return get_object_vars(json_decode(file_get_contents('php://input')));
 		}
 		else  
 			return $_POST;

@@ -22,9 +22,12 @@ class dbclass extends mysqli {
 		$DB_NAME = DB_NAME;
 		dbclass::$connection = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 		if (mysqli_connect_errno()) {
-			printf("Connect failed:( %s\n", mysqli_connect_error());
-			exit();
+			Logger::do_log("Connect failed:( %s\n", mysqli_connect_error());
+			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => 'Internal Error. Please contact server monkey\'s. Error code: 1234'));
+			echo $error_m->m_error->getMessage();
+			return;
 		}
+		Logger::do_log("Connected to databse " . $DB_NAME);
 	}	
 
 	function execute($query){

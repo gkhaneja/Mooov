@@ -4,7 +4,7 @@
 class Logger {
 
 	private static $file_handle;
-	private $log_file="/home/gourav/Mooov/trunk/mooov.log";
+	private $log_file="/tmp/mooov.log";
 	private $level = 10;
 
 	public static function bootup(){

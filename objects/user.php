@@ -10,26 +10,27 @@ class User extends dbclass {
 
 	function __construct(){
 		$this->fields = array();
-		$this->fields['id'] = new Field('id','id',0,1); 
-		$this->fields['first_name'] = new Field('first_name','first_name',1,0);
-		$this->fields['last_name'] = new Field('last_name','last_name',1,0);
-		$this->fields['username'] = new Field('username','username',1,0);
+		$this->fields['id'] = new Field('id','id',1); 
+		$this->fields['first_name'] = new Field('first_name','first_name',0);
+		$this->fields['last_name'] = new Field('last_name','last_name',0);
+		$this->fields['username'] = new Field('username','username',0);
+		$this->fields['uuid'] = new Field('uuid','uuid',0);
 	}
 
 	function add($arguments){
+		if(!isset($arguments['uuid'])){
+			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field uuid is not set.'));
+			echo $error_m->m_error->getMessage();
+			return;
+		}
 		foreach($this->fields as $field){
-			if($field->mandatory == 1 && !isset($arguments[$field->name])){
-				$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field ' . $field->name . ' is not set.'));
-				echo $error_m->m_error->getMessage();
-				return;
-			}
 			if($field->readonly == 0 && isset($arguments[$field->name])){
 				$this->fields[$field->name]->value = $arguments[$field->name];
 			}
 		}
-		parent::insert('user',$this->fields);
+		$id = parent::insert('user',$this->fields);
 		$json_msg = new JSONMessage();
-		$json_msg->setBody(array("user_id" => array()));
+		$json_msg->setBody(array("user_id" => $id));
 		echo $json_msg->getMessage();
 	}	
 

@@ -6,12 +6,12 @@ class Field {
 	var $name;
 	var $mandatory;
 	var $readonly;
+  var $update_mandatory;
 	var $value;
 
-	function __construct($dbname, $name, $mandatory, $readonly){
+	function __construct($dbname, $name, $readonly){
 		$this->dbname = $dbname;
 		$this->name = $name;
-		$this->mandatory = $mandatory;	
 		$this->readonly = $readonly;
 	}
 
