@@ -43,7 +43,7 @@ class ServiceFactory {
 				$arguments = $_GET;
 				break;
 			case 'POST':
-				$arguments = $_POST;
+				$arguments = getPostArguments();
 				break;
 			case 'PUT':
 			case 'DELETE':
@@ -52,6 +52,18 @@ class ServiceFactory {
 
 		call_user_func(array($service,$function),$arguments);
 		return;
+	}
+	
+	function getPostArguments()
+	{
+		$request_type =  $_SERVER['CONTENT_TYPE'];
+		
+		if(preg_match('/json/', $request_type) != 0)
+		{	
+			return json_decode(file_get_contents('php://input'));
+		}
+		else  
+			return $_POST;
 	}
 }
 
