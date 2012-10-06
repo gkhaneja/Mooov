@@ -2,6 +2,7 @@
 //require_once("");
 require_once('objects/field.php');
 require_once("objects/logger.php");
+require_once("conf/db.inc");
 
 class dbclass extends mysqli {
 
@@ -15,10 +16,10 @@ class dbclass extends mysqli {
 	}
 
 	function connect(){
-		$DB_HOST = "localhost";
-		$DB_USER = "root";
-		$DB_PASS = "rock";
-		$DB_NAME = "stranger";
+		$DB_HOST = DB_HOST;
+		$DB_USER = DB_USER;
+		$DB_PASS = DB_PASS;
+		$DB_NAME = DB_NAME;
 		dbclass::$connection = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 		if (mysqli_connect_errno()) {
 			printf("Connect failed:( %s\n", mysqli_connect_error());
