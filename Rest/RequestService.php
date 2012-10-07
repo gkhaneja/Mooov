@@ -2,6 +2,7 @@
 //require_once("/home/gourav/Mooov/trunk/autoload.php");
 require_once('RestService.php');
 require_once('objects/user.php');
+require_once('objects/request.php');
 
 class RequestService extends RestService {
 
