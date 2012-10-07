@@ -10,6 +10,11 @@ class RequestService extends RestService {
 		$request->add($arguments);
 	}
 
+	public function getNearbyRequests($arguments){
+		$request = new Request();
+		$request->getNearbyRequests($arguments);
+	}
+
 }
 
 
