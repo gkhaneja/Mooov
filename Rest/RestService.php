@@ -1,5 +1,4 @@
 <?php
-require_once("/home/gourav/Mooov/trunk/autoload.php");
 
 foreach ($_REQUEST as $key=>$val) {
 	${$key}=$val;

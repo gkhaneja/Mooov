@@ -1,0 +1,49 @@
+<?php
+require_once('objects/dbclass.php');
+require_once('objects/field.php');
+require_once('objects/exception.php');
+
+class UserDetails extends dbclass{
+	
+	var $fields;
+	
+	function __construct(){
+		$this->fields = array();
+		$this->fields['id'] = new Field('id','id',1);
+		$this->fields['user_id'] = new Field('user_id','user_id',0); // Foreign key from user table
+		$this->fields['firstname'] = new Field('firstname','firstname',0);
+		$this->fields['lastname'] = new Field('lastname','lastname',0);
+		$this->fields['username'] = new Field('username','username',0);
+		$this->fields['fbid'] = new Field('fbid','fbid',0);
+		$this->fields['fbtoken'] = new Field('fbtoken','fbtoken',0);
+		$this->fields['birthday'] = new Field('birthday','birthday',0);
+		$this->fields['email'] = new Field('email','email',0);
+		$this->fields['workplace'] = new Field('workplace','workplace',0);
+		
+	}
+
+	function add($arguments){
+		if(!isset($arguments['user_id'])){
+			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field user_id is not set.'));
+			echo $error_m->m_error->getMessage();
+			return;
+		}
+		$result = parent::select('user', array('id'),array('id' => $arguments['user_id'])); // check if incoming user if exists
+		if(!isset($result[0]['id']))
+		{
+			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'This user doesnt exist'));
+			echo $error_m->m_error->getMessage();
+			return;
+		}
+		foreach($this->fields as $field){
+			if($field->readonly == 0 && isset($arguments[$field->name])){
+				$this->fields[$field->name]->value = $arguments[$field->name];
+			}
+		}
+		$id = parent::insert('user_details',$this->fields);
+		$json_msg = new JSONMessage();
+		$json_msg->setBody(array("Success" => "Success"));
+		echo $json_msg->getMessage();
+	}
+	
+}
