@@ -23,6 +23,17 @@ class Request extends dbclass {
 			echo $error_m->m_error->getMessage();
 			return;
 		}
+		if(!isset($arguments['id'])){
+			$result = parent::select('request','*',array('user_id' => $arguments['user_id']));
+		}else{
+			$result = parent::select('request','*',array('id' => $arguments['id']));
+	  }	
+		if(count($result)==0){
+			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Request does not exist.'));
+			echo $error_m->m_error->getMessage();
+			return;
+		}
+	  	
 		$sql = "select r1.user_id, from request as r1, request as r2 where r1.src_lattitude<r2.src_lattitude+1 and r1.src_lattitude>r2.src_lattitude-1 and r1.src_longitude<r2.src_longitude+1 and r1.src_longitude>r2.src_longitude-1 and r1.dst_lattitude<r2.dst_lattitude+1 and r1.dst_lattitude>r2.dst_lattitude-1 and r1.dst_longitude<r2.dst_longitude+1 and r1.dst_longitude>r2.dst_longitude-1 and r2.user_id=" . $this->user_id;
 		$result = parent::execute($sql); 
 		$ret = array();
