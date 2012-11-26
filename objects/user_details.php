@@ -45,7 +45,7 @@ class UserDetails extends dbclass{
 		               
                         }
                         $json_msg = new JSONMessage();
-                        $json_msg->setBody(array("Success" => "Success"));
+                        $json_msg->setBody(array("Status" => "Success"));
                         echo $json_msg->getMessage();
                         return;
 

@@ -70,10 +70,15 @@ class Request extends dbclass {
                         if($result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
                            $work_data =  unserialize($row['workplace']);
+                           $hometown_data = unserialize($row['hometown']);
+                           $location_data =  unserialize($row['location']);
 			   error_log(print_r($work_data,true));
                            $work_place  = $work_data[0]['employer']['name'];
+                           $hometown  = $hometown_data['name'];
+                           $current_city   = $location_data['name'];
+		            $pic = 'http://graph.facebook.com/' . $row['fbid'] . '/picture';
                            $fb_array = array( "firstname" => stripslashes($row['firstname']), "lastname" => stripslashes($row['lastname']),
-                              "works_at" => $work_place);  
+                              "works_at" => $work_place,"lives_in" => $current_city , "hometown" => $hometown, "image_url" =>  $pic);  
                         }
 	          }
                         $resp[] = array("loc_info" => $loc_array,  "fb_info" => $fb_array);

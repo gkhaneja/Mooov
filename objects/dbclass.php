@@ -27,6 +27,8 @@ class dbclass extends mysqli {
 	}	
 
 	function execute($query){
+//			$query  = dbclass::$connection->real_escape_string($query);
+//			error_log($query);
 		Logger::do_log($query);
 		$result = dbclass::$connection->query($query) or die(dbclass::$connection->error.__LINE__);
 		if (!$result) {
