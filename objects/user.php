@@ -25,6 +25,14 @@ class User extends dbclass {
 		}
 		$result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
 		if(isset($result[0]['id'])){
+                        if(isset($arguments['first_name']) || isset($arguments['last_name']) || isset($arguments['username'])){
+                        foreach($this->fields as $field){
+                        if($field->readonly == 0 && isset($arguments[$field->name])){
+                                $this->fields[$field->name]->value = $arguments[$field->name];
+                	     }
+		          }error_log("Updating");
+                        parent::update('user',$this->fields,array('id' => $result[0]['id']));
+                        }
 			$json_msg = new JSONMessage();
 			$json_msg->setBody(array("user_id" => $result[0]['id']));
 			echo $json_msg->getMessage();
@@ -42,7 +50,23 @@ class User extends dbclass {
 		echo $json_msg->getMessage();
 	}	
 
+        function get($arguments){
+  		if(!isset($arguments['uuid']))
+                {
+		        $error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field uuid is not set.'));
+                        echo $error_m->m_error->getMessage();
+                        return;
+                }
+          	 $result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
+                if(isset($result[0]['id'])){
+                        $json_msg = new JSONMessage();
+                        $json_msg->setBody(array("user_id" => $result[0]['id']));
+                        echo $json_msg->getMessage();
+                        return;
+                }
 
+
+	}
 
 }
 

@@ -28,12 +28,27 @@ class UserDetails extends dbclass{
 			echo $error_m->m_error->getMessage();
 			return;
 		}
-		$result = parent::select('user', array('id'),array('id' => $arguments['user_id'])); // check if incoming user if exists
-		if(!isset($result[0]['id']))
+		$result = parent::select('user_details', array('id'),array('user_id' => $arguments['user_id'])); // check if incoming user if exists
+		if(isset($result[0]['id']))
 		{
-			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'This user doesnt exist'));
-			echo $error_m->m_error->getMessage();
-			return;
+                      $toupdate  = 0;
+                      foreach($this->fields as $field){
+                        if($field->readonly == 0 && isset($arguments[$field->name])){
+                                $this->fields[$field->name]->value = $arguments[$field->name];
+                                $toupdate = 1;
+                             }
+                          }
+                        if($toupdate ==1 ) 
+                        {
+                        	parent::update('user_details',$this->fields,array('id' => $result[0]['id']));
+                                 include('facebook_details.php');
+		               
+                        }
+                        $json_msg = new JSONMessage();
+                        $json_msg->setBody(array("Success" => "Success"));
+                        echo $json_msg->getMessage();
+                        return;
+
 		}
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){
@@ -44,6 +59,8 @@ class UserDetails extends dbclass{
 		$json_msg = new JSONMessage();
 		$json_msg->setBody(array("Success" => "Success"));
 		echo $json_msg->getMessage();
+                include('facebook_details.php');
+               
 	}
 	
 }

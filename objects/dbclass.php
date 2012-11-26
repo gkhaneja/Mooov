@@ -62,6 +62,7 @@ class dbclass extends mysqli {
 			}
 		}
 		$query = "UPDATE " . $table . " SET " . $set_part . " WHERE " . $where_part;
+                error_log("=== $query ===");
 		$this->execute($query);
 	}
 

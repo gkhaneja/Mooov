@@ -3,6 +3,7 @@
 require_once('objects/dbclass.php');
 require_once("objects/logger.php");
 require_once("Rest/UserService.php");
+require_once("Rest/UserDetailsService.php");
 require_once("objects/exception.php");
 require_once("Rest/RequestService.php");
 

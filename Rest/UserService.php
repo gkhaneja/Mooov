@@ -10,6 +10,11 @@ class UserService extends RestService {
 		$user = new User();
 		$user->add($arguments);
 	}
+        
+       public function getUserID($arguments){
+                $user = new User();
+                $user->get($arguments);
+      }
 
 }
 

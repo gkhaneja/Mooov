@@ -1,8 +1,8 @@
 <?php
 
 define('DB_HOST','localhost');
-define('DB_NAME', 'stranger');
+define('DB_NAME', 'hopon');
 define('DB_USER', 'root');
-define('DB_PASS' , 'rock'); 
+define('DB_PASS' , 'root'); 
 
 ?>
