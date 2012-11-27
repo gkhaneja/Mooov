@@ -11,9 +11,9 @@ class Request extends dbclass {
 		$this->fields = array();
 		$this->fields['id'] = new Field('id','id',1); 
 		$this->fields['user_id'] = new Field('user_id','user_id',0); 
-		$this->fields['src_lattitude'] = new Field('src_lattitude','src_lattitude',0);
+		$this->fields['src_latitude'] = new Field('src_latitude','src_latitude',0);
 		$this->fields['src_longitude'] = new Field('src_longitude','src_longitude',0);
-		$this->fields['dst_lattitude'] = new Field('dst_lattitude','dst_lattitude',0);
+		$this->fields['dst_latitude'] = new Field('dst_latitude','dst_latitude',0);
 		$this->fields['dst_longitude'] = new Field('dst_longitude','dst_longitude',0);
 	}
 
@@ -35,7 +35,7 @@ class Request extends dbclass {
 			return;
 		}
 	  	
-		$sql = "select r1.user_id from request as r1, request as r2 where r1.src_lattitude<r2.src_lattitude+1 and r1.src_lattitude>r2.src_lattitude-1 and r1.src_longitude<r2.src_longitude+1 and r1.src_longitude>r2.src_longitude-1 and r1.dst_lattitude<r2.dst_lattitude+1 and r1.dst_lattitude>r2.dst_lattitude-1 and r1.dst_longitude<r2.dst_longitude+1 and r1.dst_longitude>r2.dst_longitude-1 and r2.user_id=" . $arguments['user_id'];
+		$sql = "select r1.user_id from request as r1, request as r2 where r1.src_latitude<r2.src_latitude+1 and r1.src_latitude>r2.src_latitude-1 and r1.src_longitude<r2.src_longitude+1 and r1.src_longitude>r2.src_longitude-1 and r1.dst_latitude<r2.dst_latitude+1 and r1.dst_latitude>r2.dst_latitude-1 and r1.dst_longitude<r2.dst_longitude+1 and r1.dst_longitude>r2.dst_longitude-1 and r2.user_id=" . $arguments['user_id'];
 		$result = parent::execute($sql); 
 		$ret = array();
 		if($result->num_rows > 0) {
@@ -50,21 +50,22 @@ class Request extends dbclass {
                 $resp = array();
                 foreach($ret as $user)
                 {
+                        $fb_array = array();
+                        $user_array= array();
 			$sql = "select * from user where id = $user";
                         $result = parent::execute($sql);
                         if($result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
-                 	 $user_array = array("id" => stripslashes($row['id']), "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));             
+                 	 $user_array = array("user_id" => $user, "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));             
                         }}                            
                         $sql = "select * from request where user_id = $user";
                         $result = parent::execute($sql);
                         if($result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
-                         $loc_array = array("src_latitude" => stripslashes($row['src_lattitude']), "src_longitude" => stripslashes($row['src_longitude']), "dst_latitude" => $row['dst_lattitude'] , "dst_longitude" => $row['dst_longitude']);  
+                         $loc_array = array("src_latitude" => stripslashes($row['src_latitude']), "src_longitude" => stripslashes($row['src_longitude']), "dst_latitude" => $row['dst_latitude'] , "dst_longitude" => $row['dst_longitude']);  
 			 }}
 
-                        array_merge($user_array , $loc_array);
-
+                        $merg_array = array_merge($user_array , $loc_array);
                         $sql = "select * from user_details where user_id = $user";
                         $result = parent::execute($sql);
                         if($result->num_rows > 0) {
@@ -72,7 +73,6 @@ class Request extends dbclass {
                            $work_data =  unserialize($row['workplace']);
                            $hometown_data = unserialize($row['hometown']);
                            $location_data =  unserialize($row['location']);
-			   error_log(print_r($work_data,true));
                            $work_place  = $work_data[0]['employer']['name'];
                            $hometown  = $hometown_data['name'];
                            $current_city   = $location_data['name'];
@@ -81,7 +81,7 @@ class Request extends dbclass {
                               "works_at" => $work_place,"lives_in" => $current_city , "hometown" => $hometown, "image_url" =>  $pic);  
                         }
 	          }
-                        $resp[] = array("loc_info" => $loc_array,  "fb_info" => $fb_array);
+                        $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array);
 		}
                 
                 $json_msg = new JSONMessage();
@@ -90,7 +90,7 @@ class Request extends dbclass {
 	}
 	
 	function add($arguments){
-		if(!isset($arguments['user_id']) || !isset($arguments['src_lattitude']) || !isset($arguments['src_longitude']) || !isset($arguments['dst_lattitude']) || !isset($arguments['dst_longitude'])){
+		if(!isset($arguments['user_id']) || !isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
 			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
 			echo $error_m->m_error->getMessage();
 			return;
