@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.28, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.24, for debian-linux-gnu (i686)
 --
 -- Host: localhost    Database: hopon
 -- ------------------------------------------------------
--- Server version	5.5.28-0ubuntu0.12.04.2
+-- Server version	5.5.24-0ubuntu0.12.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -41,6 +41,56 @@ LOCK TABLES `exceptions` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `mumbai_dst`
+--
+
+DROP TABLE IF EXISTS `mumbai_dst`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `mumbai_dst` (
+  `row_id` int(10) unsigned NOT NULL,
+  `col_id` int(10) unsigned NOT NULL,
+  `users` varchar(500) DEFAULT NULL,
+  KEY `row_id` (`row_id`,`col_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `mumbai_dst`
+--
+
+LOCK TABLES `mumbai_dst` WRITE;
+/*!40000 ALTER TABLE `mumbai_dst` DISABLE KEYS */;
+INSERT INTO `mumbai_dst` VALUES (106,89,'1,2,3'),(106,88,'1,2,3'),(105,89,'1,2,3'),(105,88,'1,2,3');
+/*!40000 ALTER TABLE `mumbai_dst` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `mumbai_src`
+--
+
+DROP TABLE IF EXISTS `mumbai_src`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `mumbai_src` (
+  `row_id` int(10) unsigned NOT NULL,
+  `col_id` int(10) unsigned NOT NULL,
+  `users` varchar(500) DEFAULT NULL,
+  KEY `row_id` (`row_id`,`col_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `mumbai_src`
+--
+
+LOCK TABLES `mumbai_src` WRITE;
+/*!40000 ALTER TABLE `mumbai_src` DISABLE KEYS */;
+INSERT INTO `mumbai_src` VALUES (101,84,'1,2'),(101,83,'1,2'),(100,84,'1'),(100,83,'1'),(102,84,'2'),(102,83,'2'),(104,84,'3'),(104,83,'3'),(103,84,'3'),(103,83,'3');
+/*!40000 ALTER TABLE `mumbai_src` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `request`
 --
 
@@ -69,7 +119,7 @@ CREATE TABLE `request` (
 
 LOCK TABLES `request` WRITE;
 /*!40000 ALTER TABLE `request` DISABLE KEYS */;
-INSERT INTO `request` VALUES (1,1,19.12570000,72.91030000,19.13450000,72.91050000,NULL,'2012-11-27 17:46:31'),(2,2,19.12540000,72.91040000,19.13450000,72.91050000,NULL,'2012-11-27 17:46:43'),(3,3,19.12570000,72.91040000,19.13450000,72.91050000,NULL,'2012-11-27 17:46:59'),(4,4,19.12570000,72.91026000,19.13450000,72.91050000,NULL,'2012-11-27 17:47:16'),(5,9,19.12510000,72.90320000,19.12560000,72.90320000,NULL,'2012-11-27 16:38:39'),(7,10,19.12510000,72.90320000,19.12560000,72.90320000,NULL,'2012-11-27 16:38:39'),(8,34,19.11798600,72.90163700,19.11798600,72.90163700,NULL,'2012-11-27 20:12:39'),(9,35,19.11802500,72.90162900,19.11802500,72.90162900,NULL,'2012-11-27 20:30:38'),(10,36,19.11827900,72.90166700,19.11827900,72.90166700,NULL,'2012-11-27 21:55:40'),(11,37,19.11781200,72.90158200,19.11781200,72.90158200,NULL,'2012-11-27 21:57:43');
+INSERT INTO `request` VALUES (1,1,19.00000000,72.90000000,19.00500000,72.90500000,NULL,'2012-11-28 20:02:32'),(2,2,19.00100000,72.90000000,19.00500000,72.90500000,NULL,'2012-11-28 20:03:18'),(3,3,19.00300000,72.90000000,19.00500000,72.90500000,NULL,'2012-11-28 20:03:39'),(4,4,19.12570000,72.91026000,19.13450000,72.91050000,NULL,'2012-11-27 17:47:16'),(5,9,19.12510000,72.90320000,19.12560000,72.90320000,NULL,'2012-11-27 16:38:39'),(7,10,19.12510000,72.90320000,19.12560000,72.90320000,NULL,'2012-11-27 16:38:39'),(8,34,19.11798600,72.90163700,19.11798600,72.90163700,NULL,'2012-11-27 20:12:39'),(9,35,19.11802500,72.90162900,19.11802500,72.90162900,NULL,'2012-11-27 20:30:38'),(10,36,19.11827900,72.90166700,19.11827900,72.90166700,NULL,'2012-11-27 21:55:40'),(11,37,19.11781200,72.90158200,19.11781200,72.90158200,NULL,'2012-11-27 21:57:43');
 /*!40000 ALTER TABLE `request` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -120,24 +170,6 @@ CREATE TABLE `user` (
   KEY `username_2` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
-
-
-DROP TABLE IF EXISTS mumbai_src;
-CREATE TABLE mumbai_src (
-row_id INT UNSIGNED NOT NULL,
-col_id INT UNSIGNED NOT NULL,
-users VARCHAR(500),
-INDEX(row_id,col_id)
-);
-
-DROP TABLE IF EXISTS mumbai_dst;
-CREATE TABLE IF NOT EXISTS mumbai_dst (
-row_id INT UNSIGNED NOT NULL,
-col_id INT UNSIGNED NOT NULL,
-users VARCHAR(500),
-INDEX(row_id,col_id)
-);
 
 --
 -- Dumping data for table `user`
@@ -194,4 +226,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-11-28 15:17:52
+-- Dump completed on 2012-11-29  1:41:27
