@@ -2,6 +2,8 @@
 //require_once("/home/gourav/Mooov/trunk/autoload.php");
 require_once('objects/dbclass.php');
 require_once('objects/field.php');
+require_once('objects/JSONMessage.php');
+require_once('objects/mumbai.php');
 
 class Request extends dbclass {
 
@@ -18,7 +20,7 @@ class Request extends dbclass {
 	}
 
 	function getNearbyRequests($arguments){
-                print_r($arguments['id']);
+                //print_r($arguments['id']);
 		if(!isset($arguments['user_id']) && !isset($arguments['id'])){
 			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
 			echo $error_m->m_error->getMessage();
@@ -34,17 +36,20 @@ class Request extends dbclass {
 			echo $error_m->m_error->getMessage();
 			return;
 		}
+		//getting from mumbai table	
+		$mumbai = new Mumbai();
+		$matches = $mumbai->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
+		//getting from mumbai table	
 	  	
-		$sql = "select r1.user_id from request as r1, request as r2 where r1.src_latitude<r2.src_latitude+1 and r1.src_latitude>r2.src_latitude-1 and r1.src_longitude<r2.src_longitude+1 and r1.src_longitude>r2.src_longitude-1 and r1.dst_latitude<r2.dst_latitude+1 and r1.dst_latitude>r2.dst_latitude-1 and r1.dst_longitude<r2.dst_longitude+1 and r1.dst_longitude>r2.dst_longitude-1 and r2.user_id=" . $arguments['user_id'];
-		$result = parent::execute($sql); 
 		$ret = array();
-		if($result->num_rows > 0) {
-			while($row = $result->fetch_assoc()) {
+		
+	
+		foreach($matches as $row) {
 				error_log(print_r($row,true));
                                 if($row['user_id'] == $arguments['user_id'])
                                       continue;
 				$ret[] = stripslashes($row['user_id']);//array("id" => stripslashes($row['user_id']), "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));
-			}
+			
 		}
                 
                 $resp = array();
@@ -82,8 +87,8 @@ class Request extends dbclass {
                         }
 	          }
                         $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array);
-		}
-                
+		
+		}                
                 $json_msg = new JSONMessage();
                 $json_msg->setBody (array("NearbyUsers" => $resp)); 
 		echo $json_msg->getMessage();
@@ -101,6 +106,10 @@ class Request extends dbclass {
 			echo $error_m->m_error->getMessage();
 			return;
 		}
+	//Inserting into mumbai table
+	$mumbai = new Mumbai();
+	$mumbai->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
+	//Inserting into mumbai table
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){
 				$this->fields[$field->name]->value = $arguments[$field->name];

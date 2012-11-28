@@ -121,6 +121,24 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+
+DROP TABLE IF EXISTS mumbai_src;
+CREATE TABLE mumbai_src (
+row_id INT UNSIGNED NOT NULL,
+col_id INT UNSIGNED NOT NULL,
+users VARCHAR(500),
+INDEX(row_id,col_id)
+);
+
+DROP TABLE IF EXISTS mumbai_dst;
+CREATE TABLE IF NOT EXISTS mumbai_dst (
+row_id INT UNSIGNED NOT NULL,
+col_id INT UNSIGNED NOT NULL,
+users VARCHAR(500),
+INDEX(row_id,col_id)
+);
+
 --
 -- Dumping data for table `user`
 --

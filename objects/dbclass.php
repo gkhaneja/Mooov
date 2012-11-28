@@ -2,6 +2,7 @@
 //require_once("");
 require_once('objects/field.php');
 require_once("objects/logger.php");
+require_once("objects/exception.php");
 require_once("conf/db.inc");
 
 class dbclass extends mysqli {
