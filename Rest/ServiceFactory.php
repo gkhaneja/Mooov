@@ -62,8 +62,10 @@ class ServiceFactory {
 		$request_type =  $_SERVER['CONTENT_TYPE'];
 		
 		if(preg_match('/json/', $request_type) != 0)
-		{	
-			return get_object_vars(json_decode(file_get_contents('php://input')));
+		{ 
+                        $req = file_get_contents('php://input');
+			error_log($req);	
+			return get_object_vars(json_decode($req));
 		}
 		else  
 			return $_POST;
