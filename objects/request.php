@@ -4,7 +4,8 @@ require_once('objects/dbclass.php');
 require_once('objects/field.php');
 require_once('objects/JSONMessage.php');
 require_once('objects/mumbai.php');
-
+require_once('objects/location_info.php');
+require_once('objects/facebook_info.php');
 class Request extends dbclass {
 
 	var $fields;
@@ -17,6 +18,10 @@ class Request extends dbclass {
 		$this->fields['src_longitude'] = new Field('src_longitude','src_longitude',0);
 		$this->fields['dst_latitude'] = new Field('dst_latitude','dst_latitude',0);
 		$this->fields['dst_longitude'] = new Field('dst_longitude','dst_longitude',0);
+		$this->fields['src_locality'] = new Field('src_locality','src_locality',0);
+		$this->fields['src_address'] = new Field('src_address','src_address',0);
+		$this->fields['dst_locality'] = new Field('dst_locality','dst_locality',0);
+		$this->fields['dst_address'] = new Field('dst_longitude','dst_address',0);
 	}
 
 	function getNearbyRequests($arguments){
@@ -40,23 +45,24 @@ class Request extends dbclass {
 		$mumbai = new Mumbai();
 		$matches = $mumbai->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
 		//getting from mumbai table	
-	  	
+	        error_log("=== Matches ======" . print_r($matches,true));	
 		$ret = array();
 		
 	
 		foreach($matches as $row) {
 				error_log(print_r($row,true));
-                                if($row['user_id'] == $arguments['user_id'])
+                                if($row == $arguments['user_id'])
                                       continue;
-				$ret[] = stripslashes($row['user_id']);//array("id" => stripslashes($row['user_id']), "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));
+				$ret[] = $row;//array("id" => stripslashes($row['user_id']), "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));
 			
 		}
                 
                 $resp = array();
+				error_log(print_r($ret,true));
                 foreach($ret as $user)
                 {
-                        $fb_array = array();
-                        $user_array= array();
+                        $fb_array;
+                        $user_array;
 			$sql = "select * from user where id = $user";
                         $result = parent::execute($sql);
                         if($result->num_rows > 0) {
@@ -67,7 +73,9 @@ class Request extends dbclass {
                         $result = parent::execute($sql);
                         if($result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
-                         $loc_array = array("src_latitude" => stripslashes($row['src_latitude']), "src_longitude" => stripslashes($row['src_longitude']), "dst_latitude" => $row['dst_latitude'] , "dst_longitude" => $row['dst_longitude']);  
+                         $locinfo_src = new LocationInfo('src',$row);
+                         $locinfo_dst = new LocationInfo('dst',$row);
+                         $loc_array = array_merge($locinfo_src->get(), $locinfo_dst->get());
 			 }}
 
                         $merg_array = array_merge($user_array , $loc_array);
@@ -75,15 +83,8 @@ class Request extends dbclass {
                         $result = parent::execute($sql);
                         if($result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
-                           $work_data =  unserialize($row['workplace']);
-                           $hometown_data = unserialize($row['hometown']);
-                           $location_data =  unserialize($row['location']);
-                           $work_place  = $work_data[0]['employer']['name'];
-                           $hometown  = $hometown_data['name'];
-                           $current_city   = $location_data['name'];
-		            $pic = 'http://graph.facebook.com/' . $row['fbid'] . '/picture';
-                           $fb_array = array( "firstname" => stripslashes($row['firstname']), "lastname" => stripslashes($row['lastname']),
-                              "works_at" => $work_place,"lives_in" => $current_city , "hometown" => $hometown, "image_url" =>  $pic);  
+                                   $fbinfo = new FBInfo($row);
+                                   $fb_array = $fbinfo->getData();
                         }
 	          }
                         $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array);

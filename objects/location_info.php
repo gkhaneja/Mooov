@@ -23,7 +23,6 @@ public function __construct($type,$arguments)
            $id = SRC;
         else
            $id = DEST;
-	print_r($arguments);
 	if(isset($arguments[$id.LATITUDE]))
                  $this->latitude = $arguments[$id.LATITUDE];
 
@@ -41,8 +40,8 @@ public function __construct($type,$arguments)
 
 public function get()
 {
-$type  = $this->type;
-return array($type.LATITUDE => $this->latitude , $this.LONGITUDE => $this->longitude , $this.ADDRESS => $this->address , $this.LOCALITY => $this->locality);
+	$type  = $this->type;
+            return  array($type.LATITUDE => $this->latitude , $type.LONGITUDE => $this->longitude , $type.ADDRESS => $this->address , $type.LOCALITY => $this->locality);
 }
 
 }

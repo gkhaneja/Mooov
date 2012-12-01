@@ -48,10 +48,10 @@ if(!isset($arguments['user_id'])| !isset($arguments['fbtoken'])  || !isset($argu
  $uname = $data['username'];
  $gender = $data['gender'];
  $email = $data['email'];
- $education  = serialize ($data['education']); 
+ $education  =addslashes(serialize ($data['education'])); 
  $hometown  =  serialize($data['hometown']);
  $location =  serialize($data['location']);
- $query = "UPDATE user_details SET  workplace = '$workplace', firstname = '$fname' , lastname = '$lname' , username ='$uname', gender='$gender' , email='$email', location = '$location', hometown = '$hometown' WHERE  user_id = $userid "; 
+ $query = "UPDATE user_details SET  workplace = '$workplace', firstname = '$fname' , lastname = '$lname' , username ='$uname', gender='$gender' , email='$email', location = '$location', hometown = '$hometown', education ='$education'  WHERE  user_id = $userid "; 
  error_log($query);
  error_log( parent::execute($query));
 
