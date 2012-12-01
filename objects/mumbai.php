@@ -6,6 +6,7 @@ class Mumbai extends dbclass {
 	var $NORTH = 18.90000000;
 	var $EAST = 72.95500000;
 	var $WEST = 72.81670000;
+  var $RADIUS = 0.001;
 
 	function deleteRequest($user_id){
 		$result = parent::select('request',array('*'),array('user_id' => $user_id));
@@ -18,14 +19,14 @@ class Mumbai extends dbclass {
 			if($lon_src > $this->EAST || $lon_src < $this->WEST) return 1;
 			if($lat_dst > $this->SOUTH || $lat_dst < $this->NORTH) return 1;
 			if($lon_dst > $this->EAST || $lon_dst < $this->WEST) return 1;
-			$row_floor_src = floor(($lat_src - $this->NORTH)/0.001);
-			$row_ceil_src = ceil(($lat_src - $this->NORTH)/0.001);
-			$col_floor_src = floor(($lon_src - $this->WEST)/0.001);
-			$col_ceil_src = ceil(($lon_src - $this->WEST)/0.001);
-			$row_floor_dst = floor(($lat_dst - $this->NORTH)/0.001);
-			$row_ceil_dst = ceil(($lat_dst - $this->NORTH)/0.001);
-			$col_floor_dst = floor(($lon_dst - $this->WEST)/0.001);
-			$col_ceil_dst = ceil(($lon_dst - $this->WEST)/0.001);
+			$row_floor_src = floor(($lat_src - $this->NORTH)/$this->RADIUS);
+			$row_ceil_src = ceil(($lat_src - $this->NORTH)/$this->RADIUS);
+			$col_floor_src = floor(($lon_src - $this->WEST)/$this->RADIUS);
+			$col_ceil_src = ceil(($lon_src - $this->WEST)/$this->RADIUS);
+			$row_floor_dst = floor(($lat_dst - $this->NORTH)/$this->RADIUS);
+			$row_ceil_dst = ceil(($lat_dst - $this->NORTH)/$this->RADIUS);
+			$col_floor_dst = floor(($lon_dst - $this->WEST)/$this->RADIUS);
+			$col_ceil_dst = ceil(($lon_dst - $this->WEST)/$this->RADIUS);
   		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_ceil_src, 'col_id' => $col_ceil_src));
 			if(count($result)>0){
 				$pattern = "/," . $user_id . ",/";
@@ -156,14 +157,14 @@ function addRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
 	if($lat_dst > $this->SOUTH || $lat_dst < $this->NORTH) return 1;
 	if($lon_dst > $this->EAST || $lon_dst < $this->WEST) return 1;
 	$this->deleteRequest($user_id);
-	$row_floor_src = floor(($lat_src - $this->NORTH)/0.001);
-	$row_ceil_src = ceil(($lat_src - $this->NORTH)/0.001);
-	$col_floor_src = floor(($lon_src - $this->WEST)/0.001);
-	$col_ceil_src = ceil(($lon_src - $this->WEST)/0.001);
-	$row_floor_dst = floor(($lat_dst - $this->NORTH)/0.001);
-	$row_ceil_dst = ceil(($lat_dst - $this->NORTH)/0.001);
-	$col_floor_dst = floor(($lon_dst - $this->WEST)/0.001);
-	$col_ceil_dst = ceil(($lon_dst - $this->WEST)/0.001);
+	$row_floor_src = floor(($lat_src - $this->NORTH)/$this->RADIUS);
+	$row_ceil_src = ceil(($lat_src - $this->NORTH)/$this->RADIUS);
+	$col_floor_src = floor(($lon_src - $this->WEST)/$this->RADIUS);
+	$col_ceil_src = ceil(($lon_src - $this->WEST)/$this->RADIUS);
+	$row_floor_dst = floor(($lat_dst - $this->NORTH)/$this->RADIUS);
+	$row_ceil_dst = ceil(($lat_dst - $this->NORTH)/$this->RADIUS);
+	$col_floor_dst = floor(($lon_dst - $this->WEST)/$this->RADIUS);
+	$col_ceil_dst = ceil(($lon_dst - $this->WEST)/$this->RADIUS);
   $result = parent::select('mumbai_src',array('users'),array('row_id' => $row_ceil_src, 'col_id' => $col_ceil_src));
 	if(count($result)>0){
 		$users = explode(",",$result[0]['users']);
@@ -277,14 +278,14 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
 	if($lon_src > $this->EAST || $lon_src < $this->WEST) return $matches;
 	if($lat_dst > $this->SOUTH || $lat_dst < $this->NORTH) return $matches;
 	if($lon_dst > $this->EAST || $lon_dst < $this->WEST) return $matches;
-	$row_floor_src = floor(($lat_src - $this->NORTH)/0.001);
-	$row_ceil_src = ceil(($lat_src - $this->NORTH)/0.001);
-	$col_floor_src = floor(($lon_src - $this->WEST)/0.001);
-	$col_ceil_src = ceil(($lon_src - $this->WEST)/0.001);
-	$row_floor_dst = floor(($lat_dst - $this->NORTH)/0.001);
-	$row_ceil_dst = ceil(($lat_dst - $this->NORTH)/0.001);
-	$col_floor_dst = floor(($lon_dst - $this->WEST)/0.001);
-	$col_ceil_dst = ceil(($lon_dst - $this->WEST)/0.001);
+	$row_floor_src = floor(($lat_src - $this->NORTH)/$this->RADIUS);
+	$row_ceil_src = ceil(($lat_src - $this->NORTH)/$this->RADIUS);
+	$col_floor_src = floor(($lon_src - $this->WEST)/$this->RADIUS);
+	$col_ceil_src = ceil(($lon_src - $this->WEST)/$this->RADIUS);
+	$row_floor_dst = floor(($lat_dst - $this->NORTH)/$this->RADIUS);
+	$row_ceil_dst = ceil(($lat_dst - $this->NORTH)/$this->RADIUS);
+	$col_floor_dst = floor(($lon_dst - $this->WEST)/$this->RADIUS);
+	$col_ceil_dst = ceil(($lon_dst - $this->WEST)/$this->RADIUS);
 	$partial_matches = array();
   $result = parent::select('mumbai_src',array('users'),array('row_id' => $row_ceil_src, 'col_id' => $col_ceil_src));
 	if(count($result)>0){
