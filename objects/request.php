@@ -95,6 +95,31 @@ class Request extends dbclass {
 		echo $json_msg->getMessage();
 	}
 
+	function delete($arguments){
+		if(!isset($arguments['user_id'])){
+			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
+			echo $error_m->m_error->getMessage();
+			return;
+		}
+		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
+		if(!isset($result[0]['id'])){
+			$error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'User id does not exist.'));
+			echo $error_m->m_error->getMessage();
+			return;
+		}
+		//Removing from mumbai table
+		$mumbai = new Mumbai();
+		$mumbai->deleteRequest($arguments['user_id']);
+		//Removing from mumbai table
+		$result = parent::select('request',array('id'),array('user_id' => $arguments['user_id']));
+		if(isset($result[0]['id'])){
+			$sql = "DELETE FROM request WHERE user_id = " . $arguments['user_id'];
+			parent::execute($sql);
+		}
+		$json_msg = new JSONMessage();
+		$json_msg->setBody("status:0");
+		echo $json_msg->getMessage();
+	}
 	
 	function add($arguments){
 		if(!isset($arguments['user_id']) || !isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){

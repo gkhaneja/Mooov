@@ -16,6 +16,11 @@ class RequestService extends RestService {
 		$request->getNearbyRequests($arguments);
 	}
 
+	public function deleteRequest($arguments){
+		$request = new Request();
+		$request->delete($arguments);
+	}
+
 }
 
 
