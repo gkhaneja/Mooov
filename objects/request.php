@@ -75,7 +75,7 @@ class Request extends dbclass {
                         while($row = $result->fetch_assoc()) {
                          $locinfo_src = new LocationInfo('src',$row);
                          $locinfo_dst = new LocationInfo('dst',$row);
-                         $loc_array = array_merge($locinfo_src->get(), $locinfo_dst->get());
+                         $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get());
 			 }}
 
                         $merg_array = array_merge($user_array , $loc_array);
