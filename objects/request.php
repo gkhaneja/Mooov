@@ -94,6 +94,7 @@ class Request extends dbclass {
                 $json_msg->setBody (array("NearbyUsers" => $resp)); 
 		echo $json_msg->getMessage();
 	}
+
 	
 	function add($arguments){
 		if(!isset($arguments['user_id']) || !isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){

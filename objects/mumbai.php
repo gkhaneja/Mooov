@@ -2,16 +2,160 @@
 require_once('objects/dbclass.php');
 
 class Mumbai extends dbclass {
-	var $SOUTH = 19.23;
-	var $NORTH = 18.9;
-	var $EAST = 72.955;
-	var $WEST = 72.8167;
+	var $SOUTH = 19.23000000;
+	var $NORTH = 18.90000000;
+	var $EAST = 72.95500000;
+	var $WEST = 72.81670000;
+
+	function deleteRequest($user_id){
+		$result = parent::select('request',array('*'),array('user_id' => $user_id));
+		if(count($result)>0){
+			$lat_src = $result[0]['src_latitude'];
+			$lon_src = $result[0]['src_longitude'];
+			$lat_dst = $result[0]['dst_latitude'];
+			$lon_dst = $result[0]['dst_longitude'];
+			if($lat_src > $this->SOUTH || $lat_src < $this->NORTH) return 1;
+			if($lon_src > $this->EAST || $lon_src < $this->WEST) return 1;
+			if($lat_dst > $this->SOUTH || $lat_dst < $this->NORTH) return 1;
+			if($lon_dst > $this->EAST || $lon_dst < $this->WEST) return 1;
+			$row_floor_src = floor(($lat_src - $this->NORTH)/0.001);
+			$row_ceil_src = ceil(($lat_src - $this->NORTH)/0.001);
+			$col_floor_src = floor(($lon_src - $this->WEST)/0.001);
+			$col_ceil_src = ceil(($lon_src - $this->WEST)/0.001);
+			$row_floor_dst = floor(($lat_dst - $this->NORTH)/0.001);
+			$row_ceil_dst = ceil(($lat_dst - $this->NORTH)/0.001);
+			$col_floor_dst = floor(($lon_dst - $this->WEST)/0.001);
+			$col_ceil_dst = ceil(($lon_dst - $this->WEST)/0.001);
+  		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_ceil_src, 'col_id' => $col_ceil_src));
+			if(count($result)>0){
+				$pattern = "/," . $user_id . ",/";
+				$replacement = ",";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/^" . $user_id . ",/";
+				$replacement = "";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/," . $user_id . "$/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/" . $user_id . "/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$sql = "UPDATE mumbai_src SET users = \"" . $result[0]['users'] . "\" WHERE row_id = " . $row_ceil_src . " AND col_id = " . $col_ceil_src;
+				parent::execute($sql);		
+			}
+  		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_ceil_src, 'col_id' => $col_floor_src));
+			if(count($result)>0){
+				$pattern = "/," . $user_id . ",/";
+				$replacement = ",";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/^" . $user_id . ",/";
+				$replacement = "";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/," . $user_id . "$/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/" . $user_id . "/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$sql = "UPDATE mumbai_src SET users = \"" . $result[0]['users'] . "\" WHERE row_id = " . $row_ceil_src . " AND col_id = " . $col_floor_src;
+				parent::execute($sql);		
+			}
+  		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_floor_src, 'col_id' => $col_ceil_src));
+			if(count($result)>0){
+				$pattern = "/," . $user_id . ",/";
+				$replacement = ",";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/^" . $user_id . ",/";
+				$replacement = "";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/," . $user_id . "$/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/" . $user_id . "/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$sql = "UPDATE mumbai_src SET users = \"" . $result[0]['users'] . "\" WHERE row_id = " . $row_floor_src . " AND col_id = " . $col_ceil_src;
+				parent::execute($sql);		
+			}
+  		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_floor_src, 'col_id' => $col_floor_src));
+			if(count($result)>0){
+				$pattern = "/," . $user_id . ",/";
+				$replacement = ",";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/^" . $user_id . ",/";
+				$replacement = "";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/," . $user_id . "$/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/" . $user_id . "/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$sql = "UPDATE mumbai_src SET users = \"" . $result[0]['users'] . "\" WHERE row_id = " . $row_floor_src . " AND col_id = " . $col_floor_src;
+				parent::execute($sql);		
+			}
+  		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_ceil_dst, 'col_id' => $col_ceil_dst));
+			if(count($result)>0){
+				$pattern = "/," . $user_id . ",/";
+				$replacement = ",";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/^" . $user_id . ",/";
+				$replacement = "";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/," . $user_id . "$/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/" . $user_id . "/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$sql = "UPDATE mumbai_dst SET users = \"" . $result[0]['users'] . "\" WHERE row_id = " . $row_ceil_dst . " AND col_id = " . $col_ceil_dst;
+				parent::execute($sql);		
+			}
+  		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_ceil_dst, 'col_id' => $col_floor_dst));
+			if(count($result)>0){
+				$pattern = "/," . $user_id . ",/";
+				$replacement = ",";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/^" . $user_id . ",/";
+				$replacement = "";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/," . $user_id . "$/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/" . $user_id . "/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$sql = "UPDATE mumbai_dst SET users = \"" . $result[0]['users'] . "\" WHERE row_id = " . $row_ceil_dst . " AND col_id = " . $col_floor_dst;
+				parent::execute($sql);		
+			}
+  		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_floor_dst, 'col_id' => $col_ceil_dst));
+			if(count($result)>0){
+				$pattern = "/," . $user_id . ",/";
+				$replacement = ",";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/^" . $user_id . ",/";
+				$replacement = "";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/," . $user_id . "$/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/" . $user_id . "/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$sql = "UPDATE mumbai_dst SET users = \"" . $result[0]['users'] . "\" WHERE row_id = " . $row_floor_dst . " AND col_id = " . $col_ceil_dst;
+				parent::execute($sql);		
+			}
+  		$result = parent::select('mumbai_src',array('users'),array('row_id' => $row_floor_dst, 'col_id' => $col_floor_dst));
+			if(count($result)>0){
+				$pattern = "/," . $user_id . ",/";
+				$replacement = ",";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/^" . $user_id . ",/";
+				$replacement = "";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/," . $user_id . "$/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$pattern = "/" . $user_id . "/";
+				$result[0]['users'] = preg_replace($pattern,$replacement,$result[0]['users']);
+				$sql = "UPDATE mumbai_dst SET users = \"" . $result[0]['users'] . "\" WHERE row_id = " . $row_floor_dst . " AND col_id = " . $col_floor_dst;
+				parent::execute($sql);		
+			}
+		}
+		return 0;
+	}
 
 function addRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
 	if($lat_src > $this->SOUTH || $lat_src < $this->NORTH) return 1;
 	if($lon_src > $this->EAST || $lon_src < $this->WEST) return 1;
 	if($lat_dst > $this->SOUTH || $lat_dst < $this->NORTH) return 1;
 	if($lon_dst > $this->EAST || $lon_dst < $this->WEST) return 1;
+	$this->deleteRequest($user_id);
 	$row_floor_src = floor(($lat_src - $this->NORTH)/0.001);
 	$row_ceil_src = ceil(($lat_src - $this->NORTH)/0.001);
 	$col_floor_src = floor(($lon_src - $this->WEST)/0.001);
