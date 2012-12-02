@@ -21,13 +21,13 @@ class ServiceFactory {
 		$dbobject = new dbclass();
 		$dbobject->connect();
 		$parts=explode('/',$this->uri);
-		if(count($parts)<3 || class_exists($parts[1],true)==false){
+		if(count($parts)<4 || class_exists($parts[2],true)==false){
 			$error_m = new ExceptionHandler(array("code" =>"1" , 'error' => 'Service not Found'));
 			echo $error_m->m_error->getMessage();
 			return;
 		}    
-		$service = new $parts[1]();
-		$function = $parts[2];
+		$service = new $parts[2]();
+		$function = $parts[3];
 		if(method_exists($service,$function)==false){
 			Logger::do_log("Method not found: " . $function);
 			$error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Method not Found'));
