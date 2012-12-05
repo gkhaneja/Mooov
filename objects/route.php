@@ -38,7 +38,7 @@ class Route extends dbclass {
 		
 		//print_r($path1);
 		//print_r($path2);
-		for)
+		
 	}
 
 	function __toString(){
