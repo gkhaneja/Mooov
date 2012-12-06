@@ -94,6 +94,14 @@
       		directionsDisplay.setDirections(response);
     		}
  	 });
+    var source  = autocomplete.getPlace().geometry.location.toString();
+    var dest  = autocomplete1.getPlace().geometry.location.toString();
+     $.ajax({
+  url: '/getmatches.php' + '?source='+ source +'&dest=' + dest,
+  success: function(data) {
+    alert(data);
+  }
+});
    
     });
 
