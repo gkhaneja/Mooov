@@ -1,0 +1,40 @@
+#map_canvas
+{
+position:absolute;
+width: 50%;
+height: 50%;
+left:40%;
+top:100px;
+border:5px solid green;
+}
+.location
+{
+width: 90%;
+
+}
+.loc_div
+{
+width:25%;
+position:absolute; 
+top:200px; 
+left:10%;
+
+border: 2px solid #fc0;
+	padding: 8px 10px;
+	font-size: 120%;
+	color: #c90;
+	font-weight: bold;
+	background-color: #ff9;
+	-moz-border-radius-topleft: 8px;
+	-webkit-border-top-left-radius: 8px;	
+	-moz-border-radius-bottomright: 8px;
+	-webkit-border-bottom-right-radius: 8px;
+}
+
+.logo
+{
+
+font-size: 200%;
+font-style: italic;
+
+}
