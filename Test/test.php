@@ -1,21 +1,23 @@
 <?php
-/*$path_parts = pathinfo($_SERVER['PHP_SELF']);
-$dir =  $path_parts['dirname'] . "";
-require_once($dir . "/../autoload.php");
-$service = new UserService("GET");
-$output = $service->performGet("1");
-echo $output . "\n";*/
+require_once("Test/user.php");
+require_once("Test/request.php");
 
-echo date("Y-m-d H:i:s") . "\n";
+//test1();
+test2();
 
-function foo(){
-	print_r(debug_backtrace());
+function test2(){
+ $request = new RequestTest();
+ $request->get(39);
+ 
 }
 
-function bar(){
-	foo();
+function test1(){
+ $user = new UserTest();
+ echo $user->addUser("test3") . "\n";
+
+ $request = new RequestTest();
+ $request->add(41,19.000,72.9,19.046,72.8937);
 }
 
-bar();
 
 ?>

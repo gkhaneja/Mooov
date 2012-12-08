@@ -6,6 +6,7 @@ require_once('objects/JSONMessage.php');
 require_once('objects/mumbai.php');
 require_once('objects/location_info.php');
 require_once('objects/facebook_info.php');
+ require_once("conf/constants.inc");
 class Request extends dbclass {
 
 	var $fields;
@@ -25,7 +26,6 @@ class Request extends dbclass {
 	}
 
 	function getNearbyRequests($arguments){
-                //print_r($arguments['id']);
 		if(!isset($arguments['user_id']) && !isset($arguments['id'])){
 			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
 			echo $error_m->m_error->getMessage();
@@ -43,12 +43,13 @@ class Request extends dbclass {
 		}
 		//getting from mumbai table	
 		$mumbai = new Mumbai();
+//TODO: call match request with incrementing Radius
 		$matches = $mumbai->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
 		//getting from mumbai table	
-	        error_log("=== Matches ======" . print_r($matches,true));	
+ //TODO: Rank the results
+	        Logger::do_log("=== Matches ======" . print_r($matches,true));	
 		$ret = array();
 		
-	
 		foreach($matches as $row) {
 				error_log(print_r($row,true));
                                 if($row == $arguments['user_id'])

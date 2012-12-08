@@ -1,6 +1,7 @@
 <?php
 require_once('objects/dbclass.php');
 require_once('objects/logger.php');
+ require_once("conf/constants.inc");
 
 class Route extends dbclass {
 
@@ -8,8 +9,41 @@ class Route extends dbclass {
 	var $lon_src;
 	var $lat_dst;
 	var $lon_dst;
+ 
+	var $row_ceil_src;
+	var $col_ceil_src;
+	var $row_ceil_dst;
+	var $col_ceil_dst;
+
+	var $row_floor_src;
+	var $col_floor_src;
+	var $row_floor_dst;
+	var $col_floor_dst;
+
 	var $google_direction_api = "http://maps.googleapis.com/maps/api/directions/json";
 
+ function Route($lat_src,$lon_src,$lat_dst,$lon_dst){
+  if($lat_src > SOUTH || $lat_src < NORTH){};
+		if($lon_src > EAST || $lon_src < WEST) {};
+		if($lat_dst > SOUTH || $lat_dst < NORTH) {};
+		if($lon_dst > EAST || $lon_dst < WEST) {};
+
+  $this->lat_src = $lat_src;
+  $this->lon_src = $lon_src;
+  $this->lat_dst = $lat_dst;
+  $this->lon_dst = $lon_dst;
+
+			$this->row_floor_src = floor(($lat_src - NORTH)/RADIUS);
+			$this->col_floor_src = floor(($lon_src - WEST)/RADIUS);
+			$this->row_floor_dst = floor(($lat_dst - NORTH)/RADIUS);
+			$this->col_floor_dst = floor(($lon_dst - WEST)/RADIUS);
+
+			$this->row_ceil_src = ceil(($lat_src - NORTH)/RADIUS);
+			$this->col_ceil_src = ceil(($lon_src - WEST)/RADIUS);
+			$this->row_ceil_dst = ceil(($lat_dst - NORTH)/RADIUS);
+			$this->col_ceil_dst = ceil(($lon_dst - WEST)/RADIUS);
+  
+ }
 
 	function getPath($route){
 		$ch = curl_init($this->google_direction_api . "?origin=" . $route->lat_src . "," . $route->lon_src . "&destination=" . $route->lat_dst . "," . $route->lon_dst . "&sensor=false&alternatives=true");
