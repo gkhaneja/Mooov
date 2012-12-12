@@ -27,6 +27,11 @@ class Coordinate extends dbclass {
   
  }
 
+ function __toString(){
+  $str = "(" . $this->lat . ", " . $this->lon . ")";
+  return $str;
+ }
+
 }
 
 

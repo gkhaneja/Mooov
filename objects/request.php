@@ -23,6 +23,7 @@ class Request extends dbclass {
 		$this->fields['src_address'] = new Field('src_address','src_address',0);
 		$this->fields['dst_locality'] = new Field('dst_locality','dst_locality',0);
 		$this->fields['dst_address'] = new Field('dst_longitude','dst_address',0);
+		$this->fields['route_id'] = new Field('route_id','route_id',0);
 		$this->fields['type'] = new Field('type','type',0);
 	}
 
@@ -138,7 +139,7 @@ class Request extends dbclass {
 		}
 	//Inserting into mumbai table
 	$mumbai = new Mumbai();
-	$mumbai->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
+	$arguments['route_id'] = $mumbai->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
 	//Inserting into mumbai table
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){

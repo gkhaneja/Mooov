@@ -28,7 +28,7 @@ class Mumbai extends dbclass {
 	function deleteRequest($user_id){
 		$result = parent::select('request',array('*'),array('user_id' => $user_id));
 		if(count($result)>0){
-   $route = new Route($result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
+   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
    $this->delete($user_id, $route->row_ceil_src, $route->col_ceil_src, 'mumbai_src');
    $this->delete($user_id, $route->row_ceil_src, $route->col_floor_src, 'mumbai_src');
    $this->delete($user_id, $route->row_floor_src, $route->col_ceil_src, 'mumbai_src');
@@ -37,6 +37,7 @@ class Mumbai extends dbclass {
    $this->delete($user_id, $route->row_ceil_dst, $route->col_floor_dst, 'mumbai_dst');
    $this->delete($user_id, $route->row_floor_dst, $route->col_ceil_dst, 'mumbai_dst');
    $this->delete($user_id, $route->row_floor_dst, $route->col_floor_dst, 'mumbai_dst');
+   $route->delete();
 		}
 		return 0;
 	}
@@ -59,7 +60,7 @@ function add($row_id, $col_id, $user_id, $table_name){
 }
 
 function addRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
- $route = new Route($lat_src,$lon_src,$lat_dst,$lon_dst);
+ $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst);
 	$this->deleteRequest($user_id);
  $this->add($route->row_ceil_src, $route->col_ceil_src, $user_id, 'mumbai_src');
  $this->add($route->row_ceil_src, $route->col_floor_src, $user_id, 'mumbai_src');
@@ -69,7 +70,8 @@ function addRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
  $this->add($route->row_ceil_dst, $route->col_floor_dst, $user_id, 'mumbai_dst');
  $this->add($route->row_floor_dst, $route->col_ceil_dst, $user_id, 'mumbai_dst');
  $this->add($route->row_floor_dst, $route->col_floor_dst, $user_id, 'mumbai_dst');
-	return 0;
+ $route_id = $route->add();
+	return $route_id;
 }
 
 function match($row_id, $col_id, $table_name){
@@ -82,7 +84,7 @@ function match($row_id, $col_id, $table_name){
 }
 
 function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
- $route = new Route($lat_src,$lon_src,$lat_dst,$lon_dst);
+ $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst);
 	
  $matches_src = array();
  $matches_src = array_merge($matches_src, $this->match($route->row_ceil_src, $route->col_ceil_src, 'mumbai_src'));
