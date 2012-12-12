@@ -29,6 +29,15 @@ public function reverseGeo($lat,$lng)
 	     $subresult = $subresult['address_components'];
              foreach($subresult as $address)
                {
+
+                if($address['types'][0] == 'sublocality')
+                   {
+                          $locality_shortname = $address['short_name'];
+                         $locality_longname = $address['long_name'];
+                          $resp['sublocality_shortname'] = $locality_shortname ;
+                          $resp['sublocality_longname'] = $locality_longname;
+                   }
+
 		if($address['types'][0] == 'locality')
                    {
 			  $locality_shortname = $address['short_name'];
