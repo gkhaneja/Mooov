@@ -23,6 +23,7 @@ class Request extends dbclass {
 		$this->fields['src_address'] = new Field('src_address','src_address',0);
 		$this->fields['dst_locality'] = new Field('dst_locality','dst_locality',0);
 		$this->fields['dst_address'] = new Field('dst_longitude','dst_address',0);
+		$this->fields['type'] = new Field('type','type',0);
 	}
 
 	function getNearbyRequests($arguments){
@@ -76,7 +77,8 @@ class Request extends dbclass {
                         while($row = $result->fetch_assoc()) {
                          $locinfo_src = new LocationInfo('src',$row);
                          $locinfo_dst = new LocationInfo('dst',$row);
-                         $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get());
+		         $type= $row['type'];
+                         $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "type" => $type);
 			 }}
 
                         $merg_array = array_merge($user_array , $loc_array);
