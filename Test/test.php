@@ -18,7 +18,7 @@ function test1(){
 
 function test2(){
  $request = new RequestTest();
- //$request->add(39,19.000,72.9,19.046,72.8937);
+ $request->add(39,19.000,72.9,19.046,72.8937);
  $request->add(40,19.001,72.9,19.046,72.8937);
  $request->add(41,19.002,72.9,19.046,72.8937);
 }

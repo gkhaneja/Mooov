@@ -27,8 +27,23 @@ class Request extends dbclass {
 		$this->fields['type'] = new Field('type','type',0);
 	}
 
+ function checkTypeCompatibility($type1, $type2){
+  $ret = FALSE;
+  switch($type1){
+   case 0: 
+    if($type2==0 || $type2==1) $ret = TRUE;
+    break;
+   case 1:
+    if($type2==0) $ret = TRUE;
+    break;
+   default:
+    $ret = TRUE;
+  }
+  return $ret;
+ }
+
 	function getNearbyRequests($arguments){
-		if(!isset($arguments['user_id']) && !isset($arguments['id'])){
+  if(!isset($arguments['user_id']) && !isset($arguments['id'])){
 			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
 			echo $error_m->m_error->getMessage();
 			return;
@@ -36,66 +51,65 @@ class Request extends dbclass {
 		if(!isset($arguments['id'])){
 			$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
 		}else{
-			$result = parent::select('request',array('*'),array('id' => $arguments['id']));
-	  }	
+   $result = parent::select('request',array('*'),array('id' => $arguments['id']));
+	 }	
 		if(count($result)==0){
-			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Request does not exist.'));
+		 $error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Request does not exist.'));
 			echo $error_m->m_error->getMessage();
 			return;
 		}
-		//getting from mumbai table	
 		$mumbai = new Mumbai();
-//TODO: call match request with incrementing Radius
-		$matches = $mumbai->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
-		//getting from mumbai table	
- //TODO: Rank the results
-	        Logger::do_log("=== Matches ======" . print_r($matches,true));	
-		$ret = array();
-		
-		foreach($matches as $row) {
-				error_log(print_r($row,true));
-                                if($row == $arguments['user_id'])
-                                      continue;
-				$ret[] = $row;//array("id" => stripslashes($row['user_id']), "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));
-			
+  //TODO: call match request with incrementing Radius
+		$matches = $mumbai->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);	
+  Logger::do_log("=== Matches ======" . print_r($matches,true));	
+ 
+  //TODO: Rank the results
+  //TODO: Filter as per the type of request	
+ 	$ret = array();
+		foreach($matches as $match) {
+   $sql = "select * from request where user_id = $match";
+   $res = parent::execute($sql);
+   if($res->num_rows > 0) {
+    $row = $res->fetch_assoc();
+    if($this->checkTypeCompatibility($result[0]['type'],$row['type'])==TRUE){
+ 			 $ret[] = $match;
+    }
+   }
 		}
                 
-                $resp = array();
-				error_log(print_r($ret,true));
-                foreach($ret as $user)
-                {
-                        $fb_array;
-                        $user_array;
+  $resp = array();
+  foreach($ret as $user){
+   $fb_array;
+   $user_array;
 			$sql = "select * from user where id = $user";
-                        $result = parent::execute($sql);
-                        if($result->num_rows > 0) {
-                        while($row = $result->fetch_assoc()) {
-                 	 $user_array = array("user_id" => $user, "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));             
-                        }}                            
-                        $sql = "select * from request where user_id = $user";
-                        $result = parent::execute($sql);
-                        if($result->num_rows > 0) {
-                        while($row = $result->fetch_assoc()) {
-                         $locinfo_src = new LocationInfo('src',$row);
-                         $locinfo_dst = new LocationInfo('dst',$row);
-		         $type= $row['type'];
-                         $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "type" => $type);
-			 }}
-
-                        $merg_array = array_merge($user_array , $loc_array);
-                        $sql = "select * from user_details where user_id = $user";
-                        $result = parent::execute($sql);
-                        if($result->num_rows > 0) {
-                        while($row = $result->fetch_assoc()) {
-                                   $fbinfo = new FBInfo($row);
-                                   $fb_array = $fbinfo->getData();
-                        }
-	          }
-                        $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array);
-		
+   $result = parent::execute($sql);
+   if($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+     $user_array = array("user_id" => $user, "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));    }
+   }                            
+   $sql = "select * from request where user_id = $user";
+   $result = parent::execute($sql);
+   if($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+     $locinfo_src = new LocationInfo('src',$row);
+     $locinfo_dst = new LocationInfo('dst',$row);
+		   $type= $row['type'];
+     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "type" => $type);
+			 }
+   }
+   $merg_array = array_merge($user_array , $loc_array);
+   $sql = "select * from user_details where user_id = $user";
+   $result = parent::execute($sql);
+   if($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+     $fbinfo = new FBInfo($row);
+     $fb_array = $fbinfo->getData();
+    }
+	  }
+   $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array);
 		}                
-                $json_msg = new JSONMessage();
-                $json_msg->setBody (array("NearbyUsers" => $resp)); 
+  $json_msg = new JSONMessage();
+  $json_msg->setBody (array("NearbyUsers" => $resp)); 
 		echo $json_msg->getMessage();
 	}
 

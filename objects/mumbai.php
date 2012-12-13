@@ -15,7 +15,7 @@ class Mumbai extends dbclass {
   $result = parent::select($table_name,array('users'),array('row_id' => $row_id, 'col_id' => $col_id));
 		if(count($result)>0){
    $users = explode($result[0]['users']);
-   if(($key = array_search($user_id, $users)) != FALSE) {
+   if(($key = array_search($user_id, $users)) !== FALSE) {
     unset($users[$key]);
    }
    $user_str = implode($users);
@@ -121,7 +121,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
   $matches = array_merge($matches, array_intersect($matches_src,$dst));
  }
  $matches = array_unique($matches);
- if(($key = array_search($user_id, $matches)) != FALSE) {
+ if(($key = array_search($user_id, $matches)) !== FALSE) {
   unset($matches[$key]);
  }
 	return $matches;
