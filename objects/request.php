@@ -64,8 +64,8 @@ class Request extends dbclass {
   Logger::do_log("=== Matches ======" . print_r($matches,true));	
  
   //TODO: Rank the results
-  //TODO: Filter as per the type of request	
  	$ret = array();
+  $route1 = new Route($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
 		foreach($matches as $match) {
    $sql = "select * from request where user_id = $match";
    $res = parent::execute($sql);
@@ -94,7 +94,9 @@ class Request extends dbclass {
      $locinfo_src = new LocationInfo('src',$row);
      $locinfo_dst = new LocationInfo('dst',$row);
 		   $type= $row['type'];
-     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "type" => $type);
+     $route2 = new Route($user, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude']);
+     $percent = $route1->matchRoute($route1,$route2);
+     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "type" => $type, "percent_match" => $percent);
 			 }
    }
    $merg_array = array_merge($user_array , $loc_array);

@@ -124,6 +124,7 @@ matching r2
   $coord1 = new Coordinate($path1[0]['start_location']['lat'], $path1[0]['start_location']['lng']);
   $coord2 = new Coordinate($path2[0]['start_location']['lat'], $path2[0]['start_location']['lng']);
   if(!$this->equal($coord1, $coord2)){
+   //echo "start is not same\n";
    return 0;
   }
   $M = array();
