@@ -4,12 +4,7 @@ require_once('objects/route.php');
 require_once('objects/coordinate.php');
 require_once("conf/constants.inc");
 
-class Mumbai extends dbclass {
-	var $SOUTH = 19.23000000;
-	var $NORTH = 18.90000000;
-	var $EAST = 72.95500000;
-	var $WEST = 72.81670000;
-  var $RADIUS = 0.001;
+class City extends dbclass {
 
  function delete($row_id, $col_id, $user_id, $table_name){
   $result = parent::select($table_name,array('users'),array('row_id' => $row_id, 'col_id' => $col_id));

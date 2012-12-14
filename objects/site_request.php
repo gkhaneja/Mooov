@@ -3,7 +3,7 @@
 require_once('objects/dbclass.php');
 require_once('objects/field.php');
 require_once('objects/JSONMessage.php');
-require_once('objects/mumbai.php');
+require_once('objects/city.php');
 require_once('objects/location_info.php');
 require_once('objects/facebook_info.php');
 class Request extends dbclass {
@@ -26,10 +26,8 @@ class Request extends dbclass {
 
 	function getNearbyRequests($arguments){
                       
-		//getting from mumbai table	
-		$mumbai = new Mumbai();
-		$matches = $mumbai->matchRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
-		//getting from mumbai table	
+		$city = new City();
+		$matches = $city->matchRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
 	        error_log("=== Matches ======" . print_r($matches,true));	
 		$ret = array();
 		

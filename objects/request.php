@@ -3,7 +3,7 @@
 require_once('objects/dbclass.php');
 require_once('objects/field.php');
 require_once('objects/JSONMessage.php');
-require_once('objects/mumbai.php');
+require_once('objects/city.php');
 require_once('objects/location_info.php');
 require_once('objects/facebook_info.php');
  require_once("conf/constants.inc");
@@ -58,9 +58,9 @@ class Request extends dbclass {
 			echo $error_m->m_error->getMessage();
 			return;
 		}
-		$mumbai = new Mumbai();
+		$city = new City();
   //TODO: call match request with incrementing Radius
-		$matches = $mumbai->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);	
+		$matches = $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);	
   Logger::do_log("=== Matches ======" . print_r($matches,true));	
  
   //TODO: Rank the results
@@ -125,10 +125,8 @@ class Request extends dbclass {
 			echo $error_m->m_error->getMessage();
 			return;
 		}
-		//Removing from mumbai table
-		$mumbai = new Mumbai();
-		$mumbai->deleteRequest($arguments['user_id']);
-		//Removing from mumbai table
+		$city = new City();
+		$city->deleteRequest($arguments['user_id']);
 		$result = parent::select('request',array('id'),array('user_id' => $arguments['user_id']));
 		if(isset($result[0]['id'])){
 			$sql = "DELETE FROM request WHERE user_id = " . $arguments['user_id'];
@@ -151,10 +149,8 @@ class Request extends dbclass {
 			echo $error_m->m_error->getMessage();
 			return;
 		}
-	//Inserting into mumbai table
-	$mumbai = new Mumbai();
-	$arguments['route_id'] = $mumbai->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
-	//Inserting into mumbai table
+	$city = new City();
+	$arguments['route_id'] = $city->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){
 				$this->fields[$field->name]->value = $arguments[$field->name];
