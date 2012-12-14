@@ -6,6 +6,7 @@ define('EAST', 72.95500000);
 define('WEST', 72.81670000);
 
 define('RADIUS', 0.001);
+define('RADIUS_DIST', 100);
 
 
 ?>

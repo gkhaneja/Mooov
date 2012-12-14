@@ -98,7 +98,7 @@ class Route extends dbclass {
 	}
 
  function equal($coord1, $coord2){
-  if(geo2distance($coord1->lat, $coord1->lon, $coord2->lat, $coord->lon) < RADIUS){
+  if($this->geo2distance($coord1->lat, $coord1->lon, $coord2->lat, $coord2->lon) <= RADIUS_DIST){
    return true;
   }else{
    return false;
@@ -117,11 +117,13 @@ matching r2
 		if($path1==NULL || $path2==NULL){
 			 return 0;
 		}
+  //print_r($path1);
+  //print_r($path2);
   if(count($path1)==0) return 100;
   if(count($path2)==0) return 0;
   $coord1 = new Coordinate($path1[0]['start_location']['lat'], $path1[0]['start_location']['lng']);
   $coord2 = new Coordinate($path2[0]['start_location']['lat'], $path2[0]['start_location']['lng']);
-  if(!equal($coord1, $coord2)){
+  if(!$this->equal($coord1, $coord2)){
    return 0;
   }
   $M = array();
@@ -131,41 +133,50 @@ matching r2
     $M[$i][$j] = -1;
    }
   }
-  $nmatch = matchRecursion($path1, $path2, 0, 0, $M);
+  $nmatch = $this->matchRecursion($path1, $path2, 0, 0, $M);
   $match =0; $total=0;
 		for($i=0;$i<count($path1);$i++){
    if($i<$nmatch){
-    $match += $step['distance']['value']; 
+    $match += $path1[$i]['distance']['value']; 
    }
-   $total += $step['distance']['value'];
+   $total += $path1[$i]['distance']['value'];
   }
+  if($total == 0) return 100;
 		return $match*100/$total;
 	}
 
  function matchRecursion($path1, $path2, $p1, $p2, &$M){
+  //echo "Recursion: checking for point " . $p1 . ", " . $p2 . "\n";
   if(count($path1)==$p1){
+   //echo "Returning 0 because p1=count\n";
    return 0;
   }
   if(count($path2)==$p2){
+   //echo "Returning 0 because p2=count\n";
    return 0;
   }
-  if($M[$p1][$p2]!=-1) return $M[$p1][$p2];
+  if($M[$p1][$p2]!=-1){
+   //echo "Returning M=" . $M[$p1][$p2] . "because it is not -1\n"; 
+   return $M[$p1][$p2];
+  }
   $coord1 = new Coordinate($path1[$p1]['end_location']['lat'], $path1[$p1]['end_location']['lng']);
   $coord2 = new Coordinate($path2[$p2]['end_location']['lat'], $path2[$p2]['end_location']['lng']);
-  if(!equal($coord1,$coord2)){
+  if(!$this->equal($coord1,$coord2)){
    $M[$p1][$p2] = 0;
+   //echo "Returning 0 because coord " . $coord1 . ", " . $coord2 . "are not equal\n"; 
    return $M[$p1][$p2];
   } 
-  $a = matchRecursion($path1,$path2, $p1+1, $p2, $M);
-  $b = matchRecursion($path1,$path2, $p1, $p2+1, $M);
-  $c = matchRecursion($path1,$path2, $p1+1, $p2+1, $M);
+  $a = $this->matchRecursion($path1,$path2, $p1+1, $p2, $M);
+  $b = $this->matchRecursion($path1,$path2, $p1, $p2+1, $M);
+  $c = $this->matchRecursion($path1,$path2, $p1+1, $p2+1, $M);
   if($a>$b && $a>$c){
    $M[$p1][$p2] = $a+1;
-  }elseif($$b>$c){
+  }elseif($b>$c){
    $M[$p1][$p2] = $b;
   }else{
    $M[$p1][$p2] = $c+1;
   }
+  //echo "Returning M=" . $M[$p1][$p2] . "\n"; 
   return $M[$p1][$p2];
  }
 
