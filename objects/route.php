@@ -27,10 +27,10 @@ class Route extends dbclass {
 	var $google_direction_api = "http://maps.googleapis.com/maps/api/directions/json";
 
  function Route($user_id, $lat_src,$lon_src,$lat_dst,$lon_dst){
-  if($lat_src > SOUTH || $lat_src < NORTH){};
-		if($lon_src > EAST || $lon_src < WEST) {};
-		if($lat_dst > SOUTH || $lat_dst < NORTH) {};
-		if($lon_dst > EAST || $lon_dst < WEST) {};
+  if($lat_src > $GLOBALS['SOUTH'] || $lat_src < $GLOBALS['NORTH']){};
+		if($lon_src > $GLOBALS['EAST'] || $lon_src < $GLOBALS['WEST']) {};
+		if($lat_dst > $GLOBALS['SOUTH'] || $lat_dst < $GLOBALS['NORTH']) {};
+		if($lon_dst > $GLOBALS['EAST'] || $lon_dst < $GLOBALS['WEST']) {};
 
   $this->user_id = $user_id;
   $this->lat_src = $lat_src;
@@ -38,15 +38,15 @@ class Route extends dbclass {
   $this->lat_dst = $lat_dst;
   $this->lon_dst = $lon_dst;
 
-			$this->row_floor_src = floor(($lat_src - NORTH)/RADIUS);
-			$this->col_floor_src = floor(($lon_src - WEST)/RADIUS);
-			$this->row_floor_dst = floor(($lat_dst - NORTH)/RADIUS);
-			$this->col_floor_dst = floor(($lon_dst - WEST)/RADIUS);
+			$this->row_floor_src = floor(($lat_src - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
+			$this->col_floor_src = floor(($lon_src - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
+			$this->row_floor_dst = floor(($lat_dst - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
+			$this->col_floor_dst = floor(($lon_dst - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
 
-			$this->row_ceil_src = ceil(($lat_src - NORTH)/RADIUS);
-			$this->col_ceil_src = ceil(($lon_src - WEST)/RADIUS);
-			$this->row_ceil_dst = ceil(($lat_dst - NORTH)/RADIUS);
-			$this->col_ceil_dst = ceil(($lon_dst - WEST)/RADIUS);
+			$this->row_ceil_src = ceil(($lat_src - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
+			$this->col_ceil_src = ceil(($lon_src - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
+			$this->row_ceil_dst = ceil(($lat_dst - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
+			$this->col_ceil_dst = ceil(($lon_dst - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
   
  }
 
@@ -98,7 +98,7 @@ class Route extends dbclass {
 	}
 
  function equal($coord1, $coord2){
-  if($this->geo2distance($coord1->lat, $coord1->lon, $coord2->lat, $coord2->lon) <= RADIUS_DIST){
+  if($this->geo2distance($coord1->lat, $coord1->lon, $coord2->lat, $coord2->lon) <= $GLOBALS['RADIUS_DIST']){
    return true;
   }else{
    return false;
