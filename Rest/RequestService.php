@@ -33,8 +33,10 @@ class RequestService extends RestService {
   $GLOBALS['NORTH'] = 18.90000000;
   $GLOBALS['EAST'] = 72.95500000;
   $GLOBALS['WEST'] = 72.81670000;
-  $GLOBALS['RADIUS_DIST'] = 112;
-  $GLOBALS['RADIUS'] = 0.001;
+  $GLOBALS['RADIUS'] = 112;
+  $GLOBALS['DEGSTEP'] = 0.001;
+  $GLOBALS['RADIUS_X'] = 112;
+  $GLOBALS['RADIUS_Y'] = 105;
  }
 
 }

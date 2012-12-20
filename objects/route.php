@@ -38,15 +38,15 @@ class Route extends dbclass {
   $this->lat_dst = $lat_dst;
   $this->lon_dst = $lon_dst;
 
-			$this->row_floor_src = floor(($lat_src - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
-			$this->col_floor_src = floor(($lon_src - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
-			$this->row_floor_dst = floor(($lat_dst - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
-			$this->col_floor_dst = floor(($lon_dst - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
+			$this->row_floor_src = floor(($lat_src - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->col_floor_src = floor(($lon_src - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
+			$this->row_floor_dst = floor(($lat_dst - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->col_floor_dst = floor(($lon_dst - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
 
-			$this->row_ceil_src = ceil(($lat_src - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
-			$this->col_ceil_src = ceil(($lon_src - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
-			$this->row_ceil_dst = ceil(($lat_dst - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
-			$this->col_ceil_dst = ceil(($lon_dst - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
+			$this->row_ceil_src = ceil(($lat_src - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->col_ceil_src = ceil(($lon_src - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
+			$this->row_ceil_dst = ceil(($lat_dst - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->col_ceil_dst = ceil(($lon_dst - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
   
  }
 
@@ -98,7 +98,7 @@ class Route extends dbclass {
 	}
 
  function equal($coord1, $coord2){
-  if($this->geo2distance($coord1->lat, $coord1->lon, $coord2->lat, $coord2->lon) <= $GLOBALS['RADIUS_DIST']){
+  if($this->geo2distance($coord1->lat, $coord1->lon, $coord2->lat, $coord2->lon) <= $GLOBALS['RADIUS']){
    return true;
   }else{
    return false;

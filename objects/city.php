@@ -78,43 +78,76 @@ function match($row_id, $col_id, $table_name){
  return $users;
 }
 
+function checkRow($row_id){
+ $upper = ($GLOBALS['SOUTH']-$GLOBALS['NORTH'])/$GLOBALS['DEGSTEP'];
+ if($row_id>=0 && $row_id<=$upper){
+  return true;
+ }
+ return false;
+}
+
+function checkCol($col_id){
+ $upper = ($GLOBALS['EAST']-$GLOBALS['WEST'])/$GLOBALS['DEGSTEP'];
+ if($row_id>=0 && $row_id<=$upper){
+  return true;
+ }
+ return false;
+}
+
+function getSearchCoords($route){
+ $coords = array();
+ if(!isset($GLOBALS['RADIUS'])){
+  $GLOBALS['RADIUS'] = $GLOBALS['RADIUS_X'];
+ }
+ $steps = ($GLOBALS['RADIUS_X']>$GLOBALS['RADIUS_Y']) ? $GLOBALS['RADIUS']/$GLOBALS['RADIUS_Y'] : $GLOBALS['RADIUS']/$GLOBALS['RADIUS_X'];
+ for($i=0;$i<$steps;$i++){
+  $row_id = $route->row_floor_src - $i;
+  if(!$this->checkRow($row_id)) continue;
+  for($j=0;$j<$steps;$j++){
+   $col_id = $route->col_floor_src - $j;
+   if(!$this->checkCol($col_id)) continue;
+   $coords[] = array('row_id'=>$row_id, 'col_id'=>$col_id);  
+  }
+ } 
+ for($i=1;$i<$steps;$i++){
+  $row_id = $route->row_floor_src - $i;
+  if(!$this->checkRow($row_id)) continue;
+  for($j=1;$j<$steps;$j++){
+   $col_id = $route->col_floor_src + $j;
+   if(!$this->checkCol($col_id)) continue;
+   $coords[] = array('row_id'=>$row_id, 'col_id'=>$col_id);  
+  }
+ } 
+ for($i=1;$i<$steps;$i++){
+  $row_id = $route->row_floor_src + $i;
+  if(!$this->checkRow($row_id)) continue;
+  for($j=1;$j<$steps;$j++){
+   $col_id = $route->col_floor_src + $j;
+   if(!$this->checkCol($col_id)) continue;
+   $coords[] = array('row_id'=>$row_id, 'col_id'=>$col_id);  
+  }
+ } 
+ for($i=1;$i<$steps;$i++){
+  $row_id = $route->row_floor_src + $i;
+  if(!$this->checkRow($row_id)) continue;
+  for($j=1;$j<$steps;$j++){
+   $col_id = $route->col_floor_src - $j;
+   if(!$this->checkCol($col_id)) continue;
+   $coords[] = array('row_id'=>$row_id, 'col_id'=>$col_id);  
+  }
+ } 
+ return $coords;
+ //return array(array('row_id' => $route->row_ceil_src, 'col_id'=>$route->col_ceil_src), array('row_id' => $route->row_ceil_src, 'col_id'=>$route->col_floor_src), array('row_id' => $route->row_floor_src, 'col_id'=>$route->col_ceil_src), array('row_id' => $route->row_floor_src, 'col_id'=>$route->col_floor_src));
+}
+
 function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
  $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst);
-	
- $matches_src = array();
- $matches_src = array_merge($matches_src, $this->match($route->row_ceil_src, $route->col_ceil_src, 'mumbai_src'));
- $matches_src = array_merge($matches_src, $this->match($route->row_ceil_src, $route->col_floor_src, 'mumbai_src'));
- $matches_src = array_merge($matches_src, $this->match($route->row_floor_src, $route->col_ceil_src, 'mumbai_src'));
- $matches_src = array_merge($matches_src, $this->match($route->row_floor_src, $route->col_floor_src, 'mumbai_src'));
- $matches_src = array_unique($matches_src);
-
- $matches_dst = array();
- $path = $route->getPath($route);
- if($path!=NULL){
-  foreach($path as $step){
-   $dst = array();
-   $geo = new Coordinate($step['end_location']['lat'], $step['end_location']['lng']);
-   $dst = array_merge($dst, $this->match($geo->row_ceil, $geo->col_ceil, 'mumbai_dst'));
-   $dst = array_merge($dst, $this->match($geo->row_ceil, $geo->col_floor, 'mumbai_dst'));
-   $dst = array_merge($dst, $this->match($geo->row_floor, $geo->col_ceil, 'mumbai_dst'));
-   $dst = array_merge($dst, $this->match($geo->row_floor, $geo->col_floor, 'mumbai_dst')); 
-   $dst = array_unique($dst);
-   $matches_dst[] = $dst;
-  }
- }
- $dst1 = array(); 
- $dst1 = array_merge($dst1, $this->match($route->row_ceil_dst, $route->col_ceil_dst, 'mumbai_dst'));
- $dst1 = array_merge($dst1, $this->match($route->row_ceil_dst, $route->col_floor_dst, 'mumbai_dst'));
- $dst1 = array_merge($dst1, $this->match($route->row_floor_dst, $route->col_ceil_dst, 'mumbai_dst'));
- $dst1 = array_merge($dst1, $this->match($route->row_floor_dst, $route->col_floor_dst, 'mumbai_dst')); 
- $dst1 = array_unique($dst1);
- $matches_dst[] = $dst1;
- //TODO: add start elements too
-
+ $coords = $this->getSearchCoords($route);	
  $matches = array();
- foreach($matches_dst as $dst){
-  $matches = array_merge($matches, array_intersect($matches_src,$dst));
+ foreach($coords as $coord){
+   $matches = array_merge($matches, $this->match($coord['row_id'], $coord['col_id'], 'mumbai_src'));
  }
+
  $matches = array_unique($matches);
  if(($key = array_search($user_id, $matches)) !== FALSE) {
   unset($matches[$key]);

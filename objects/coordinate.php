@@ -19,11 +19,11 @@ class Coordinate extends dbclass {
   $this->lat = $lat;
   $this->lon = $lon;
 
-			$this->row_floor = floor(($lat - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
-			$this->col_floor = floor(($lon - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
+			$this->row_floor = floor(($lat - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->col_floor = floor(($lon - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
 
-			$this->row_ceil = ceil(($lat - $GLOBALS['NORTH'])/$GLOBALS['RADIUS']);
-			$this->col_ceil = ceil(($lon - $GLOBALS['WEST'])/$GLOBALS['RADIUS']);
+			$this->row_ceil = ceil(($lat - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->col_ceil = ceil(($lon - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
   
  }
 
