@@ -37,6 +37,7 @@ class RequestService extends RestService {
   $GLOBALS['DEGSTEP'] = 0.001;
   $GLOBALS['RADIUS_X'] = 112;
   $GLOBALS['RADIUS_Y'] = 105;
+  $GLOBALS['THRESHOLD'] = 20;
  }
 
 }
