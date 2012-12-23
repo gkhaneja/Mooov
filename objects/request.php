@@ -63,11 +63,9 @@ class Request extends dbclass {
 		$matches = $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);	
   Logger::do_log("=== Matches ======" . print_r($matches,true));	
  
-  //TODO: Rank the results
  	$ret = array();
-  $route1 = new Route($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
 		foreach($matches as $match) {
-   $sql = "select * from request where user_id = $match";
+   $sql = "select * from request where user_id = " . $match['user_id'];
    $res = parent::execute($sql);
    if($res->num_rows > 0) {
     $row = $res->fetch_assoc();
@@ -78,29 +76,29 @@ class Request extends dbclass {
 		}
                 
   $resp = array();
-  foreach($ret as $user){
+  foreach($ret as $match){
    $fb_array;
    $user_array;
-			$sql = "select * from user where id = $user";
+   $other_info;
+			$sql = "select * from user where id =" . $match['user_id'];
    $result = parent::execute($sql);
    if($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-     $user_array = array("user_id" => $user, "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));    }
+     $user_array = array("user_id" => $match['user_id'], "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));    }
    }                            
-   $sql = "select * from request where user_id = $user";
+   $sql = "select * from request where user_id =" . $match['user_id'];
    $result = parent::execute($sql);
    if($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
      $locinfo_src = new LocationInfo('src',$row);
      $locinfo_dst = new LocationInfo('dst',$row);
 		   $type= $row['type'];
-     $route2 = new Route($user, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude']);
-     $percent = $route1->matchRoute($route1,$route2);
-     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "type" => $type, "percent_match" => $percent);
+     $other_info = array('type' => $type, 'percent_match' => $match['percent']);
+     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get());
 			 }
    }
    $merg_array = array_merge($user_array , $loc_array);
-   $sql = "select * from user_details where user_id = $user";
+   $sql = "select * from user_details where user_id = " . $match['user_id'];
    $result = parent::execute($sql);
    if($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
@@ -108,7 +106,7 @@ class Request extends dbclass {
      $fb_array = $fbinfo->getData();
     }
 	  }
-   $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array);
+   $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array, "other_info" => $other_info);
 		}                
   $json_msg = new JSONMessage();
   $json_msg->setBody (array("NearbyUsers" => $resp)); 
