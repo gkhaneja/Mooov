@@ -42,6 +42,20 @@ class Request extends dbclass {
   return $ret;
  }
 
+ function satisfaction($matches, $ntry){
+  if($ntry==0){
+   return false;
+  }
+  if($ntry>5){
+   return true;
+  }
+  if(count($matches)<5){
+   $GLOBALS['RADIUS'] = $GLOBALS['RADIUS'] + 100;
+   return false;
+  }
+  return true;
+ }
+
 	function getNearbyRequests($arguments){
   if(!isset($arguments['user_id']) && !isset($arguments['id'])){
 			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
@@ -59,8 +73,12 @@ class Request extends dbclass {
 			return;
 		}
 		$city = new City();
-  //TODO: call match request with incrementing Radius
-		$matches = $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);	
+  $ntry=0;
+  $matches = array();
+  while($this->satisfaction($matches,$ntry)==false){
+		 $matches = $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);	
+   $ntry++;
+  } 
   Logger::do_log("=== Matches ======" . print_r($matches,true));	
  
  	$ret = array();
