@@ -3,6 +3,7 @@
 require_once('RestService.php');
 require_once('objects/user.php');
 require_once('objects/request.php');
+require_once('objects/decode_city.php');
 
 class RequestService extends RestService {
 
@@ -13,22 +14,24 @@ class RequestService extends RestService {
 	}
 
 	public function getNearbyRequests($arguments){
-  $this->initializeRegion();
+	        $this->initializeRegion($arguments);
 		$request = new Request();
 		$request->getNearbyRequests($arguments);
 	}
 
 	public function deleteRequest($arguments){
-  $this->initializeRegion();
+	        $this->initializeRegion($arguments);
 		$request = new Request();
 		$request->delete($arguments);
 	}
 
- function initializeRegion(){
-  Logger::do_log("Region detected as Mumbai");
-  $GLOBALS['city'] = 'mumbai';
-  $GLOBALS['src_table'] = 'mumbai_src';
-  $GLOBALS['dst_table'] = 'mumbai_dst';
+ function initializeRegion($arguments){
+  $region  = $this->detect_region($arguments);
+  error_log("Region detected : $region ");
+  Logger::do_log("Region detected as $region");
+  $GLOBALS['city'] = $region;
+  $GLOBALS['src_table'] = $region. '_src';
+  $GLOBALS['dst_table'] = $region . '_dst';
   $GLOBALS['SOUTH'] = 19.23000000;
   $GLOBALS['NORTH'] = 18.90000000;
   $GLOBALS['EAST'] = 72.95500000;
@@ -38,6 +41,17 @@ class RequestService extends RestService {
   $GLOBALS['RADIUS_X'] = 112;
   $GLOBALS['RADIUS_Y'] = 105;
   $GLOBALS['THRESHOLD'] = 20;
+ }
+ 
+ function detect_region($arguments){
+  $userid = $arguments['user_id'];
+  $c =new UserCity();
+  $city = $c->getCity($userid);
+  if(!empty($city))
+    return  strtolower($city);
+
+  error_log("City not found");
+  return 'mumbai';
  }
 
 }
