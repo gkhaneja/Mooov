@@ -4,6 +4,7 @@ require_once('RestService.php');
 require_once('objects/user.php');
 require_once('objects/request.php');
 require_once('objects/decode_city.php');
+require_once('conf/constants.inc');
 
 class RequestService extends RestService {
 
@@ -32,10 +33,11 @@ class RequestService extends RestService {
   $GLOBALS['city'] = $region;
   $GLOBALS['src_table'] = $region. '_src';
   $GLOBALS['dst_table'] = $region . '_dst';
-  $GLOBALS['SOUTH'] = 19.23000000;
-  $GLOBALS['NORTH'] = 18.90000000;
-  $GLOBALS['EAST'] = 72.95500000;
-  $GLOBALS['WEST'] = 72.81670000;
+  $GLOBALS['SOUTH'] = constant($region._SOUTH); 
+  $GLOBALS['NORTH'] = constant($region . _NORTH);
+  $GLOBALS['EAST'] = constant($region . _EAST);
+  $GLOBALS['WEST'] = constant($region . _WEST);
+  Logger::do_log("South - " . $GLOBALS['SOUTH'] . " " . mumbai_SOUTH);
   $GLOBALS['RADIUS'] = 112;
   $GLOBALS['DEGSTEP'] = 0.001;
   $GLOBALS['RADIUS_X'] = 112;

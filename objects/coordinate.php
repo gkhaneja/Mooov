@@ -13,16 +13,16 @@ class Coordinate extends dbclass {
 	var $col_floor;
 
  function Coordinate($lat,$lon){
-  if($lat > $GLOBALS['SOUTH'] || $lat < $GLOBALS['NORTH']){};
+  if($lat > $GLOBALS['NORTH'] || $lat < $GLOBALS['SOUTH']){};
 		if($lon > $GLOBALS['EAST'] || $lon < $GLOBALS['WEST']) {};
 
   $this->lat = $lat;
   $this->lon = $lon;
 
-			$this->row_floor = floor(($lat - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->row_floor = floor(($lat - $GLOBALS['SOUTH'])/$GLOBALS['DEGSTEP']);
 			$this->col_floor = floor(($lon - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
 
-			$this->row_ceil = ceil(($lat - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->row_ceil = ceil(($lat - $GLOBALS['SOUTH'])/$GLOBALS['DEGSTEP']);
 			$this->col_ceil = ceil(($lon - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
   
  }

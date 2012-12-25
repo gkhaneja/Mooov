@@ -27,9 +27,9 @@ class Route extends dbclass {
 	var $google_direction_api = "http://maps.googleapis.com/maps/api/directions/json";
 
  function Route($user_id, $lat_src,$lon_src,$lat_dst,$lon_dst){
-  if($lat_src > $GLOBALS['SOUTH'] || $lat_src < $GLOBALS['NORTH']){};
+  if($lat_src > $GLOBALS['NORTH'] || $lat_src < $GLOBALS['SOUTH']){};
 		if($lon_src > $GLOBALS['EAST'] || $lon_src < $GLOBALS['WEST']) {};
-		if($lat_dst > $GLOBALS['SOUTH'] || $lat_dst < $GLOBALS['NORTH']) {};
+		if($lat_dst > $GLOBALS['NORTH'] || $lat_dst < $GLOBALS['SOUTH']) {};
 		if($lon_dst > $GLOBALS['EAST'] || $lon_dst < $GLOBALS['WEST']) {};
 
   $this->user_id = $user_id;
@@ -38,14 +38,14 @@ class Route extends dbclass {
   $this->lat_dst = $lat_dst;
   $this->lon_dst = $lon_dst;
 
-			$this->row_floor_src = floor(($lat_src - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->row_floor_src = floor(($lat_src - $GLOBALS['SOUTH'])/$GLOBALS['DEGSTEP']);
 			$this->col_floor_src = floor(($lon_src - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
-			$this->row_floor_dst = floor(($lat_dst - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->row_floor_dst = floor(($lat_dst - $GLOBALS['SOUTH'])/$GLOBALS['DEGSTEP']);
 			$this->col_floor_dst = floor(($lon_dst - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
 
-			$this->row_ceil_src = ceil(($lat_src - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->row_ceil_src = ceil(($lat_src - $GLOBALS['SOUTH'])/$GLOBALS['DEGSTEP']);
 			$this->col_ceil_src = ceil(($lon_src - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
-			$this->row_ceil_dst = ceil(($lat_dst - $GLOBALS['NORTH'])/$GLOBALS['DEGSTEP']);
+			$this->row_ceil_dst = ceil(($lat_dst - $GLOBALS['SOUTH'])/$GLOBALS['DEGSTEP']);
 			$this->col_ceil_dst = ceil(($lon_dst - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
   
  }

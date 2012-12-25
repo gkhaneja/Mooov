@@ -79,7 +79,7 @@ function match($row_id, $col_id, $table_name){
 }
 
 function checkRow($row_id){
- $upper = ($GLOBALS['SOUTH']-$GLOBALS['NORTH'])/$GLOBALS['DEGSTEP'];
+ $upper = ($GLOBALS['NORTH']-$GLOBALS['SOUTH'])/$GLOBALS['DEGSTEP'];
  if($row_id>=0 && $row_id<=$upper){
   return true;
  }
