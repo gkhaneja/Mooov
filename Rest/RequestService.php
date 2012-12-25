@@ -9,7 +9,7 @@ require_once('conf/constants.inc');
 class RequestService extends RestService {
 
 	public function addRequest($arguments){
-  $this->initializeRegion();
+  $this->initializeRegion($arguments);
 		$request = new Request();
 		$request->add($arguments);
 	}
@@ -37,7 +37,6 @@ class RequestService extends RestService {
   $GLOBALS['NORTH'] = constant($region . _NORTH);
   $GLOBALS['EAST'] = constant($region . _EAST);
   $GLOBALS['WEST'] = constant($region . _WEST);
-  Logger::do_log("South - " . $GLOBALS['SOUTH'] . " " . mumbai_SOUTH);
   $GLOBALS['RADIUS'] = 112;
   $GLOBALS['DEGSTEP'] = 0.001;
   $GLOBALS['RADIUS_X'] = 112;
