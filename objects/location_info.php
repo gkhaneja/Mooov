@@ -1,10 +1,10 @@
 <?php
-define(LATITUDE, '_latitude');
-define(LONGITUDE, '_longitude');
-define(ADDRESS, '_address');
-define(LOCALITY, '_locality');
-define(SRC, 'src');
-define(DEST, 'dst');
+define('LATITUDE', '_latitude');
+define('LONGITUDE', '_longitude');
+define('ADDRESS', '_address');
+define('LOCALITY', '_locality');
+define('SRC', 'src');
+define('DEST', 'dst');
 
 class LocationInfo
 {
