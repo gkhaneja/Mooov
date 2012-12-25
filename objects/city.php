@@ -154,6 +154,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
  }
  $ret = array();
  foreach($matches as $match){
+  if(empty($match)) continue;
   $sql = "select * from request where user_id = $match";
   $result = parent::execute($sql);
   if($result->num_rows > 0) {
