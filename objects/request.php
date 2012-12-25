@@ -49,7 +49,7 @@ class Request extends dbclass {
   if($ntry>5){
    return true;
   }
-  if(count($matches)<5){
+  if(count($matches)<1){
    $GLOBALS['RADIUS'] = $GLOBALS['RADIUS'] + 100;
    return false;
   }

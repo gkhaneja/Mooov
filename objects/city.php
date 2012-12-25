@@ -159,7 +159,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
   $result = parent::execute($sql);
   if($result->num_rows > 0) {
    while($row = $result->fetch_assoc()) {
-    $route2 = new Route($user, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude']);
+    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude']);
     $percent = $route->matchRoute($route,$route2);
     if($percent > $GLOBALS['THRESHOLD']){
      $ret[] = array('user_id' => $match, 'percent' => $percent);

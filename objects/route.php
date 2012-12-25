@@ -112,8 +112,12 @@ matching r2
 ***********************************/
 	function matchRoute($route1, $route2){
 		//TODO: First check in the route table. If entry exists, return the match.
-		$path1 = $this->getPath($route1);
-		$path2 = $this->getPath($route2);
+  $path1 = parent::execute("select path from route where user_id = " . $route1->user_id);
+  $path2 = parent::execute("select path from route where user_id = " . $route2->user_id);
+  $path1 = json_decode($path1,true);
+  $path2 = json_decode($path2,true);
+		//$path1 = $this->getPath($route1);
+		//$path2 = $this->getPath($route2);
 		if($path1==NULL || $path2==NULL){
 			 return 0;
 		}
