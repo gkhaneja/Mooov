@@ -69,7 +69,7 @@ class Route extends dbclass {
   $path_str = mysql_real_escape_string(serialize($path2));
 		$result = parent::select('route',array('id'),array('user_id' => $this->user_id));
 		if(isset($result[0]['id'])){
-   $sql = "UPDATE route SET src_latitude=" . $this->user_id . ", src_longitude=" . $this->lon_src . ", dst_latitude=" . $this->lat_dst . ", dst_longitude=" . $this->lon_dst . ", path=\"" . $path_str . "\" WHERE user_id=" . $this->user_id;
+   $sql = "UPDATE route SET src_latitude=" . $this->lat_src . ", src_longitude=" . $this->lon_src . ", dst_latitude=" . $this->lat_dst . ", dst_longitude=" . $this->lon_dst . ", path=\"" . $path_str . "\" WHERE user_id=" . $this->user_id;
 		}else{
    $sql = "INSERT INTO route (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, path) VALUES (" . $this->user_id . "," .$this->lat_src . "," . $this->lon_src . "," . $this->lat_dst . "," . $this->lon_dst . ",\"" . $path_str . "\")";
 		}
@@ -111,11 +111,23 @@ returns the percentge of the r1
 matching r2
 ***********************************/
 	function matchRoute($route1, $route2){
-		//TODO: First check in the route table. If entry exists, return the match.
-  $path1 = parent::execute("select path from route where user_id = " . $route1->user_id);
-  $path2 = parent::execute("select path from route where user_id = " . $route2->user_id);
-  $path1 = json_decode($path1,true);
-  $path2 = json_decode($path2,true);
+		//TODO: Implement plan B
+  $res = parent::execute("select path from route where user_id = " . $route1->user_id);
+   if($res->num_rows > 0) {
+    $row = $res->fetch_assoc();
+    $path1 = unserialize($row['path']);
+   }else{
+	return 50;
+   }
+    
+  $res = parent::execute("select path from route where user_id = " . $route2->user_id);
+   if($res->num_rows > 0) {
+    $row = $res->fetch_assoc();
+    $path2 = unserialize($row['path']);
+   }else{
+	return 50;
+   }
+	Logger::do_log(print_r($path1,true));
 		//$path1 = $this->getPath($route1);
 		//$path2 = $this->getPath($route2);
 		if($path1==NULL || $path2==NULL){

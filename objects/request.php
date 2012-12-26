@@ -22,7 +22,7 @@ class Request extends dbclass {
 		$this->fields['src_locality'] = new Field('src_locality','src_locality',0);
 		$this->fields['src_address'] = new Field('src_address','src_address',0);
 		$this->fields['dst_locality'] = new Field('dst_locality','dst_locality',0);
-		$this->fields['dst_address'] = new Field('dst_longitude','dst_address',0);
+		$this->fields['dst_address'] = new Field('dst_address','dst_address',0);
 		$this->fields['route_id'] = new Field('route_id','route_id',0);
 		$this->fields['type'] = new Field('type','type',0);
 	}
@@ -46,10 +46,10 @@ class Request extends dbclass {
   if($ntry==0){
    return false;
   }
-  if($ntry>5){
+  if($ntry>1){
    return true;
   }
-  if(count($matches)<1){
+  if(count($matches)<5){
    $GLOBALS['RADIUS'] = $GLOBALS['RADIUS'] + 100;
    return false;
   }
