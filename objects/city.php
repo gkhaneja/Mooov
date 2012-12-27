@@ -69,12 +69,23 @@ function addRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
 	return $route_id;
 }
 
-function match($row_id, $col_id, $table_name){
+function match($coords, $table_name){
  $users = array();
- $result = parent::select($table_name, array('users'),array('row_id' => $row_id, 'col_id' => $col_id));
-	if(count($result)>0){
-		$users = explode(",",$result[0]['users']);
-	}
+ if(empty($coords)) return $users;
+ $sql = "select users from $table_name where";
+ $first=1;
+ foreach($coords as $coord){
+  if($first==1){
+   $sql = $sql . " (row_id = " . $coord['row_id'] . " AND col_id = " . $coord['col_id'] . ")";
+   $first=0;
+  }else{
+   $sql = $sql . " OR (row_id = " . $coord['row_id'] . " AND col_id = " . $coord['col_id'] . ")";
+  }
+ }
+ $results = parent::execute($sql);
+ while($row = $results->fetch_assoc()) {
+		$users = array_unique(array_merge($users,explode(",",$row['users'])));
+ }
  return $users;
 }
 
@@ -88,7 +99,7 @@ function checkRow($row_id){
 
 function checkCol($col_id){
  $upper = ($GLOBALS['EAST']-$GLOBALS['WEST'])/$GLOBALS['DEGSTEP'];
- if($row_id>=0 && $row_id<=$upper){
+ if($col_id>=0 && $col_id<=$upper){
   return true;
  }
  return false;
@@ -144,9 +155,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
  $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst);
  $coords = $this->getSearchCoords($route);	
  $matches = array();
- foreach($coords as $coord){
-   $matches = array_merge($matches, $this->match($coord['row_id'], $coord['col_id'], 'mumbai_src'));
- }
+ $matches = $this->match($coords, 'mumbai_src');
 
  $matches = array_unique($matches);
  if(($key = array_search($user_id, $matches)) !== FALSE) {

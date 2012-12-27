@@ -127,7 +127,7 @@ matching r2
    }else{
 	return 50;
    }
-	Logger::do_log(print_r($path1,true));
+	//Logger::do_log(print_r($path1,true));
 		//$path1 = $this->getPath($route1);
 		//$path2 = $this->getPath($route2);
 		if($path1==NULL || $path2==NULL){

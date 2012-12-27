@@ -46,7 +46,7 @@ class Request extends dbclass {
   if($ntry==0){
    return false;
   }
-  if($ntry>1){
+  if($ntry>5){
    return true;
   }
   if(count($matches)<5){
