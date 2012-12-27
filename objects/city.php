@@ -6,7 +6,7 @@ require_once("conf/constants.inc");
 
 class City extends dbclass {
 
- function delete($row_id, $col_id, $user_id, $table_name){
+ function delete($user_id, $row_id, $col_id, $table_name){
   $result = parent::select($table_name,array('users'),array('row_id' => $row_id, 'col_id' => $col_id));
 		if(count($result)>0){
    $users = explode($result[0]['users']);
