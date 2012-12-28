@@ -107,9 +107,6 @@ function checkCol($col_id){
 
 function getSearchCoords($route){
  $coords = array();
- if(!isset($GLOBALS['RADIUS'])){
-  $GLOBALS['RADIUS'] = $GLOBALS['RADIUS_X'];
- }
  $steps = ($GLOBALS['RADIUS_X']>$GLOBALS['RADIUS_Y']) ? $GLOBALS['RADIUS']/$GLOBALS['RADIUS_Y'] : $GLOBALS['RADIUS']/$GLOBALS['RADIUS_X'];
  for($i=0;$i<$steps;$i++){
   $row_id = $route->row_floor_src - $i;
@@ -153,11 +150,22 @@ function getSearchCoords($route){
 
 function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
  $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst);
- $coords = $this->getSearchCoords($route);	
+ //$coords = $this->getSearchCoords($route);	
+ $step_x = $GLOBALS['RADIUS']/$GLOBALS['RADIUS_X'];
+ $step_y = $GLOBALS['RADIUS']/$GLOBALS['RADIUS_Y'];
+ $x1 = floor($route->row_floor_src - $step_x);
+ $x2 = ceil($route->row_floor_src + $step_x);
+ $y1 = floor($route->col_floor_src - $step_y);
+ $y2 = ceil($route->col_floor_src + $step_y);
  $matches = array();
- $matches = $this->match($coords, 'mumbai_src');
+ $sql = "select users from " . $GLOBALS['src_table'] . " where row_id>=$x1 AND row_id<=$x2 AND col_id>=$y1 AND col_id<=$y2";
+ $results = parent::execute($sql);
+ while($row = $results->fetch_assoc()) {
+		$matches = array_unique(array_merge($matches,explode(",",$row['users'])));
+ }
+ //$matches = $this->match($coords, $GLOBALS['src_table']);
 
- $matches = array_unique($matches);
+ //$matches = array_unique($matches);
  if(($key = array_search($user_id, $matches)) !== FALSE) {
   unset($matches[$key]);
  }
