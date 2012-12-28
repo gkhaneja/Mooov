@@ -146,8 +146,24 @@ function getSearchCoords($route){
  } 
  return $coords;
 }
+ 
+ 
+function checkTypeCompatibility($type1, $type2){
+  $ret = FALSE;
+  switch($type1){
+   case 0: 
+    if($type2==0 || $type2==1) $ret = TRUE;
+    break;
+   case 1:
+    if($type2==0) $ret = TRUE;
+    break;
+   default:
+    $ret = TRUE;
+  }
+  return $ret;
+}
 
-function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
+function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $users = array()){
  $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst);
  //$coords = $this->getSearchCoords($route);	
  $step_x = $GLOBALS['RADIUS']/$GLOBALS['RADIUS_X'];
@@ -168,6 +184,11 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
  if(($key = array_search($user_id, $matches)) !== FALSE) {
   unset($matches[$key]);
  }
+ foreach($users as $user){
+  if(($key = array_search($user['user_id'], $matches)) !== FALSE){
+   unset($matches[$key]);
+  }
+ }
  $ret = array();
  foreach($matches as $match){
   if(empty($match)) continue;
@@ -175,6 +196,9 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
   $result = parent::execute($sql);
   if($result->num_rows > 0) {
    while($row = $result->fetch_assoc()) {
+    if($this->checkTypeCompatibility($type,$row['type'])==FALSE){
+     continue;
+    }
     $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude']);
     $percent = $route->matchRoute($route,$route2);
     if($percent > $GLOBALS['THRESHOLD']){

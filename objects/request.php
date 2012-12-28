@@ -76,25 +76,13 @@ class Request extends dbclass {
   $ntry=0;
   $matches = array();
   while($this->satisfaction($matches,$ntry)==false){
-		 $matches = $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);	
+		 $matches = array_merge($matches, $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $matches));	
    $ntry++;
   } 
   Logger::do_log("=== Matches ======" . print_r($matches,true));	
  
- 	$ret = array();
-		foreach($matches as $match) {
-   $sql = "select * from request where user_id = " . $match['user_id'];
-   $res = parent::execute($sql);
-   if($res->num_rows > 0) {
-    $row = $res->fetch_assoc();
-    if($this->checkTypeCompatibility($result[0]['type'],$row['type'])==TRUE){
- 			 $ret[] = $match;
-    }
-   }
-		}
-                
   $resp = array();
-  foreach($ret as $match){
+  foreach($matches as $match){
    $fb_array;
    $user_array;
    $other_info;
