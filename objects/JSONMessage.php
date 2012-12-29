@@ -19,6 +19,7 @@ class JSONMessage{
 	{
 		$this->m_header = array();
 		$this->m_body = array();
+  //$this->m_error = array();
 	} 
 	
 	public function setError($error)

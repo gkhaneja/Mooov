@@ -27,10 +27,18 @@ class Route extends dbclass {
 	var $google_direction_api = "http://maps.googleapis.com/maps/api/directions/json";
 
  function Route($user_id, $lat_src,$lon_src,$lat_dst,$lon_dst){
-  if($lat_src > $GLOBALS['NORTH'] || $lat_src < $GLOBALS['SOUTH']){};
-		if($lon_src > $GLOBALS['EAST'] || $lon_src < $GLOBALS['WEST']) {};
-		if($lat_dst > $GLOBALS['NORTH'] || $lat_dst < $GLOBALS['SOUTH']) {};
-		if($lon_dst > $GLOBALS['EAST'] || $lon_dst < $GLOBALS['WEST']) {};
+  if($lat_src > $GLOBALS['NORTH'] || $lat_src < $GLOBALS['SOUTH'] || $lon_src > $GLOBALS['EAST'] || $lon_src < $GLOBALS['WEST']){
+   Logger::do_log("Coordinate ($lat_src, $lon_src) does not match the city " . $GLOBALS['city']);
+			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Bad Coordinates."));
+			echo $error_m->m_error->getMessage();
+			exit();
+  }
+  if($lat_dst > $GLOBALS['NORTH'] || $lat_dst < $GLOBALS['SOUTH'] || $lon_dst > $GLOBALS['EAST'] || $lon_dst < $GLOBALS['WEST']) {
+   Logger::do_log("Coordinate ($lat_dst, $lon_dst) does not match the city " . $GLOBALS['city']);
+			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Bad Coordinates."));
+			echo $error_m->m_error->getMessage();
+			exit();
+  }
 
   $this->user_id = $user_id;
   $this->lat_src = $lat_src;

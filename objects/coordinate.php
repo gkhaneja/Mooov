@@ -13,8 +13,18 @@ class Coordinate extends dbclass {
 	var $col_floor;
 
  function Coordinate($lat,$lon){
-  if($lat > $GLOBALS['NORTH'] || $lat < $GLOBALS['SOUTH']){};
-		if($lon > $GLOBALS['EAST'] || $lon < $GLOBALS['WEST']) {};
+  if($lat > $GLOBALS['NORTH'] || $lat < $GLOBALS['SOUTH']){
+   Logger::do_log("Coordinate ($lat, $lon) does not match the city " . $GLOBALS['city']);
+			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Bad Coordinates."));
+			echo $error_m->m_error->getMessage();
+			exit();
+  }
+		if($lon > $GLOBALS['EAST'] || $lon < $GLOBALS['WEST']) {
+   Logger::do_log("Coordinate ($lat, $lon) does not match the city " . $GLOBALS['city']);
+			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Bad Coordinates."));
+			echo $error_m->m_error->getMessage();
+			exit();
+  }
 
   $this->lat = $lat;
   $this->lon = $lon;

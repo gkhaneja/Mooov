@@ -19,8 +19,8 @@ class dbclass extends mysqli {
 		$DB_NAME = DB_NAME;
 		dbclass::$connection = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 		if (mysqli_connect_errno()) {
-			Logger::do_log("Connect failed:( %s\n", mysqli_connect_error());
-			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => 'Internal Error. Please contact server monkey\'s. Error code: 1234'));
+			Logger::do_log("DB Connection failed: " . mysqli_connect_error());
+			$error_m = new ExceptionHandler(array("code" =>"1" , 'error' => 'Internal Error'));
 			echo $error_m->m_error->getMessage();
 			exit();
 		}
@@ -33,9 +33,9 @@ class dbclass extends mysqli {
 		Logger::do_log($query);
 		$result = dbclass::$connection->query($query);
 		if (!$result) {
-    	Logger::do_log('Invalid query: ' . mysql_error());
-                        $err_code = dbclass::$connection->errno;
-			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Internal Error. Please contact server monkey\'s. Error Code $err_code "));
+   Logger::do_log('Invalid query: ' . mysql_error());
+   $err_code = dbclass::$connection->errno;
+			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Internal Error"));
 			echo $error_m->m_error->getMessage();
 			exit();
 		}

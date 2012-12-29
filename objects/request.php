@@ -68,7 +68,7 @@ class Request extends dbclass {
    $result = parent::select('request',array('*'),array('id' => $arguments['id']));
 	 }	
 		if(count($result)==0){
-		 $error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Request does not exist.'));
+		 $error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'Request does not exist.'));
 			echo $error_m->m_error->getMessage();
 			return;
 		}
