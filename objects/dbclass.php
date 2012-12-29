@@ -31,10 +31,11 @@ class dbclass extends mysqli {
 //			$query  = dbclass::$connection->real_escape_string($query);
 //			error_log($query);
 		Logger::do_log($query);
-		$result = dbclass::$connection->query($query) or die(dbclass::$connection->error.__LINE__);
+		$result = dbclass::$connection->query($query);
 		if (!$result) {
     	Logger::do_log('Invalid query: ' . mysql_error());
-			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => 'Internal Error. Please contact server monkey\'s. Error code: 1234'));
+                        $err_code = dbclass::$connection->errno;
+			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Internal Error. Please contact server monkey\'s. Error Code $err_code "));
 			echo $error_m->m_error->getMessage();
 			exit();
 		}
