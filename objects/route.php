@@ -58,11 +58,13 @@ class Route extends dbclass {
   $path = $this->getPath($this);
   $path2[0]['lat'] = $this->lat_src;
   $path2[0]['lon'] = $this->lon_src;
+  $path2[0]['dist'] = 0;
   if($path != NULL){
    $size = 1;
    foreach($path as $step){
      $path2[$size]['lat'] = $step['end_location']['lat'];
      $path2[$size]['lon'] = $step['end_location']['lng'];
+     $path2[$size]['dist'] = $step['distance']['value'];
      $size++;
    }
   }
@@ -117,7 +119,7 @@ matching r2
     $row = $res->fetch_assoc();
     $path1 = unserialize($row['path']);
    }else{
-	return 50;
+    return 50;
    }
     
   $res = parent::execute("select path from route where user_id = " . $route2->user_id);
@@ -137,12 +139,14 @@ matching r2
   //print_r($path2);
   if(count($path1)==0) return 100;
   if(count($path2)==0) return 0;
-  $coord1 = new Coordinate($path1[0]['start_location']['lat'], $path1[0]['start_location']['lng']);
-  $coord2 = new Coordinate($path2[0]['start_location']['lat'], $path2[0]['start_location']['lng']);
+  $coord1 = new Coordinate($path1[0]['lat'], $path1[0]['lon']);
+  $coord2 = new Coordinate($path2[0]['lat'], $path2[0]['lon']);
   if(!$this->equal($coord1, $coord2)){
    //echo "start is not same\n";
    return 0;
   }
+  $init_dist = $this->geo2distance($route1->lat_src, $route1->lon_src, $route2->lat_src, $route2->lon_src);
+  //Logger::do_log("init dist - $init_dist");
   $M = array();
   for($i=0;$i<count($path1);$i++){
    $M[$i]=array();
@@ -152,14 +156,23 @@ matching r2
   }
   $nmatch = $this->matchRecursion($path1, $path2, 0, 0, $M);
   $match =0; $total=0;
+   //Logger::do_log("path - " . print_r($path1,true));
 		for($i=0;$i<count($path1);$i++){
    if($i<$nmatch){
-    $match += $path1[$i]['distance']['value']; 
+    $match += $path1[$i]['dist']; 
    }
-   $total += $path1[$i]['distance']['value'];
+   //Logger::do_log("ith distance - " . $path1[$i]['dist']);
+   $total += $path1[$i]['dist'];
   }
+   //Logger::do_log("total - $total");
   if($total == 0) return 100;
-		return $match*100/$total;
+		$percent = $match*100/$total;
+  if($init_dist>100){
+   $init_factor = pow($init_dist/100, 0.33);
+   //Logger::do_log("init factor - $init_factor");
+   $percent = $percent/$init_factor;
+  }
+  return $percent;
 	}
 
  function matchRecursion($path1, $path2, $p1, $p2, &$M){
@@ -176,8 +189,8 @@ matching r2
    //echo "Returning M=" . $M[$p1][$p2] . "because it is not -1\n"; 
    return $M[$p1][$p2];
   }
-  $coord1 = new Coordinate($path1[$p1]['end_location']['lat'], $path1[$p1]['end_location']['lng']);
-  $coord2 = new Coordinate($path2[$p2]['end_location']['lat'], $path2[$p2]['end_location']['lng']);
+  $coord1 = new Coordinate($path1[$p1]['lat'], $path1[$p1]['lon']);
+  $coord2 = new Coordinate($path2[$p2]['lat'], $path2[$p2]['lon']);
   if(!$this->equal($coord1,$coord2)){
    $M[$p1][$p2] = 0;
    //echo "Returning 0 because coord " . $coord1 . ", " . $coord2 . "are not equal\n"; 
