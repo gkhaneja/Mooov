@@ -50,20 +50,23 @@ class User extends dbclass {
 		echo $json_msg->getMessage();
 	}	
 
-        function get($arguments){
-  		if(!isset($arguments['uuid']))
-                {
-		        $error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field uuid is not set.'));
-                        echo $error_m->m_error->getMessage();
-                        return;
-                }
-          	 $result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
-                if(isset($result[0]['id'])){
-                        $json_msg = new JSONMessage();
-                        $json_msg->setBody(array("user_id" => $result[0]['id']));
-                        echo $json_msg->getMessage();
-                        return;
-                }
+ function get($arguments){
+  if(!isset($arguments['uuid']))
+  {
+		 $error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field uuid is not set.'));
+    echo $error_m->m_error->getMessage();
+    return;
+  }
+  $result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
+  if(isset($result[0]['id'])){
+   $json_msg = new JSONMessage();
+   $json_msg->setBody(array("user_id" => $result[0]['id']));
+   echo $json_msg->getMessage();
+   return;
+  }else{
+		  $error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'uuid does not exist'));
+    echo $error_m->m_error->getMessage();
+  }
 
 
 	}

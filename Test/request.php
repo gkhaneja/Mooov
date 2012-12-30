@@ -14,10 +14,10 @@ function add($user_id, $lat_src, $lon_src, $lat_dst, $lon_dst){
  $data = curl_exec($ch);
  $data = json_decode($data,true);
  curl_close($ch);
- print_r($data);
+ return $data;
 }
 
-function get($user_id){
+function match($user_id){
  $ch = curl_init($this->get_url . "user_id=" . $user_id);
  curl_setopt($ch, CURLOPT_HEADER, 0);
  curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
@@ -25,7 +25,7 @@ function get($user_id){
  $data = curl_exec($ch);
  $data = json_decode($data,true);
  curl_close($ch);
- print_r($data);
+ return $data;
 }
 
 }
