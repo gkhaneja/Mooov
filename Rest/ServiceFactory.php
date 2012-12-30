@@ -1,6 +1,7 @@
 <?php
 //require_once("/home/gourav/Mooov/trunk/autoload.php");
 require_once('objects/dbclass.php');
+require_once('objects/cache.php');
 require_once("objects/logger.php");
 require_once("Rest/UserService.php");
 require_once("Rest/ChatService.php");
@@ -17,6 +18,7 @@ class ServiceFactory {
 
 	public function serve(){
 		Logger::bootup();
+  Cache::init();
 		Logger::do_log("URL recieved: " . $this->uri);
 		$dbobject = new dbclass();
 		$dbobject->connect();
