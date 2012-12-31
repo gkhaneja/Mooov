@@ -11,6 +11,9 @@ public function  __construct()
  $this->googleURL = GOOGLE_URL;
 }
 
+var $mapped_cities = array('thane' => 'mumbai');
+
+
 public function reverseGeo($lat,$lng)
 {
  //$lat =  '19.1154908';
@@ -72,20 +75,26 @@ public function reverseGeo($lat,$lng)
 public function getCity($lat,$lan)
 {
   $results = $this->reverseGeo($lat,$lan);
- 
+  $city='';
   foreach($results as $result)
   {
     if(isset($result['locality_shortname']))
-      return $result['locality_shortname'] ;
-
+      {
+        $city= $result['locality_shortname'] ;
+        break;
+      }
   }
-  return '';
+  if(isset($this->mapped_cities[strtolower($city)]))
+    $city = $this->mapped_cities[strtolower($city)];
+
+  return $city;
 }
 
 }
 /*
 $gc = new GeoCoding();
-$r = $gc->getCity('19.1231172','72.8771669');
+//$r = $gc->getCity('19.1231172','72.8771669');
+$r = $gc->getCity('19.224','72.9177');
 print_r($r);
 */
 ?>
