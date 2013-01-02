@@ -12,7 +12,7 @@ require_once("conf/constants.inc");
 
 
 initialize();
-$tests = createTestCases(5);
+$tests = createTestCases(100);
 $errors = array();
 addUsers($tests, $errors);
 addRequests($tests, $errors);
@@ -27,12 +27,14 @@ function analyze($tests, $errors){
  $code3=0;
  $code4=0;
  $code5=0;
+ $unrecognized_errors=0;
  $mismatch=0;
  foreach($errors as $error){
-  if($error['code']==1) $code1++;
-  if($error['code']==3) $code3++;
-  if($error['code']==4) $code4++;
-  if($error['code']==5) $code5++;
+  if($error['code']==1){ $code1++; continue;}
+  if($error['code']==3){ $code3++; continue; }
+  if($error['code']==4){ $code4++;continue; }
+  if($error['code']==5){ $code5++; continue; }
+  $unrecognized_errors++;
  }
  foreach($tests as $test){
   if($test['enable']==0 || $test['result']==0) $mismatch++;
@@ -43,6 +45,7 @@ function analyze($tests, $errors){
  echo "Code 3 errors: $code3\n";
  echo "Code 4 errors: $code4\n";
  echo "Code 5 errors: $code5\n";
+ echo "Urecgnized errors: $unrecognized_errors\n";
 }
 
 
@@ -111,9 +114,13 @@ function putMatch(&$top5, $user_id, $percent){
 
 function setExpectations(&$tests){
  for($i=0;$i<count($tests);$i++){
+  if($tests[$i]['enable']==0) continue;
+   if(!isset($tests[$i]['user_id'])) continue;
   $top5=array(array('user_id'=>0, 'percent'=>0),array('user_id'=>0, 'percent'=>0),array('user_id'=>0, 'percent'=>0),array('user_id'=>0, 'percent'=>0),array('user_id'=>0, 'percent'=>0));
   for($j=0;$j<count($tests);$j++){
    if($i==$j) continue;
+   if($tests[$j]['enable']==0) continue;
+   if(!isset($tests[$j]['user_id'])) continue;
    $route1 = new Route($tests[$i]['user_id'],$tests[$i]['lat_src'],$tests[$i]['lon_src'],$tests[$i]['lat_dst'],$tests[$i]['lon_dst']);
    $route2 = new Route($tests[$j]['user_id'],$tests[$j]['lat_src'],$tests[$j]['lon_src'],$tests[$j]['lat_dst'],$tests[$j]['lon_dst']);
    $percent = $route1->matchRoute($route1,$route2);
@@ -178,14 +185,14 @@ function createTestCases($N){
 
 
 function getRandomLat($north, $south){
- $max = ($north-$south)/0.001;
+ $max = floor(($north-$south)/0.001);
  $random = rand(0,$max);
  $lat = $south + 0.001*$random;
  return $lat;
 }
 
 function getRandomLon($east, $west){
- $max = ($east-$west)/0.001;
+ $max = floor(($east-$west)/0.001);
  $random = rand(0,$max);
  $lon = $west + 0.001*$random;
  return $lon;
