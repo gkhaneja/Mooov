@@ -88,6 +88,12 @@ if($code  ==  'ok')
 }
 else
 {
+   // If user already exists on Chat server delete it and create new
+   if($code == 'UserAlreadyExistsException')
+   {
+     $this->deleteUser($arguments);
+     $this->createUser($arguments);
+   }
 	  $error_m = new ExceptionHandler(array("code" =>"3" , 'error' => $code));
           echo $error_m->m_error->getMessage();
           return;
