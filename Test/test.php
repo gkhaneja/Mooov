@@ -12,15 +12,15 @@ require_once("conf/constants.inc");
 
 
 initialize();
-$tests = createTestCases(100);
+$tests = createTestCases(5);
 $errors = array();
 addUsers($tests, $errors);
 addRequests($tests, $errors);
 setExpectations($tests);
 matchRequests($tests, $errors);
 analyze($tests, $errors);
-//print_r($tests);
-//print_r($errors);
+print_r($tests);
+print_r($errors);
 
 function analyze($tests, $errors){
  $code1=0;

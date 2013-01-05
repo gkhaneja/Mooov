@@ -17,6 +17,7 @@ class ServiceFactory {
 	}
 
 	public function serve(){
+  $start_time = microtime(true);
 		Logger::bootup();
   Cache::init();
 		Logger::do_log("URL recieved: " . $this->uri);
@@ -63,6 +64,8 @@ class ServiceFactory {
 		
                 }		*/
 		call_user_func(array($service,$function),$arguments);
+  $end_time = microtime(true);
+  Logger::do_log("Serve Time: " . ($end_time-$start_time)*1000 . " milliseconds");
 		return;
 	}
 	

@@ -33,8 +33,8 @@ class dbclass extends mysqli {
 		Logger::do_log($query);
 		$result = dbclass::$connection->query($query);
 		if (!$result) {
-   Logger::do_log('Invalid query: ' . mysql_error());
-   $err_code = dbclass::$connection->errno;
+   Logger::do_log('Invalid query: ' . dbclass::$connection->mysqli_error());
+   //$err_code = dbclass::$connection->errno;
 			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Internal Error"));
 			echo $error_m->m_error->getMessage();
 			exit();
