@@ -9,11 +9,11 @@ class City extends dbclass {
  function delete($user_id, $row_id, $col_id, $table_name){
   $result = parent::select($table_name,array('users'),array('row_id' => $row_id, 'col_id' => $col_id));
 		if(count($result)>0){
-   $users = explode($result[0]['users']);
+   $users = explode(",",$result[0]['users']);
    if(($key = array_search($user_id, $users)) !== FALSE) {
     unset($users[$key]);
    }
-   $user_str = implode($users);
+   $user_str = implode(",",$users);
 			$sql = "UPDATE " . $table_name . " SET users = \"" . $user_str . "\" WHERE row_id = " . $row_id . " AND col_id = " . $col_id;
 			parent::execute($sql);		
 		}
