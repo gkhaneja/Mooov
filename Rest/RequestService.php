@@ -25,6 +25,12 @@ class RequestService extends RestService {
 		$request = new Request();
 		$request->delete($arguments);
 	}
+	
+ public function getRequest($arguments){
+	        //$this->initializeRegion($arguments);
+		$request = new Request();
+		$request->get($arguments);
+}
 
  function initializeRegion($arguments){
   $region  = $this->detect_region($arguments);

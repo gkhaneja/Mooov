@@ -174,6 +174,29 @@ class Request extends dbclass {
 		echo $json_msg->getMessage();
 	}	
 
+ function get($arguments){
+		if(!isset($arguments['user_id'])){
+			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
+			echo $error_m->m_error->getMessage();
+			return;
+		}
+		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
+		if(!isset($result[0]['id'])){
+			$error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'User id does not exist.'));
+			echo $error_m->m_error->getMessage();
+			return;
+		}
+		$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
+		if(isset($result[0]['id'])){
+		 $json_msg = new JSONMessage();
+		 $json_msg->setBody($result[0]);
+		 echo $json_msg->getMessage();
+  }else{
+			$error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'User id does not exist.'));
+			echo $error_m->m_error->getMessage();
+  }
+ }
+
 }
 
 
