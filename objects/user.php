@@ -19,20 +19,18 @@ class User extends dbclass {
 
 	function add($arguments){
 		if(!isset($arguments['uuid'])){
-			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field uuid is not set.'));
-			echo $error_m->m_error->getMessage();
-			return;
+			throw new APIException(array("code" =>"3" ,'field'=>'uuid', 'error' => 'Field uuid is not set'));
 		}
 		$result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
 		if(isset($result[0]['id'])){
-                        if(isset($arguments['first_name']) || isset($arguments['last_name']) || isset($arguments['username'])){
-                        foreach($this->fields as $field){
-                        if($field->readonly == 0 && isset($arguments[$field->name])){
-                                $this->fields[$field->name]->value = $arguments[$field->name];
-                	     }
-		          }error_log("Updating");
-                        parent::update('user',$this->fields,array('id' => $result[0]['id']));
-                        }
+   if(isset($arguments['first_name']) || isset($arguments['last_name']) || isset($arguments['username'])){
+    foreach($this->fields as $field){
+     if($field->readonly == 0 && isset($arguments[$field->name])){
+      $this->fields[$field->name]->value = $arguments[$field->name];
+     }
+		  }error_log("Updating");
+    parent::update('user',$this->fields,array('id' => $result[0]['id']));
+   }
 			$json_msg = new JSONMessage();
 			$json_msg->setBody(array("user_id" => $result[0]['id']));
 			echo $json_msg->getMessage();
@@ -51,11 +49,8 @@ class User extends dbclass {
 	}	
 
  function get($arguments){
-  if(!isset($arguments['uuid']))
-  {
-		 $error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field uuid is not set.'));
-    echo $error_m->m_error->getMessage();
-    return;
+  if(!isset($arguments['uuid'])){
+		 throw new APIException(array("code" =>"3" ,'field'=>'uuid', 'error' => 'Field uuid is not set'));
   }
   $result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
   if(isset($result[0]['id'])){
@@ -64,8 +59,7 @@ class User extends dbclass {
    echo $json_msg->getMessage();
    return;
   }else{
-		  $error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'uuid does not exist'));
-    echo $error_m->m_error->getMessage();
+		  throw new APIException(array("code" =>"5" ,'entity'=>'user', 'error' => 'User does not exist'));
   }
 
 

@@ -15,15 +15,11 @@ class Coordinate extends dbclass {
  function Coordinate($lat,$lon){
   if($lat > $GLOBALS['NORTH'] || $lat < $GLOBALS['SOUTH']){
    Logger::do_log("Coordinate ($lat, $lon) does not match the city " . $GLOBALS['city']);
-			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Bad Coordinates."));
-			echo $error_m->m_error->getMessage();
-			exit();
+			throw new APIException(array("code" =>"4", 'reference'=>Logger::$rid, 'error' => "Bad Coordinates"));
   }
 		if($lon > $GLOBALS['EAST'] || $lon < $GLOBALS['WEST']) {
    Logger::do_log("Coordinate ($lat, $lon) does not match the city " . $GLOBALS['city']);
-			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Bad Coordinates."));
-			echo $error_m->m_error->getMessage();
-			exit();
+			throw new APIException(array("code" =>"4" , 'reference'=>Logger::$rid, 'error' => "Bad Coordinates"));
   }
 
   $this->lat = $lat;

@@ -67,9 +67,12 @@ class ServiceFactory {
    dbclass::$connection->autocommit(false);
 		 call_user_func(array($service,$function),$arguments);
    dbclass::$connection->commit();
-  }catch(Exception $e){
+  }catch(APIException $e){
    Logger::do_log("Rollbacking Transaction");
-   dbclass::$connection()->rollback();
+   dbclass::$connection->rollback();
+		 $m_error = new JSONMessage();
+	  $m_error->setError($e->exception);
+			echo $m_error->getMessage();
   }
   $end_time = microtime(true);
   Logger::do_log("Serve Time: " . ($end_time-$start_time)*1000 . " milliseconds");

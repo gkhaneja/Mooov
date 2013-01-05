@@ -29,15 +29,11 @@ class Route extends dbclass {
  function Route($user_id, $lat_src,$lon_src,$lat_dst,$lon_dst){
   if($lat_src > $GLOBALS['NORTH'] || $lat_src < $GLOBALS['SOUTH'] || $lon_src > $GLOBALS['EAST'] || $lon_src < $GLOBALS['WEST']){
    Logger::do_log("Coordinate ($lat_src, $lon_src) does not match the city " . $GLOBALS['city']);
-			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Bad Coordinates."));
-			echo $error_m->m_error->getMessage();
-			exit();
+			throw new APIException(array("code" =>"4", 'reference'=>Logger::$rid, 'error' => "Bad Coordinates"));
   }
   if($lat_dst > $GLOBALS['NORTH'] || $lat_dst < $GLOBALS['SOUTH'] || $lon_dst > $GLOBALS['EAST'] || $lon_dst < $GLOBALS['WEST']) {
    Logger::do_log("Coordinate ($lat_dst, $lon_dst) does not match the city " . $GLOBALS['city']);
-			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Bad Coordinates."));
-			echo $error_m->m_error->getMessage();
-			exit();
+			throw new APIException(array("code" =>"4", 'reference'=>Logger::$rid, 'error' => "Bad Coordinates"));
   }
 
   $this->user_id = $user_id;

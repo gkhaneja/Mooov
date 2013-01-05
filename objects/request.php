@@ -58,9 +58,7 @@ class Request extends dbclass {
 
 	function getNearbyRequests($arguments){
   if(!isset($arguments['user_id']) && !isset($arguments['id'])){
-			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
-			echo $error_m->m_error->getMessage();
-			return;
+			throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
 		}
 		if(!isset($arguments['id'])){
 			$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
@@ -68,9 +66,7 @@ class Request extends dbclass {
    $result = parent::select('request',array('*'),array('id' => $arguments['id']));
 	 }	
 		if(count($result)==0){
-		 $error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'Request does not exist.'));
-			echo $error_m->m_error->getMessage();
-			return;
+		 throw new APIException(array("code" =>"5" , 'error' => 'Request does not exist.'));
 		}
 		$city = new City();
   $ntry=0;
@@ -121,15 +117,11 @@ class Request extends dbclass {
 
 	function delete($arguments){
 		if(!isset($arguments['user_id'])){
-			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
-			echo $error_m->m_error->getMessage();
-			return;
+			throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set', 'field'=>'user_id'));
 		}
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
-			$error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'User id does not exist.'));
-			echo $error_m->m_error->getMessage();
-			return;
+			throw new APIException(array("code" =>"5" , 'entity'=>'user' ,'error' => 'User does not exist'));
 		}
 		$city = new City();
 		$city->deleteRequest($arguments['user_id']);
@@ -144,19 +136,27 @@ class Request extends dbclass {
 	}
 	
 	function add($arguments){
-		if(!isset($arguments['user_id']) || !isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
-			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
-			echo $error_m->m_error->getMessage();
-			return;
+		if(!isset($arguments['user_id'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
+		}
+		if(!isset($arguments['src_latitude'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'src_latitude' ,'error' => 'Required Fields are not set'));
+		}
+		if(!isset($arguments['src_longitude'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'src_longitude' ,'error' => 'Required Fields are not set'));
+		}
+		if(!isset($arguments['dst_latitude'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'dst_latitude' ,'error' => 'Required Fields are not set'));
+		}
+		if(!isset($arguments['dst_longitude'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'dst_longitude' ,'error' => 'Required Fields are not set'));
 		}
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
-			$error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'User id does not exist.'));
-			echo $error_m->m_error->getMessage();
-			return;
+			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
 		}
-	$city = new City();
-	$arguments['route_id'] = $city->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
+	 $city = new City();
+	 $arguments['route_id'] = $city->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){
 				$this->fields[$field->name]->value = $arguments[$field->name];
@@ -176,15 +176,11 @@ class Request extends dbclass {
 
  function get($arguments){
 		if(!isset($arguments['user_id'])){
-			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
-			echo $error_m->m_error->getMessage();
-			return;
+			throw new APIException(array("code" =>"3" , 'field'=>'user_id', 'error' => 'Required Fields are not set'));
 		}
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
-			$error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'User id does not exist.'));
-			echo $error_m->m_error->getMessage();
-			return;
+			throw APIException(array("code" =>"5" ,'entity'=>'user', 'error' => 'User does not exist'));
 		}
 		$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
 		if(isset($result[0]['id'])){
@@ -192,8 +188,7 @@ class Request extends dbclass {
 		 $json_msg->setBody($result[0]);
 		 echo $json_msg->getMessage();
   }else{
-			$error_m = new ExceptionHandler(array("code" =>"5" , 'error' => 'User id does not exist.'));
-			echo $error_m->m_error->getMessage();
+			throw APIException(array("code" =>"5" , 'entity'=>'request', 'error' => 'Request does not exist.'));
   }
  }
 

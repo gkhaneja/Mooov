@@ -12,4 +12,12 @@ class ExceptionHandler {
 	 
 }
 
+class APIException extends Exception {
+ public $exception;
+ 
+ public function __construct($exception){
+  $this->exception=$exception;
+ }
+}
+
 ?>

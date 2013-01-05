@@ -24,9 +24,7 @@ class UserDetails extends dbclass{
 
 	function add($arguments){
 		if(!isset($arguments['user_id'])){
-			$error_m = new ExceptionHandler(array("code" =>"3" , 'error' => 'Field user_id is not set.'));
-			echo $error_m->m_error->getMessage();
-			return;
+			throw new APIException(array("code" =>"3", 'field'=>'user_id', 'error' => 'Field user_id is not set'));
 		}
 		$result = parent::select('user_details', array('id'),array('user_id' => $arguments['user_id'])); // check if incoming user if exists
 		if(isset($result[0]['id']))

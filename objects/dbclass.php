@@ -20,9 +20,7 @@ class dbclass extends mysqli {
 		dbclass::$connection = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 		if (mysqli_connect_errno()) {
 			Logger::do_log("DB Connection failed: " . mysqli_connect_error());
-			$error_m = new ExceptionHandler(array("code" =>"1" , 'error' => 'Internal Error'));
-			echo $error_m->m_error->getMessage();
-			exit();
+			throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
 		}
 		Logger::do_log("Connected to databse " . $DB_NAME);
 	}	
@@ -35,9 +33,7 @@ class dbclass extends mysqli {
 		if (!$result) {
    Logger::do_log('Invalid query: ' . dbclass::$connection->mysqli_error());
    //$err_code = dbclass::$connection->errno;
-			$error_m = new ExceptionHandler(array("code" =>"4" , 'error' => "Internal Error"));
-			echo $error_m->m_error->getMessage();
-			exit();
+			throw new APIException(array("code" =>"4", 'reference'=>Logger::$rid, 'error' => "Internal Error"));
 		}
 		return $result;
 	}
