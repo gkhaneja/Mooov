@@ -8,7 +8,7 @@ define('mumbai_WEST', 72.81670000);
 define('bangalore_SOUTH', 12.729591);
 define('bangalore_NORTH', 13.17951);
 define('bangalore_EAST', 77.877816);
-define('bangalore_WEST', 77.679024);
+define('bangalore_WEST', 77.383402);
 
 define('DEG_STEP', 0.001);
 define('RADIUS_X', 112);
