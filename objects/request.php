@@ -74,8 +74,12 @@ class Request extends dbclass {
   while($this->satisfaction($matches,$ntry)==false){
 		 $matches = array_merge($matches, $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $matches));	
    $ntry++;
+  }
+  $match_str="";
+  foreach($matches as $match){
+   $match_str .= $match['user_id'] . "(" . $match['percent'] . "),";
   } 
-  Logger::do_log("=== Matches ======" . print_r($matches,true));	
+  Logger::do_log("Matches: $match_str");	
  
   $resp = array();
   foreach($matches as $match){

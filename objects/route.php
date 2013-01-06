@@ -176,7 +176,7 @@ matching r2
    //Logger::do_log("init factor - $init_factor");
    $percent = $percent/$init_factor;
   }
-  return $percent;
+  return round($percent,2);
 	}
 
  function matchRecursion($path1, $path2, $p1, $p2, &$M){

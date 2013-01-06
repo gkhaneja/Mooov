@@ -3,7 +3,7 @@
 define('mumbai_NORTH', '19.23000000');
 define('mumbai_SOUTH', 18.90000000);
 define('mumbai_EAST', 72.95500000);
-define('mumbai_WEST', 72.81670000);
+define('mumbai_WEST', 72.810000);
 
 define('bangalore_SOUTH', 12.729591);
 define('bangalore_NORTH', 13.17951);

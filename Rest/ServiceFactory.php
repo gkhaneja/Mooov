@@ -68,7 +68,7 @@ class ServiceFactory {
 		 call_user_func(array($service,$function),$arguments);
    dbclass::$connection->commit();
   }catch(APIException $e){
-   Logger::do_log("Rollbacking Transaction");
+   Logger::do_log("Terminating Request. Exception: " . $e->exception['error']);
    dbclass::$connection->rollback();
 		 $m_error = new JSONMessage();
 	  $m_error->setError($e->exception);
