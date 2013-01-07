@@ -111,31 +111,38 @@ class Route extends dbclass {
   }  
  }
 
+ function matchRoutes($user_route, $routes){
+		//TODO: Implement plan B
+  $res = parent::execute("select path from route where user_id = " . $user_route->user_id);
+  if($res->num_rows > 0) {
+   $row = $res->fetch_assoc();
+   $path1 = unserialize($row['path']);
+  }else{
+   return 50;
+  }
+  $ret=array();
+  foreach($routes as $route){
+   $res = parent::execute("select path from route where user_id = " . $route->user_id);
+   if($res->num_rows > 0) {
+    $row = $res->fetch_assoc();
+    $path2 = unserialize($row['path']);
+   }else{
+    return 50;
+   }
+   $percent = $this->matchRoute($path1, $path2);
+   if($percent > $GLOBALS['THRESHOLD']){
+    $ret[] = array('user_id' => $route->user_id, 'percent' => $percent);
+   }
+  }
+  return $ret;
+ }
+
 /**********************************
 Given two routes r1 and r2,
 returns the percentge of the r1
 matching r2
 ***********************************/
-	function matchRoute($route1, $route2){
-		//TODO: Implement plan B
-  $res = parent::execute("select path from route where user_id = " . $route1->user_id);
-   if($res->num_rows > 0) {
-    $row = $res->fetch_assoc();
-    $path1 = unserialize($row['path']);
-   }else{
-    return 50;
-   }
-    
-  $res = parent::execute("select path from route where user_id = " . $route2->user_id);
-   if($res->num_rows > 0) {
-    $row = $res->fetch_assoc();
-    $path2 = unserialize($row['path']);
-   }else{
-	return 50;
-   }
-	//Logger::do_log(print_r($path1,true));
-		//$path1 = $this->getPath($route1);
-		//$path2 = $this->getPath($route2);
+	function matchRoute($path1, $path2){
 		if($path1==NULL || $path2==NULL){
 			 return 0;
 		}

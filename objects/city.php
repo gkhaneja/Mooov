@@ -189,7 +189,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $user
    unset($matches[$key]);
   }
  }
- $ret = array();
+ $routes=array();
  foreach($matches as $match){
   if(empty($match)) continue;
   $sql = "select * from request where user_id = $match";
@@ -200,13 +200,11 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $user
      continue;
     }
     $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude']);
-    $percent = $route->matchRoute($route,$route2);
-    if($percent > $GLOBALS['THRESHOLD']){
-     $ret[] = array('user_id' => $match, 'percent' => $percent);
-    }
-		 }
-  }
+    $routes[] = $route2;
+   }
+  }  
  }
+ $ret = $route->matchRoutes($route,$routes);
 	return $ret;
 }
 
