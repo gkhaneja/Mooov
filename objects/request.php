@@ -68,6 +68,7 @@ class Request extends dbclass {
 		if(count($result)==0){
 		 throw new APIException(array("code" =>"5" , 'error' => 'Request does not exist.'));
 		}
+  $user_id = $result[0]['user_id'];
 		$city = new City();
   $ntry=0;
   $matches = array();
@@ -117,6 +118,9 @@ class Request extends dbclass {
   $json_msg = new JSONMessage();
   $json_msg->setBody (array("NearbyUsers" => $resp)); 
 		echo $json_msg->getMessage();
+  Logger::do_log("Caching the result, key $user_id");
+  $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
+  Cache::setValueArray($user_id, $cache_arr);
 	}
 
 	function delete($arguments){

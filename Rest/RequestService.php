@@ -9,25 +9,37 @@ require_once('conf/constants.inc');
 class RequestService extends RestService {
 
 	public function addRequest($arguments){
+  Logger::do_log("Deleting from cache, key " . $arguments['user_id']);
+  Cache::deleteKey($arguments['user_id']);
   $this->initializeRegion($arguments);
 		$request = new Request();
 		$request->add($arguments);
 	}
 
 	public function getNearbyRequests($arguments){
-	        $this->initializeRegion($arguments);
+  $val = Cache::getValueArray($arguments['user_id']);
+  if(!empty($val)){
+   if((time() - $val['time'] <= 300)){
+    Logger::do_log("Sending the cached results, key " . $arguments['user_id']);
+    $json_msg = new JSONMessage();
+    $json_msg->setBody (array("NearbyUsers" => $val['resp'])); 
+		  echo $json_msg->getMessage();
+    return;
+   }
+  }
+	 $this->initializeRegion($arguments);
 		$request = new Request();
 		$request->getNearbyRequests($arguments);
 	}
 
 	public function deleteRequest($arguments){
-	        $this->initializeRegion($arguments);
+	 $this->initializeRegion($arguments);
 		$request = new Request();
 		$request->delete($arguments);
 	}
 	
  public function getRequest($arguments){
-	        //$this->initializeRegion($arguments);
+	 //$this->initializeRegion($arguments);
 		$request = new Request();
 		$request->get($arguments);
 }
