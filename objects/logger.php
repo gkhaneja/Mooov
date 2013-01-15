@@ -6,7 +6,7 @@ class Logger {
 	private static $file_handle;
 	private $log_file="/tmp/mooov.log";
 	private $level = 10;
- private static $rid;
+ public static $rid;
 
 	public static function bootup(){
 		$logger = new Logger();

@@ -16,10 +16,20 @@ class RequestService extends RestService {
 		$request->add($arguments);
 	}
 
+ public function addCarpoolRequest($arguments){
+		$request = new Request();
+		$request->addCarpoolRequest($arguments);
+ }
+
+ public function getCarpoolMatches($arguments){
+		$request = new Request();
+		$request->getCarpoolMatches($arguments);
+ }
+
 	public function getNearbyRequests($arguments){
   $val = Cache::getValueArray($arguments['user_id']);
-  if(!empty($val)){
-   if((time() - $val['time'] <= 300)){
+  if(!empty($val) && constant('ENABLE_CACHING')==1){
+   if((time() - $val['time'] <= constant('CACHE_EXPIRY'))){
     Logger::do_log("Sending the cached results, key " . $arguments['user_id']);
     $json_msg = new JSONMessage();
     $json_msg->setBody (array("NearbyUsers" => $val['resp'])); 

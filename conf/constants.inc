@@ -14,5 +14,8 @@ define('DEG_STEP', 0.001);
 define('RADIUS_X', 112);
 define('RADIUS_Y', 105);
 
+define('ENABLE_CACHING',1);
+define('CACHE_EXPIRY', 100);
+
 
 ?>

@@ -7,6 +7,7 @@ require_once('objects/city.php');
 require_once('objects/location_info.php');
 require_once('objects/facebook_info.php');
  require_once("conf/constants.inc");
+require_once("utils/revgeo.php");
 class Request extends dbclass {
 
 	var $fields;
@@ -118,9 +119,11 @@ class Request extends dbclass {
   $json_msg = new JSONMessage();
   $json_msg->setBody (array("NearbyUsers" => $resp)); 
 		echo $json_msg->getMessage();
-  Logger::do_log("Caching the result, key $user_id");
-  $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
-  Cache::setValueArray($user_id, $cache_arr);
+  if(constant('ENABLE_CACHING')==1){
+   Logger::do_log("Caching the result, key $user_id");
+   $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
+   Cache::setValueArray($user_id, $cache_arr);
+  }
 	}
 
 	function delete($arguments){
@@ -204,6 +207,96 @@ class Request extends dbclass {
   }else{
 			throw APIException(array("code" =>"5" , 'entity'=>'request', 'error' => 'Request does not exist.'));
   }
+ }
+
+ function addCarpoolRequest($arguments){
+		if(!isset($arguments['user_id'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
+		}
+		if(!isset($arguments['src_address'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'src_address' ,'error' => 'Required Fields are not set'));
+		}
+		if(!isset($arguments['dst_address'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
+		}
+		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
+		if(!isset($result[0]['id'])){
+			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
+		}
+  $geocoding = new GeoCoding();
+  $src_coord = $geocoding->geocode($arguments['src_address']); 
+  $dst_coord = $geocoding->geocode($arguments['dst_address']); 
+		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
+  $user_id=$arguments['user_id']; $src_add=$arguments['src_address']; $dst_add=$arguments['dst_address'];
+  $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];  $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
+  if(isset($result[0]['id'])){
+   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=\"$src_add\", dst_address=\"$dst_add\" WHERE user_id=$user_id";
+  }else{
+   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, \"$src_add\", \"$dst_add\")";
+  }
+  parent::execute($sql);
+ }
+
+ function getCarpoolMatches($arguments){
+		if(!isset($arguments['src_address'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'src_address' ,'error' => 'Required Fields are not set'));
+		}
+		if(!isset($arguments['dst_address'])){
+			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
+		}
+  $geocoding = new GeoCoding();
+  $src_coord = $geocoding->geocode($arguments['src_address']); $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];
+  $dst_coord = $geocoding->geocode($arguments['dst_address']); $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
+  $sql = "SELECT user_id from carpool WHERE ABS(src_latitude-$src_lat)<0.004 AND ABS(src_longitude-$src_lon)<0.004 AND ABS(dst_latitude-$dst_lat)<0.004 AND (dst_longitude-$dst_lon)<0.004";
+  $result = parent::execute($sql);
+  $matches=array();
+  if($result->num_rows > 0) {
+   while($row = $result->fetch_assoc()) {
+    $matches[]=$row['user_id'];
+   }
+  }
+
+  $match_str="";
+  foreach($matches as $match){
+   $match_str .= $match;
+  } 
+  Logger::do_log("Matches: $match_str");	
+
+  $resp = array();
+  foreach($matches as $match){
+   $fb_array;
+   $user_array;
+   $other_info;
+			$sql = "select * from user where id =" . $match;
+   $result = parent::execute($sql);
+   if($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+     $user_array = array("user_id" => $match, "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));    }
+   }                            
+   $sql = "select * from request where user_id =" . $match;
+   $result = parent::execute($sql);
+   if($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+     $locinfo_src = new LocationInfo('src',$row);
+     $locinfo_dst = new LocationInfo('dst',$row);
+		   $type= $row['type'];
+     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get());
+			 }
+   }
+   $merg_array = array_merge($user_array , $loc_array);
+   $sql = "select * from user_details where user_id = " . $match;
+   $result = parent::execute($sql);
+   if($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+     $fbinfo = new FBInfo($row);
+     $fb_array = $fbinfo->getData();
+    }
+	  }
+   $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array);
+		}                
+  $json_msg = new JSONMessage();
+  $json_msg->setBody (array("NearbyUsers" => $resp)); 
+		echo $json_msg->getMessage();
  }
 
 }

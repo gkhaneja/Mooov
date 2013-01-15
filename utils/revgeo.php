@@ -5,13 +5,33 @@ class  GeoCoding
 
 private $googleURL;
 private $addresses;
+var $mapped_cities = array('thane' => 'mumbai');
 
 public function  __construct()
 {
  $this->googleURL = GOOGLE_URL;
 }
 
-var $mapped_cities = array('thane' => 'mumbai');
+public function geocode($address){
+ $address=urlencode($address);
+ $geocodeURL = "http://maps.googleapis.com/maps/api/geocode/json?address=$address&sensor=false"; 
+ Logger::do_log("Google api call: $geocodeURL");
+ $ch = curl_init($geocodeURL);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+	curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,5);
+	$data = curl_exec($ch);
+	$results = json_decode($data,true);
+	curl_close($ch);
+ if($results['status'] != 'OK'){
+   Logger::do_log("Google geocoding call failed");
+			throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
+ }
+ $ret = array();
+ $ret['lat'] = $results['results'][0]['geometry']['location']['lat'];
+ $ret['lon'] = $results['results'][0]['geometry']['location']['lng'];
+ return $ret;
+}
 
 
 public function reverseGeo($lat,$lng)
@@ -25,68 +45,53 @@ public function reverseGeo($lat,$lng)
  if($results['status'] != 'OK')
    return;
  $results = $results['results'];
- foreach ($results as $subresult)
- {
-        $resp = array();
-             $resp['formatted_address'] = $subresult['formatted_address'];
-	     $subresult = $subresult['address_components'];
-             foreach($subresult as $address)
-               {
-
-                if($address['types'][0] == 'sublocality')
-                   {
-                          $locality_shortname = $address['short_name'];
-                         $locality_longname = $address['long_name'];
-                          $resp['sublocality_shortname'] = $locality_shortname ;
-                          $resp['sublocality_longname'] = $locality_longname;
-                   }
-
-		if($address['types'][0] == 'locality')
-                   {
-			  $locality_shortname = $address['short_name'];
+ foreach ($results as $subresult){
+  $resp = array();
+  $resp['formatted_address'] = $subresult['formatted_address'];
+	 $subresult = $subresult['address_components'];
+  foreach($subresult as $address){
+   if($address['types'][0] == 'sublocality'){
+    $locality_shortname = $address['short_name'];
+    $locality_longname = $address['long_name'];
+    $resp['sublocality_shortname'] = $locality_shortname ;
+    $resp['sublocality_longname'] = $locality_longname;
+   }
+		 if($address['types'][0] == 'locality'){
+			 $locality_shortname = $address['short_name'];
 			 $locality_longname = $address['long_name'];
-                          $resp['locality_shortname'] = $locality_shortname ;
-                          $resp['locality_longname'] = $locality_longname;
-		   }
-                if($address['types'][0] == 'postal_code')
-		 {
-
+    $resp['locality_shortname'] = $locality_shortname ;
+    $resp['locality_longname'] = $locality_longname;
+		 }
+   if($address['types'][0] == 'postal_code'){
 			 $resp['postal_code'] = $address['short_name'];
-                 }
-                if($address['types'][0] == 'administrative_area_level_1')
-		{
-
-			$resp['state'] = $address['long_name'];
-			$resp['state_code'] = $address['short_name'];
-
-                } 
- 		if($address['types'][0] == 'country')
-                {
-                        $resp['country'] = $address['long_name'];
-                        $resp['coutry_code'] = $address['short_name'];
-                } 
-               
-               }
-   $this->addresses[] =$resp;
+   }
+   if($address['types'][0] == 'administrative_area_level_1'){
+ 			$resp['state'] = $address['long_name'];
+	 		$resp['state_code'] = $address['short_name'];
+   } 
+ 		if($address['types'][0] == 'country'){
+    $resp['country'] = $address['long_name'];
+    $resp['coutry_code'] = $address['short_name'];
+   }             
+  }
+  $this->addresses[] =$resp;
  } 
  return $this->addresses;
-
 }
-public function getCity($lat,$lan)
-{
+
+
+public function getCity($lat,$lan){
   $results = $this->reverseGeo($lat,$lan);
   $city='';
-  foreach($results as $result)
-  {
-    if(isset($result['locality_shortname']))
-      {
+  foreach($results as $result){
+    if(isset($result['locality_shortname'])){
         $city= $result['locality_shortname'] ;
         break;
       }
   }
-  if(isset($this->mapped_cities[strtolower($city)]))
+  if(isset($this->mapped_cities[strtolower($city)])){
     $city = $this->mapped_cities[strtolower($city)];
-
+  }
   return $city;
 }
 
