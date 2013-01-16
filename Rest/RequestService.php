@@ -13,7 +13,11 @@ class RequestService extends RestService {
   Cache::deleteKey($arguments['user_id']);
   $this->initializeRegion($arguments);
 		$request = new Request();
-		$request->add($arguments);
+  if($GLOBALS['city']=='unrecognized_region'){
+   $request->addRandomRequest($arguments);
+  }else{
+ 		$request->add($arguments);
+  }
 	}
 
  public function addCarpoolRequest($arguments){
@@ -26,7 +30,7 @@ class RequestService extends RestService {
 		$request->getCarpoolMatches($arguments);
  }
 
-	public function getNearbyRequests($arguments){
+	public function getMatches($arguments){
   $val = Cache::getValueArray($arguments['user_id']);
   if(!empty($val) && constant('ENABLE_CACHING')==1){
    if((time() - $val['time'] <= constant('CACHE_EXPIRY'))){
@@ -37,15 +41,23 @@ class RequestService extends RestService {
     return;
    }
   }
-	 $this->initializeRegion($arguments);
+	 $this->setRegion($arguments);
 		$request = new Request();
-		$request->getNearbyRequests($arguments);
+  if($GLOBALS['city']=='unrecognized_region'){
+   $request->getRandomMatches($arguments);
+		}else{
+   $request->getMatches($arguments);
+  }
 	}
 
 	public function deleteRequest($arguments){
-	 $this->initializeRegion($arguments);
+	 $this->setRegion($arguments);
 		$request = new Request();
-		$request->delete($arguments);
+  if($GLOBALS['city']=='unrecognized_region'){
+   $request->deleteRandom($arguments);
+		}else{
+   $request->delete($arguments);
+  }
 	}
 	
  public function getRequest($arguments){
@@ -54,17 +66,32 @@ class RequestService extends RestService {
 		$request->get($arguments);
 }
 
+ function setRegion($arguments){
+  $userid = $arguments['user_id'];
+  $c =new UserCity();
+  $city = $c->getCity($userid);
+  $this->setRegionVariables($city);
+ }
+
  function initializeRegion($arguments){
   $region  = $this->detect_region($arguments);
-  error_log("Region detected : $region ");
-  Logger::do_log("Region detected as $region");
+  $this->setRegionVariables($region);
+  $userid = $arguments['user_id'];
+  $c =new UserCity();
+  $city = $c->setCity($userid,$region);
+ }
+
+ function setRegionVariables($region){
+  Logger::do_log("Setting up region as $region");
   $GLOBALS['city'] = $region;
-  $GLOBALS['src_table'] = $region. '_src';
-  $GLOBALS['dst_table'] = $region . '_dst';
-  $GLOBALS['SOUTH'] = constant($region._SOUTH); 
-  $GLOBALS['NORTH'] = constant($region . _NORTH);
-  $GLOBALS['EAST'] = constant($region . _EAST);
-  $GLOBALS['WEST'] = constant($region . _WEST);
+  if($region != 'unrecognized_region'){
+   $GLOBALS['src_table'] = $region. '_src';
+   $GLOBALS['dst_table'] = $region . '_dst';
+   $GLOBALS['SOUTH'] = constant($region. '_SOUTH'); 
+   $GLOBALS['NORTH'] = constant($region . '_NORTH');
+   $GLOBALS['EAST'] = constant($region . '_EAST');
+   $GLOBALS['WEST'] = constant($region . '_WEST');
+  }
   $GLOBALS['RADIUS'] = 500;
   $GLOBALS['DEGSTEP'] = 0.001;
   $GLOBALS['RADIUS_X'] = 112;
@@ -73,14 +100,33 @@ class RequestService extends RestService {
  }
  
  function detect_region($arguments){
-  $userid = $arguments['user_id'];
-  $c =new UserCity();
-  $city = $c->getCity($userid);
-  if(!empty($city))
-    return  strtolower($city);
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
+   return 'unrecognized_region';
+  }
+  $regions = explode(",",constant('RECOGNIZED_CITIES'));
+  foreach($regions as $region){
+   if($this->contains($arguments['src_latitude'],constant($region . '_NORTH'),constant($region . '_SOUTH')) && $this->contains($arguments['dst_latitude'],constant($region . '_NORTH'),constant($region . '_SOUTH'))  && $this->contains($arguments['src_longitude'],constant($region . '_EAST'),constant($region . '_WEST')) && $this->contains($arguments['dst_longitude'],constant($region . '_EAST'),constant($region . '_WEST'))){
+    return $region;
+   }
+  }
+  return 'unrecognized_region';
+ }
 
-  error_log("City not found");
-  return 'mumbai';
+ function contains($x, $y, $z){
+  if($y>$z){
+   if($x>=$z && $x<=$y){
+     return true;
+   }else{
+     return false;
+   }
+  }else{
+   if($x>=$y && $x<=$z){
+     return true;
+   }else{
+     return false;
+   }
+  }
+  return false;
  }
 
 }

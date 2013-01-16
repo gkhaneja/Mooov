@@ -57,7 +57,10 @@ class Request extends dbclass {
   return true;
  }
 
-	function getNearbyRequests($arguments){
+ function getRandomMatches($arguments){
+ }
+
+	function getMatches($arguments){
   if(!isset($arguments['user_id']) && !isset($arguments['id'])){
 			throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
 		}
@@ -126,6 +129,9 @@ class Request extends dbclass {
   }
 	}
 
+ function deleteRandom($arguments){
+ }
+
 	function delete($arguments){
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set', 'field'=>'user_id'));
@@ -145,6 +151,9 @@ class Request extends dbclass {
 		$json_msg->setBody("status:0");
 		echo $json_msg->getMessage();
 	}
+
+ function addRandomRequest($arguments){
+ }
 	
 	function add($arguments){
 		if(!isset($arguments['user_id'])){

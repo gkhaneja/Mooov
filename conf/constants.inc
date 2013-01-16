@@ -1,5 +1,7 @@
 <?php
 
+define('RECOGNIZED_CITIES','mumbai,bangalore');
+
 define('mumbai_NORTH', '19.23000000');
 define('mumbai_SOUTH', 18.90000000);
 define('mumbai_EAST', 72.95500000);
