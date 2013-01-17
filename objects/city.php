@@ -32,7 +32,6 @@ class City extends dbclass {
    $this->delete($user_id, $route->row_ceil_dst, $route->col_floor_dst, $GLOBALS['dst_table']);
    $this->delete($user_id, $route->row_floor_dst, $route->col_ceil_dst, $GLOBALS['dst_table']);
    $this->delete($user_id, $route->row_floor_dst, $route->col_floor_dst, $GLOBALS['dst_table']);
-   $route->delete();
 		}
 		return 0;
 	}
@@ -65,8 +64,6 @@ function addRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst){
  $this->add($route->row_ceil_dst, $route->col_floor_dst, $user_id, $GLOBALS['dst_table']);
  $this->add($route->row_floor_dst, $route->col_ceil_dst, $user_id, $GLOBALS['dst_table']);
  $this->add($route->row_floor_dst, $route->col_floor_dst, $user_id, $GLOBALS['dst_table']);
- $route_id = $route->add();
-	return $route_id;
 }
 
 function match($coords, $table_name){

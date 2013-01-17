@@ -52,12 +52,80 @@ class Request extends dbclass {
   }
   if(count($matches)<5){
    $GLOBALS['RADIUS'] = $GLOBALS['RADIUS'] + 100;
+   $GLOBALS['RADIUS2'] = $GLOBALS['RADIUS2'] + 0.001;
    return false;
   }
   return true;
  }
 
+function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $users = array()){
+ $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst);
+ //$coords = $this->getSearchCoords($route);	
+ $step_x = $GLOBALS['RADIUS2'];
+ $step_y = $GLOBALS['RADIUS2'];
+ $x1 = ($route->lat_src - $step_x);
+ $x2 = ($route->lat_src + $step_x);
+ $y1 = ($route->lon_src - $step_y);
+ $y2 = ($route->lon_src + $step_y);
+ $matches = array();
+ $sql = "select user_id from request where src_latitude>=$x1 AND src_latitude<=$x2 AND src_longitude>=$y1 AND src_longitude<=$y2";
+ $results = parent::execute($sql);
+ while($row = $results->fetch_assoc()) {
+		$matches[]=$row['user_id'];
+ }
+ //$matches = $this->match($coords, $GLOBALS['src_table']);
+
+ $matches = array_unique($matches);
+ if(($key = array_search($user_id, $matches)) !== FALSE) {
+  unset($matches[$key]);
+ }
+ foreach($users as $user){
+  if(($key = array_search($user['user_id'], $matches)) !== FALSE){
+   unset($matches[$key]);
+  }
+ }
+ $routes=array();
+ foreach($matches as $match){
+  if(empty($match)) continue;
+  $sql = "select * from request where user_id = $match";
+  $result = parent::execute($sql);
+  if($result->num_rows > 0) {
+   while($row = $result->fetch_assoc()) {
+    if($this->checkTypeCompatibility($type,$row['type'])==FALSE){
+     continue;
+    }
+    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude']);
+    $routes[] = $route2;
+   }
+  }  
+ }
+ $ret = $route->matchRoutes($route,$routes);
+	return $ret;
+}
+
  function getRandomMatches($arguments){
+  if(!isset($arguments['user_id']) && !isset($arguments['id'])){
+			throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
+		}
+		if(!isset($arguments['id'])){
+			$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
+		}else{
+   $result = parent::select('request',array('*'),array('id' => $arguments['id']));
+	 }	
+		if(count($result)==0){
+		 throw new APIException(array("code" =>"5" , 'error' => 'Request does not exist.'));
+		}
+  $user_id = $result[0]['user_id'];
+  $ntry=0;
+  $matches = array();
+  while($this->satisfaction($matches,$ntry)==false){
+		 $matches = array_merge($matches, $this->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $matches));	
+   $ntry++;
+  }
+  $resp = $this->showMatches($matches);
+  Logger::do_log("Caching the result, key $user_id");
+  $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
+  Cache::setValueArray($user_id, $cache_arr);
  }
 
 	function getMatches($arguments){
@@ -80,12 +148,20 @@ class Request extends dbclass {
 		 $matches = array_merge($matches, $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $matches));	
    $ntry++;
   }
+  $resp = $this->showMatches($matches);
+  Logger::do_log("Caching the result, key $user_id");
+  $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
+  Cache::setValueArray($user_id, $cache_arr);
+}
+
+
+function showMatches($matches){ 
   $match_str="";
   foreach($matches as $match){
    $match_str .= $match['user_id'] . "(" . $match['percent'] . "),";
   } 
   Logger::do_log("Matches: $match_str");	
- 
+  
   $resp = array();
   foreach($matches as $match){
    $fb_array;
@@ -95,7 +171,8 @@ class Request extends dbclass {
    $result = parent::execute($sql);
    if($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-     $user_array = array("user_id" => $match['user_id'], "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));    }
+     $user_array = array("user_id" => $match['user_id'], "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));    
+    }
    }                            
    $sql = "select * from request where user_id =" . $match['user_id'];
    $result = parent::execute($sql);
@@ -122,17 +199,13 @@ class Request extends dbclass {
   $json_msg = new JSONMessage();
   $json_msg->setBody (array("NearbyUsers" => $resp)); 
 		echo $json_msg->getMessage();
-  if(constant('ENABLE_CACHING')==1){
-   Logger::do_log("Caching the result, key $user_id");
-   $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
-   Cache::setValueArray($user_id, $cache_arr);
-  }
+  return $resp;
 	}
 
  function deleteRandom($arguments){
  }
 
-	function delete($arguments){
+	function delete($arguments, $unrecognized=0){
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set', 'field'=>'user_id'));
 		}
@@ -140,22 +213,26 @@ class Request extends dbclass {
 		if(!isset($result[0]['id'])){
 			throw new APIException(array("code" =>"5" , 'entity'=>'user' ,'error' => 'User does not exist'));
 		}
-		$city = new City();
-		$city->deleteRequest($arguments['user_id']);
-		$result = parent::select('request',array('id'),array('user_id' => $arguments['user_id']));
-		if(isset($result[0]['id'])){
+  if($unrecognized==0){
+		 $city = new City();
+		 $city->deleteRequest($arguments['user_id']);
+  }
+		
+		$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
+		if(count($result)>0){
+   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
+   $route->delete();
 			$sql = "DELETE FROM request WHERE user_id = " . $arguments['user_id'];
 			parent::execute($sql);
 		}
+
 		$json_msg = new JSONMessage();
 		$json_msg->setBody("status:0");
 		echo $json_msg->getMessage();
 	}
 
- function addRandomRequest($arguments){
- }
 	
-	function add($arguments){
+	function add($arguments, $unrecognized=0){
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
 		}
@@ -181,8 +258,15 @@ class Request extends dbclass {
 		if(!isset($result[0]['id'])){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
 		}
-	 $city = new City();
-	 $arguments['route_id'] = $city->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
+
+  if($unrecognized == 0){
+ 	 $city = new City();
+   $city->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
+  }
+
+  $route = new Route($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
+	 $arguments['route_id'] = $route->add();
+
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){
 				$this->fields[$field->name]->value = $arguments[$field->name];
@@ -264,7 +348,10 @@ class Request extends dbclass {
     $matches[]=$row['user_id'];
    }
   }
+  $this->showCarpoolMatches($matches);
+}
 
+function showCarpoolMatches($matches){
   $match_str="";
   foreach($matches as $match){
    $match_str .= $match;
@@ -282,7 +369,7 @@ class Request extends dbclass {
     while($row = $result->fetch_assoc()) {
      $user_array = array("user_id" => $match, "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));    }
    }                            
-   $sql = "select * from request where user_id =" . $match;
+   $sql = "select * from carpool where user_id =" . $match;
    $result = parent::execute($sql);
    if($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {

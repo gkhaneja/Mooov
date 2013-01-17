@@ -14,7 +14,7 @@ class RequestService extends RestService {
   $this->initializeRegion($arguments);
 		$request = new Request();
   if($GLOBALS['city']=='unrecognized_region'){
-   $request->addRandomRequest($arguments);
+   $request->add($arguments,1);
   }else{
  		$request->add($arguments);
   }
@@ -54,7 +54,7 @@ class RequestService extends RestService {
 	 $this->setRegion($arguments);
 		$request = new Request();
   if($GLOBALS['city']=='unrecognized_region'){
-   $request->deleteRandom($arguments);
+   $request->delete($arguments,1);
 		}else{
    $request->delete($arguments);
   }
@@ -93,6 +93,7 @@ class RequestService extends RestService {
    $GLOBALS['WEST'] = constant($region . '_WEST');
   }
   $GLOBALS['RADIUS'] = 500;
+  $GLOBALS['RADIUS2'] = 0.005;
   $GLOBALS['DEGSTEP'] = 0.001;
   $GLOBALS['RADIUS_X'] = 112;
   $GLOBALS['RADIUS_Y'] = 105;

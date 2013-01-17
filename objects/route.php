@@ -129,7 +129,7 @@ class Route extends dbclass {
    }else{
     return 50;
    }
-   $percent = $this->matchRoute($path1, $path2);
+   $percent = $this->matchRoute($path1, $path2, $user_route, $route);
    if($percent > $GLOBALS['THRESHOLD']){
     $ret[] = array('user_id' => $route->user_id, 'percent' => $percent);
    }
@@ -142,7 +142,7 @@ Given two routes r1 and r2,
 returns the percentge of the r1
 matching r2
 ***********************************/
-	function matchRoute($path1, $path2){
+	function matchRoute($path1, $path2, $route1, $route2){
 		if($path1==NULL || $path2==NULL){
 			 return 0;
 		}
