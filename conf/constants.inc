@@ -12,6 +12,11 @@ define('bangalore_NORTH', 13.17951);
 define('bangalore_EAST', 77.877816);
 define('bangalore_WEST', 77.383402);
 
+define('unrecognized_region_NORTH', 90);
+define('unrecognized_region_SOUTH', -90);
+define('unrecognized_region_EAST', 180);
+define('unrecognized_region_WEST', -180);
+
 define('DEG_STEP', 0.001);
 define('RADIUS_X', 112);
 define('RADIUS_Y', 105);

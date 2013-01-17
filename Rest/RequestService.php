@@ -84,14 +84,12 @@ class RequestService extends RestService {
  function setRegionVariables($region){
   Logger::do_log("Setting up region as $region");
   $GLOBALS['city'] = $region;
-  if($region != 'unrecognized_region'){
-   $GLOBALS['src_table'] = $region. '_src';
-   $GLOBALS['dst_table'] = $region . '_dst';
-   $GLOBALS['SOUTH'] = constant($region. '_SOUTH'); 
-   $GLOBALS['NORTH'] = constant($region . '_NORTH');
-   $GLOBALS['EAST'] = constant($region . '_EAST');
-   $GLOBALS['WEST'] = constant($region . '_WEST');
-  }
+  $GLOBALS['src_table'] = $region. '_src';
+  $GLOBALS['dst_table'] = $region . '_dst';
+  $GLOBALS['SOUTH'] = constant($region. '_SOUTH'); 
+  $GLOBALS['NORTH'] = constant($region . '_NORTH');
+  $GLOBALS['EAST'] = constant($region . '_EAST');
+  $GLOBALS['WEST'] = constant($region . '_WEST');
   $GLOBALS['RADIUS'] = 500;
   $GLOBALS['RADIUS2'] = 0.005;
   $GLOBALS['DEGSTEP'] = 0.001;
