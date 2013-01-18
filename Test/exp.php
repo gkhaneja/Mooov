@@ -26,7 +26,7 @@ echo $add . "\n";
 $address = urldecode($add);
 echo $address . "\n";*/
 
-$region='mumbai';
+/*$region='mumbai';
 $arguments['src_latitude']=19.00;
 if(contains($arguments['src_latitude'],constant($region . '_NORTH'),constant($region . '_SOUTH'))){
     echo "region is " . $region . "\n";
@@ -50,6 +50,11 @@ function contains($x, $y, $z){
    }
   }
   return false;
-}
+}*/
 
+echo date('Y-m-d h:m:s', time()) . "\n";
+echo strtotime(date('d-m-Y h:m:s', time())) . "\n";
+echo strtotime('d-m-Y h:m:s') . "\n";
+echo time() . "\n";
+echo time("2013-01-21 00:00:00") . "\n";
 ?>

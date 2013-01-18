@@ -8,6 +8,7 @@ class Route extends dbclass {
 
  var $id;
  var $user_id;
+ var $ttime;
 
 	var $lat_src;
 	var $lon_src;
@@ -26,7 +27,7 @@ class Route extends dbclass {
 
 	var $google_direction_api = "http://maps.googleapis.com/maps/api/directions/json";
 
- function Route($user_id, $lat_src,$lon_src,$lat_dst,$lon_dst){
+ function Route($user_id, $lat_src,$lon_src,$lat_dst,$lon_dst,$ttime){
   if($lat_src > $GLOBALS['NORTH'] || $lat_src < $GLOBALS['SOUTH'] || $lon_src > $GLOBALS['EAST'] || $lon_src < $GLOBALS['WEST']){
    Logger::do_log("Coordinate ($lat_src, $lon_src) does not match the city " . $GLOBALS['city']);
 			//throw new APIException(array("code" =>"4", 'reference'=>Logger::$rid, 'error' => "Bad Coordinates"));
@@ -41,6 +42,7 @@ class Route extends dbclass {
   $this->lon_src = $lon_src;
   $this->lat_dst = $lat_dst;
   $this->lon_dst = $lon_dst;
+  $this->ttime = $ttime;
 
 			$this->row_floor_src = floor(($lat_src - $GLOBALS['SOUTH'])/$GLOBALS['DEGSTEP']);
 			$this->col_floor_src = floor(($lon_src - $GLOBALS['WEST'])/$GLOBALS['DEGSTEP']);
@@ -180,8 +182,12 @@ matching r2
 		$percent = $match*100/$total;
   if($init_dist>100){
    $init_factor = pow($init_dist/100, 0.33);
-   //Logger::do_log("init factor - $init_factor");
    $percent = $percent/$init_factor;
+  }
+  $time_diff = abs($route1->ttime - $route2->ttime);
+  if($time_diff>=900){
+   $time_factor = pow($time_diff/900, 0.33);
+   $percent = $percent/$time_factor;
   }
   return round($percent,2);
 	}

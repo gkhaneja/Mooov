@@ -26,6 +26,7 @@ class Request extends dbclass {
 		$this->fields['dst_address'] = new Field('dst_address','dst_address',0);
 		$this->fields['route_id'] = new Field('route_id','route_id',0);
 		$this->fields['type'] = new Field('type','type',0);
+		$this->fields['time'] = new Field('time','time',0);
 	}
 
  function checkTypeCompatibility($type1, $type2){
@@ -43,6 +44,11 @@ class Request extends dbclass {
   return $ret;
  }
 
+ function checkTimeCompatibility($time1, $time2){
+  if(abs(time($time1)-time($time2)) <= $GLOBALS['TIME_THRESHOLD']) return true;
+  return false;
+ }
+
  function satisfaction($matches, $ntry){
   if($ntry==0){
    return false;
@@ -58,8 +64,8 @@ class Request extends dbclass {
   return true;
  }
 
-function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $users = array()){
- $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst);
+function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $users = array()){
+ $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst,time($ttime));
  //$coords = $this->getSearchCoords($route);	
  $step_x = $GLOBALS['RADIUS2'];
  $step_y = $GLOBALS['RADIUS2'];
@@ -91,10 +97,10 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $user
   $result = parent::execute($sql);
   if($result->num_rows > 0) {
    while($row = $result->fetch_assoc()) {
-    if($this->checkTypeCompatibility($type,$row['type'])==FALSE){
+    if($this->checkTypeCompatibility($type,$row['type'])==FALSE || $this->checkTimeCompatibility(time($ttime),time($row['time']))==FALSE){
      continue;
     }
-    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude']);
+    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude'],time($row['time']));
     $routes[] = $route2;
    }
   }  
@@ -119,7 +125,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $user
   $ntry=0;
   $matches = array();
   while($this->satisfaction($matches,$ntry)==false){
-		 $matches = array_merge($matches, $this->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $matches));	
+		 $matches = array_merge($matches, $this->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $result[0]['time'], $matches));	
    $ntry++;
   }
   $resp = $this->showMatches($matches);
@@ -145,7 +151,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $user
   $ntry=0;
   $matches = array();
   while($this->satisfaction($matches,$ntry)==false){
-		 $matches = array_merge($matches, $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $matches));	
+		 $matches = array_merge($matches, $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $result[0]['time'], $matches));	
    $ntry++;
   }
   $resp = $this->showMatches($matches);
@@ -220,7 +226,7 @@ function showMatches($matches){
 		
 		$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
 		if(count($result)>0){
-   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude']);
+   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], time($result[0]['time']));
    $route->delete();
 			$sql = "DELETE FROM request WHERE user_id = " . $arguments['user_id'];
 			parent::execute($sql);
@@ -254,6 +260,11 @@ function showMatches($matches){
 		if(!isset($arguments['dst_address'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
 		}
+		if(!isset($arguments['time'])){
+   $arguments['time'] = date('Y-m-d h:m:s',time());
+		}else{
+   //$arguments['time'] = date('Y-m-d h:m:s',time($arguments['time']));
+  }
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
@@ -261,10 +272,10 @@ function showMatches($matches){
 
   if($unrecognized == 0){
  	 $city = new City();
-   $city->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
+   $city->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude'], $arguments['time']);
   }
 
-  $route = new Route($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude']);
+  $route = new Route($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude'], time($arguments['time']));
 	 $arguments['route_id'] = $route->add();
 
 		foreach($this->fields as $field){
