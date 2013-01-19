@@ -23,7 +23,7 @@ class City extends dbclass {
 	function deleteRequest($user_id){
 		$result = parent::select('request',array('*'),array('user_id' => $user_id));
 		if(count($result)>0){
-   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], time($result[0]['time']));
+   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], strtotime($result[0]['time']));
    $this->delete($user_id, $route->row_ceil_src, $route->col_ceil_src, $GLOBALS['src_table']);
    $this->delete($user_id, $route->row_ceil_src, $route->col_floor_src, $GLOBALS['src_table']);
    $this->delete($user_id, $route->row_floor_src, $route->col_ceil_src, $GLOBALS['src_table']);
@@ -54,7 +54,7 @@ function add($row_id, $col_id, $user_id, $table_name){
 }
 
 function addRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst,$ttime){
- $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst,$ttime);
+ $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst,strtotime($ttime));
 	$this->deleteRequest($user_id);
  $this->add($route->row_ceil_src, $route->col_ceil_src, $user_id, $GLOBALS['src_table']);
  $this->add($route->row_ceil_src, $route->col_floor_src, $user_id, $GLOBALS['src_table']);
@@ -161,12 +161,12 @@ function checkTypeCompatibility($type1, $type2){
 }
  
 function checkTimeCompatibility($time1, $time2){
- if(abs(time($time1)-time($time2)) <= $GLOBALS['TIME_THRESHOLD']) return true;
+ if(abs($time1-$time2) <= $GLOBALS['TIME_THRESHOLD']) return true;
  return false;
 }
 
 function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $users = array()){
- $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, time($ttime));
+ $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, strtotime($ttime));
  //$coords = $this->getSearchCoords($route);	
  $step_x = $GLOBALS['RADIUS']/$GLOBALS['RADIUS_X'];
  $step_y = $GLOBALS['RADIUS']/$GLOBALS['RADIUS_Y'];
@@ -198,11 +198,11 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
   $result = parent::execute($sql);
   if($result->num_rows > 0) {
    while($row = $result->fetch_assoc()) {
-    if($this->checkTypeCompatibility($type,$row['type'])==FALSE || $this->checkTimeCompatibility(time($ttime), time($row['time']))==FALSE){
+    if($this->checkTypeCompatibility($type,$row['type'])==FALSE || $this->checkTimeCompatibility(strtotime($ttime), strtotime($row['time']))==FALSE){
      Logger::do_log("Time Incompatibility for " . $row['user_id'] . " Times: $ttime and " . $row['time']);
      continue;
     }
-    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude'], time($row['time']));
+    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude'], strtotime($row['time']));
     $routes[] = $route2;
    }
   }  

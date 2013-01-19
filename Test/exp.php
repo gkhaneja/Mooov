@@ -52,9 +52,11 @@ function contains($x, $y, $z){
   return false;
 }*/
 
-echo date('Y-m-d h:m:s', time()) . "\n";
-echo strtotime(date('d-m-Y h:m:s', time())) . "\n";
-echo strtotime('d-m-Y h:m:s') . "\n";
-echo time() . "\n";
-echo time("2013-01-21 00:00:00") . "\n";
+
+$d = date('Y-m-d h:m:s', time()) . "\n";
+$t = strtotime($d) . "\n";
+$d2 = date('Y-m-d h:m:s', $t) . "\n";
+echo $d . "\n";
+echo "$d2\n";
+
 ?>

@@ -45,7 +45,7 @@ class Request extends dbclass {
  }
 
  function checkTimeCompatibility($time1, $time2){
-  if(abs(time($time1)-time($time2)) <= $GLOBALS['TIME_THRESHOLD']) return true;
+  if(abs($time1-$time2) <= $GLOBALS['TIME_THRESHOLD']) return true;
   return false;
  }
 
@@ -65,7 +65,7 @@ class Request extends dbclass {
  }
 
 function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $users = array()){
- $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst,time($ttime));
+ $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst,strtotime($ttime));
  //$coords = $this->getSearchCoords($route);	
  $step_x = $GLOBALS['RADIUS2'];
  $step_y = $GLOBALS['RADIUS2'];
@@ -97,10 +97,10 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
   $result = parent::execute($sql);
   if($result->num_rows > 0) {
    while($row = $result->fetch_assoc()) {
-    if($this->checkTypeCompatibility($type,$row['type'])==FALSE || $this->checkTimeCompatibility(time($ttime),time($row['time']))==FALSE){
+    if($this->checkTypeCompatibility($type,$row['type'])==FALSE || $this->checkTimeCompatibility(strtotime($ttime),strtotime($row['time']))==FALSE){
      continue;
     }
-    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude'],time($row['time']));
+    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude'],strtotime($row['time']));
     $routes[] = $route2;
    }
   }  
@@ -226,7 +226,7 @@ function showMatches($matches){
 		
 		$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
 		if(count($result)>0){
-   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], time($result[0]['time']));
+   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], strtotime($result[0]['time']));
    $route->delete();
 			$sql = "DELETE FROM request WHERE user_id = " . $arguments['user_id'];
 			parent::execute($sql);
@@ -275,7 +275,7 @@ function showMatches($matches){
    $city->addRequest($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude'], $arguments['time']);
   }
 
-  $route = new Route($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude'], time($arguments['time']));
+  $route = new Route($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude'], strtotime($arguments['time']));
 	 $arguments['route_id'] = $route->add();
 
 		foreach($this->fields as $field){
