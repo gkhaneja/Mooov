@@ -27,6 +27,7 @@ class Request extends dbclass {
 		$this->fields['route_id'] = new Field('route_id','route_id',0);
 		$this->fields['type'] = new Field('type','type',0);
 		$this->fields['time'] = new Field('time','time',0);
+		$this->fields['city'] = new Field('city','city',0);
 	}
 
  function checkTypeCompatibility($type1, $type2){
@@ -277,7 +278,7 @@ function showMatches($matches){
 
   $route = new Route($arguments['user_id'], $arguments['src_latitude'], $arguments['src_longitude'], $arguments['dst_latitude'], $arguments['dst_longitude'], strtotime($arguments['time']));
 	 $arguments['route_id'] = $route->add();
-
+  $arguments['city'] = $GLOBALS['city'];
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){
 				$this->fields[$field->name]->value = $arguments[$field->name];

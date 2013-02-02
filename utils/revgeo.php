@@ -39,6 +39,7 @@ public function reverseGeo($lat,$lng)
  //$lat =  '19.1154908';
  //$lng = '72.87269519999995';
  $geoCodeURL = "http://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&sensor=false"; 
+ Logger::do_log($geoCodeURL);
 
  $results = json_decode(file_get_contents($geoCodeURL), true); 
  $resp = array();
@@ -84,8 +85,8 @@ public function getCity($lat,$lan){
   $results = $this->reverseGeo($lat,$lan);
   $city='';
   foreach($results as $result){
-    if(isset($result['locality_shortname'])){
-        $city= $result['locality_shortname'] ;
+    if(isset($result['locality_longname'])){
+        $city= strtolower($result['locality_longname']) ;
         break;
       }
   }
