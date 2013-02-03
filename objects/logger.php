@@ -11,7 +11,7 @@ class Logger {
 	public static function bootup(){
 		$logger = new Logger();
 		Logger::$file_handle = fopen($logger->log_file,"a");
-  Logger::$rid = getmypid();
+  Logger::$rid = time();
 	}
 
 	public static function do_log($logstr, $level=0){
