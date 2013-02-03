@@ -1,1 +1,1 @@
-mysql -Nse 'show tables' test | while read table; do mysql -e "truncate table $table" test; done
+mysql -Nse 'show tables' hopon -p | while read table; do mysql -e "truncate table $table" hopon -p ; done
