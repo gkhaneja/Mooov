@@ -38,20 +38,22 @@ class RequestService extends RestService {
 	public function getMatches($arguments){
   if(isset($arguments['site']) && $arguments['site']==1){
    $GLOBALS['site']=1;
+   $this->initializeRegion($arguments);
+		$request = new Request();
   }else{
    $GLOBALS['site']=0;
-  }
-  $val = Cache::getValueArray($arguments['user_id']);
-  if(!empty($val) && constant('ENABLE_CACHING')==1){
-   if((time() - $val['time'] <= constant('CACHE_EXPIRY'))){
-    Logger::do_log("Sending the cached results, key " . $arguments['user_id']);
-    $json_msg = new JSONMessage();
-    $json_msg->setBody (array("NearbyUsers" => $val['resp'])); 
-		  echo $json_msg->getMessage();
-    return;
+   $val = Cache::getValueArray($arguments['user_id']);
+   if(!empty($val) && constant('ENABLE_CACHING')==1){
+    if((time() - $val['time'] <= constant('CACHE_EXPIRY'))){
+     Logger::do_log("Sending the cached results, key " . $arguments['user_id']);
+     $json_msg = new JSONMessage();
+     $json_msg->setBody (array("NearbyUsers" => $val['resp'])); 
+		   echo $json_msg->getMessage();
+     return;
+    }
    }
+	  $this->setRegion($arguments);
   }
-	 $this->setRegion($arguments);
 		$request = new Request();
   if($GLOBALS['city']=='unrecognized_region'){
    $request->getRandomMatches($arguments);
@@ -87,8 +89,8 @@ class RequestService extends RestService {
   $region  = $this->detect_region($arguments);
   $this->setRegionVariables($region);
   $userid = $arguments['user_id'];
-  $c =new UserCity();
-  $city = $c->setCity($userid,$region);
+  //$c =new UserCity();
+  //$city = $c->setCity($userid,$region);
  }
 
  function setRegionVariables($region){
