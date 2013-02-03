@@ -1,6 +1,7 @@
 <?php
 require_once("objects/cache.php");
 require_once("conf/constants.inc");
+require_once("objects/utils.php");
 
 //Cache::bootup();
 /*Cache::init();
@@ -53,10 +54,17 @@ function contains($x, $y, $z){
 }*/
 
 
-$d = date('Y-m-d h:m:s', time()) . "\n";
+/*$d = date('Y-m-d h:m:s', time()) . "\n";
 $t = strtotime($d) . "\n";
 $d2 = date('Y-m-d h:m:s', $t) . "\n";
 echo $d . "\n";
-echo "$d2\n";
+echo "$d2\n";*/
+/*$hh="02";
+$mm="58";
+echo date('Y-m-d', time()) . " " . $hh . ":" . $mm  . ":00" . "\n";*/
 
+//$utils = new Util();
+$res = Utils::checkParams(array('user_id' => '34', 'id' => '2'), array('user_id', 'id'));
+print_r($res);
+echo "\n";
 ?>

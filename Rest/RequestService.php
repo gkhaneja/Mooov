@@ -26,11 +26,21 @@ class RequestService extends RestService {
  }
 
  public function getCarpoolMatches($arguments){
+  if(isset($arguments['site']) && $arguments['site']==1){
+   $GLOBALS['site']=1;
+  }else{
+   $GLOBALS['site']=0;
+  }
 		$request = new Request();
 		$request->getCarpoolMatches($arguments);
  }
 
 	public function getMatches($arguments){
+  if(isset($arguments['site']) && $arguments['site']==1){
+   $GLOBALS['site']=1;
+  }else{
+   $GLOBALS['site']=0;
+  }
   $val = Cache::getValueArray($arguments['user_id']);
   if(!empty($val) && constant('ENABLE_CACHING')==1){
    if((time() - $val['time'] <= constant('CACHE_EXPIRY'))){

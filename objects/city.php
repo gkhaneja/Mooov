@@ -166,6 +166,7 @@ function checkTimeCompatibility($time1, $time2){
 }
 
 function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $users = array()){
+   //Logger::do_log("Creating: Route($user_id, $lat_src, $lon_src, $lat_dst, $lon_dst, $type, $ttime)");
  $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, strtotime($ttime));
  //$coords = $this->getSearchCoords($route);	
  $step_x = $GLOBALS['RADIUS']/$GLOBALS['RADIUS_X'];

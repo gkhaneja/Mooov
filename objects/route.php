@@ -59,11 +59,10 @@ class Route extends dbclass {
  function delete(){
   
  }
-
- function add(){
-  $path = $this->getPath($this);
-  $path2[0]['lat'] = $this->lat_src;
-  $path2[0]['lon'] = $this->lon_src;
+ function getRoute($route){
+  $path = $this->getPath($route);
+  $path2[0]['lat'] = $route->lat_src;
+  $path2[0]['lon'] = $route->lon_src;
   $path2[0]['dist'] = 0;
   if($path != NULL){
    $size = 1;
@@ -73,7 +72,14 @@ class Route extends dbclass {
      $path2[$size]['dist'] = $step['distance']['value'];
      $size++;
    }
+   return $path2;
+  }else{
+   return NULL;
   }
+ }
+
+ function add(){
+  $path2 = $this->getRoute($this);
   $path_str = mysql_real_escape_string(serialize($path2));
 		$result = parent::select('route',array('id'),array('user_id' => $this->user_id));
 		if(isset($result[0]['id'])){
@@ -115,12 +121,18 @@ class Route extends dbclass {
 
  function matchRoutes($user_route, $routes){
 		//TODO: Implement plan B
-  $res = parent::execute("select path from route where user_id = " . $user_route->user_id);
-  if($res->num_rows > 0) {
-   $row = $res->fetch_assoc();
-   $path1 = unserialize($row['path']);
+  //TODO: BUG: Return an array of 50 not a single 50 in case of google api failure
+  if($GLOBALS['site']==0){
+   $res = parent::execute("select path from route where user_id = " . $user_route->user_id);
+   if($res->num_rows > 0) {
+    $row = $res->fetch_assoc();
+    $path1 = unserialize($row['path']);
+   }else{
+    return 50;
+   }
   }else{
-   return 50;
+   $path1 = $this->getRoute($user_route);
+   if($path1==NULL) return 50;
   }
   $ret=array();
   foreach($routes as $route){

@@ -4,6 +4,7 @@ require_once('objects/dbclass.php');
 require_once('objects/field.php');
 require_once('objects/JSONMessage.php');
 require_once('objects/city.php');
+require_once('objects/utils.php');
 require_once('objects/location_info.php');
 require_once('objects/facebook_info.php');
  require_once("conf/constants.inc");
@@ -136,29 +137,52 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
  }
 
 	function getMatches($arguments){
-  if(!isset($arguments['user_id']) && !isset($arguments['id'])){
-			throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
-		}
-		if(!isset($arguments['id'])){
-			$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
-		}else{
-   $result = parent::select('request',array('*'),array('id' => $arguments['id']));
-	 }	
-		if(count($result)==0){
-		 throw new APIException(array("code" =>"5" , 'error' => 'Request does not exist.'));
-		}
-  $user_id = $result[0]['user_id'];
+  if($GLOBALS['site']==0){
+   if(!isset($arguments['user_id']) && !isset($arguments['id'])){
+			 throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
+		 }
+		 if(!isset($arguments['id'])){
+			 $result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
+		 }else{
+    $result = parent::select('request',array('*'),array('id' => $arguments['id']));
+	  }	
+		 if(count($result)==0){
+		  throw new APIException(array("code" =>"5" , 'error' => 'Request does not exist.'));
+		 }
+   $user_id = $result[0]['user_id'];
+   $src_lat = $result[0]['src_latitude'];
+   $src_lon = $result[0]['src_longitude'];
+   $dst_lat = $result[0]['dst_latitude'];
+   $dst_lon = $result[0]['dst_longitude'];
+   $type = $result[0]['type'];
+   $time = $result[0]['time'];
+  }else{
+   if(Utils::checkParams($arguments, array('src_latitude','src_longitude','dst_latitude','dst_longitude'))==0){
+			 throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
+   }
+   $user_id = 0;
+   $src_lat = $arguments['src_latitude'];
+   $src_lon = $arguments['src_longitude'];
+   $dst_lat = $arguments['dst_latitude'];
+   $dst_lon = $arguments['dst_longitude'];
+   $type = (isset($arguments['type'])) ? $arguments['type'] : 0;
+   $time = (isset($arguments['time'])) ? date('Y-m-d', time()) . " " . $arguments['time']  . ":00" : date('Y-m-d H:i:s', time());
+   //Logger::do_log("Time: $time");
+  }
 		$city = new City();
   $ntry=0;
   $matches = array();
   while($this->satisfaction($matches,$ntry)==false){
-		 $matches = array_merge($matches, $city->matchRequest($result[0]['user_id'], $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], $result[0]['type'], $result[0]['time'], $matches));	
+   //Logger::do_log("Calling: matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $matches)");
+		 $matches = array_merge($matches, $city->matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $matches));	
    $ntry++;
   }
   $resp = $this->showMatches($matches);
-  Logger::do_log("Caching the result, key $user_id");
-  $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
-  Cache::setValueArray($user_id, $cache_arr);
+  if($GLOBALS['site']==0){
+   Logger::do_log("Caching the result, key $user_id");
+   $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
+   Cache::setValueArray($user_id, $cache_arr);
+  }
 }
 
 
@@ -262,9 +286,9 @@ function showMatches($matches){
 			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
 		}
 		if(!isset($arguments['time'])){
-   $arguments['time'] = date('Y-m-d h:m:s',time());
+   $arguments['time'] = date('Y-m-d H:i:s',time());
 		}else{
-   //$arguments['time'] = date('Y-m-d h:m:s',time($arguments['time']));
+   $arguments['time'] = date('Y-m-d', time()) . " " . $arguments['time']  . ":00";
   }
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
