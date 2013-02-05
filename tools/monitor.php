@@ -8,11 +8,12 @@ var $sleeptime = 100;
 var $filename = "/tmp/mooov.log";
 var $exception_pattern = "/Internal Error/";
 //var $exception_pattern = "/URL/";
-var $mailid = 'strangerbuddy@googlegroups.com';
+//var $mailid = 'strangerbuddy@googlegroups.com';
+var $mailid = 'gourav.khaneja@gmail.com';
 
 function Monitor($seek = 0){
  $fh = fopen($this->filename,'r');
- fseek($fh,$seek);
+ fseek($fh,$seek, SEEK_END);
  while(1){
   if(feof($fh)){ 
    $pos = ftell($fh);
