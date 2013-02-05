@@ -200,7 +200,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
   if($result->num_rows > 0) {
    while($row = $result->fetch_assoc()) {
     if($this->checkTypeCompatibility($type,$row['type'])==FALSE || $this->checkTimeCompatibility(strtotime($ttime), strtotime($row['time']))==FALSE){
-     Logger::do_log("Time Incompatibility for " . $row['user_id'] . " Times: $ttime and " . $row['time']);
+     //Logger::do_log("Time Incompatibility for " . $row['user_id'] . " Times: $ttime and " . $row['time']);
      continue;
     }
     $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude'], strtotime($row['time']));

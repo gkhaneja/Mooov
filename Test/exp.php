@@ -64,7 +64,15 @@ $mm="58";
 echo date('Y-m-d', time()) . " " . $hh . ":" . $mm  . ":00" . "\n";*/
 
 //$utils = new Util();
-$res = Utils::checkParams(array('user_id' => '34', 'id' => '2'), array('user_id', 'id'));
+/*$res = Utils::checkParams(array('user_id' => '34', 'id' => '2'), array('user_id', 'id'));
 print_r($res);
-echo "\n";
+echo "\n";*/
+
+
+/*$pattern = '/rid=([0-9]*)/';
+$subject = "[2013-02-04 22-02-15][rid=1359997330][RequestService][setRegionVariables] Setting up region as";
+echo preg_match($pattern,$subject,&$matches) . "\n";
+print_r($matches);*/
+
+echo mail('gourav.khaneja@gmail.com',"Test","Test") . "\n";
 ?>
