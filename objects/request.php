@@ -244,8 +244,12 @@ function showMatches($matches){
     while($row = $result->fetch_assoc()) {
      $fbinfo = new FBInfo($row);
      $fb_array = $fbinfo->getData();
+     $fb_array['fb_info_available'] = 1;
     }
 	  }
+   if(!isset($fb_array['fb_info_available'])){
+     $fb_array['fb_info_available'] = 0; 
+   }
    $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array, "other_info" => $other_info);
 		}                
   $json_msg = new JSONMessage();
