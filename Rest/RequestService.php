@@ -58,7 +58,7 @@ class RequestService extends RestService {
   if($GLOBALS['city']=='unrecognized_region'){
    $request->getRandomMatches($arguments);
 		}else{
-   $request->getMatches($arguments);
+   $request->getRandomMatches($arguments);
   }
 	}
 
