@@ -377,16 +377,27 @@ function showMatches($matches){
 		if(!isset($result[0]['id'])){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
 		}
+
   $geocoding = new GeoCoding();
-  $src_coord = $geocoding->geocode($arguments['src_address']); 
-  $dst_coord = $geocoding->geocode($arguments['dst_address']); 
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
+   $src_coord = $geocoding->geocode($arguments['src_address']); 
+   $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];  
+  }else{
+   $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude'];  
+  }
+  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
+   $dst_coord = $geocoding->geocode($arguments['dst_address']); 
+   $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
+  }else{
+   $dst_lat=$arguments['dst_latitude']; $dst_lon=$arguments['dst_longitude'];  
+  }
+
 		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
   $user_id=$arguments['user_id']; $src_add=$arguments['src_address']; $dst_add=$arguments['dst_address'];
-  $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];  $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
   if(isset($result[0]['id'])){
-   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=\"$src_add\", dst_address=\"$dst_add\" WHERE user_id=$user_id";
+   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=$src_add, dst_address=$dst_add WHERE user_id=$user_id";
   }else{
-   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, \"$src_add\", \"$dst_add\")";
+   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $src_add, $dst_add)";
   }
   parent::execute($sql);
  }
@@ -399,8 +410,16 @@ function showMatches($matches){
 			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
 		}
   $geocoding = new GeoCoding();
-  $src_coord = $geocoding->geocode($arguments['src_address']); $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];
-  $dst_coord = $geocoding->geocode($arguments['dst_address']); $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
+   $src_coord = $geocoding->geocode($arguments['src_address']); $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];
+  }else{
+   $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude'];  
+  }
+  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
+   $dst_coord = $geocoding->geocode($arguments['dst_address']); $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
+  }else{
+   $dst_lat=$arguments['dst_latitude']; $dst_lon=$arguments['dst_longitude'];  
+  }
   $sql = "SELECT user_id from carpool WHERE ABS(src_latitude-$src_lat)<0.004 AND ABS(src_longitude-$src_lon)<0.004 AND ABS(dst_latitude-$dst_lat)<0.004 AND (dst_longitude-$dst_lon)<0.004";
   $result = parent::execute($sql);
   $matches=array();
