@@ -216,9 +216,9 @@ function showMatches($matches){
   
   $resp = array();
   foreach($matches as $match){
-   $fb_array;
-   $user_array;
-   $other_info;
+   $fb_array = array();
+   $user_array = array();
+   $other_info = array();
 			$sql = "select * from user where id =" . $match['user_id'];
    $result = parent::execute($sql);
    if($result->num_rows > 0) {
@@ -415,15 +415,15 @@ function showMatches($matches){
 function showCarpoolMatches($matches){
   $match_str="";
   foreach($matches as $match){
-   $match_str .= $match;
+   $match_str .= $match . ", ";
   } 
   Logger::do_log("Matches: $match_str");	
 
   $resp = array();
   foreach($matches as $match){
-   $fb_array;
-   $user_array;
-   $other_info;
+   $fb_array = array();
+   $user_array = array();
+   $other_info = array();
 			$sql = "select * from user where id =" . $match;
    $result = parent::execute($sql);
    if($result->num_rows > 0) {

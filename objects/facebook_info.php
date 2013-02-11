@@ -13,6 +13,7 @@ private $current_city;
 private $hometown;
 private $pic;
 private $fbid;
+private $phone;
 
 public function __construct ($row)
 {
@@ -32,12 +33,13 @@ public function __construct ($row)
      $this->lastname =  $row['lastname'];
      $this->username = $row['username'];
      $this->fbid  =  $row['fbid'];
+     $this->phone  =  $row['phone'];
 }
 public function getData()
 {
 
  $fb_array = array( "fbid" => $this->fbid , "firstname" => $this->firstname,  "lastname" => $this->lastname , "username" => $this->username,
-                           "works_at" => $this->workplace,"lives_in" => $this->current_city , "hometown" => $this->hometown, "study_at" => $this->study,"image_url" =>  $this->pic, "gender" => $this->gender);
+                           "works_at" => $this->workplace,"lives_in" => $this->current_city , "hometown" => $this->hometown, "study_at" => $this->study,"image_url" =>  $this->pic, "gender" => $this->gender, "phone" => $this->phone);
 
 return $fb_array;
 }

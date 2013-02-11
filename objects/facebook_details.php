@@ -36,7 +36,7 @@ if(!isset($arguments['user_id'])| !isset($arguments['fbtoken'])  || !isset($argu
  $fbid =  $arguments['fbid'];
  $fbtoken =  $arguments['fbtoken'];
  $fburl  =   getFBquery($fbid,$fbtoken);
- error_log("== $fburl ==");
+ Logger::do_log("== $fburl ==");
  $resp =  get_data($fburl);
  $data  = parseResponse($resp);
  if($data == "NULL") return;
@@ -52,7 +52,7 @@ if(!isset($arguments['user_id'])| !isset($arguments['fbtoken'])  || !isset($argu
  $hometown  =  serialize($data['hometown']);
  $location =  serialize($data['location']);
  $query = "UPDATE user_details SET  workplace = '$workplace', firstname = '$fname' , lastname = '$lname' , username ='$uname', gender='$gender' , email='$email', location = '$location', hometown = '$hometown', education ='$education'  WHERE  user_id = $userid "; 
- error_log($query);
- error_log( parent::execute($query));
+ //Logger::do_log($query);
+ parent::execute($query);
 
 ?>

@@ -19,6 +19,7 @@ class UserDetails extends dbclass{
 		$this->fields['birthday'] = new Field('birthday','birthday',0);
 		$this->fields['email'] = new Field('email','email',0);
 		$this->fields['workplace'] = new Field('workplace','workplace',0);
+		$this->fields['phone'] = new Field('phone','phone',0);
 		
 	}
 
