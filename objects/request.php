@@ -313,7 +313,7 @@ function showMatches($matches){
 		if(!isset($arguments['time'])){
    $arguments['time'] = date('Y-m-d H:i:s',time());
 		}else{
-   $arguments['time'] = date('Y-m-d', time()) . " " . $arguments['time']  . ":00";
+   $arguments['time'] = $arguments['time'];
   }
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
@@ -373,6 +373,11 @@ function showMatches($matches){
 		if(!isset($arguments['dst_address'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
 		}
+		if(!isset($arguments['time'])){
+   $arguments['time'] = date('Y-m-d H:i:s',time());
+		}else{
+   $arguments['time'] = $arguments['time'];
+  }
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
@@ -393,13 +398,17 @@ function showMatches($matches){
   }
 
 		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
-  $user_id=$arguments['user_id']; $src_add=$arguments['src_address']; $dst_add=$arguments['dst_address'];
+  $user_id=$arguments['user_id']; $src_add=$arguments['src_address']; $dst_add=$arguments['dst_address']; $ttime=$arguments['time'];
   if(isset($result[0]['id'])){
-   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=$src_add, dst_address=$dst_add WHERE user_id=$user_id";
+   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=$src_add, dst_address=$dst_add, time=\"$ttime\" WHERE user_id=$user_id";
   }else{
-   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $src_add, $dst_add)";
+   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address, time) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $src_add, $dst_add, \"$ttime\")";
   }
   parent::execute($sql);
+		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
+		$json_msg = new JSONMessage();
+		$json_msg->setBody(array("request_id" => $result[0]['id']));
+		echo $json_msg->getMessage();
  }
 
  function getCarpoolMatches($arguments){
