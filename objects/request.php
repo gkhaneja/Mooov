@@ -400,9 +400,9 @@ function showMatches($matches){
 		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
   $user_id=$arguments['user_id']; $src_add=$arguments['src_address']; $dst_add=$arguments['dst_address']; $ttime=$arguments['time'];
   if(isset($result[0]['id'])){
-   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=$src_add, dst_address=$dst_add, time=\"$ttime\" WHERE user_id=$user_id";
+   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=\"$src_add\", dst_address=\"$dst_add\", time=\"$ttime\" WHERE user_id=$user_id";
   }else{
-   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address, time) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $src_add, $dst_add, \"$ttime\")";
+   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address, time) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, \"$src_add\", \"$dst_add\", \"$ttime\")";
   }
   parent::execute($sql);
 		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
