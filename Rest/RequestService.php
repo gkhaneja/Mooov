@@ -4,6 +4,7 @@ require_once('RestService.php');
 require_once('objects/user.php');
 require_once('objects/request.php');
 require_once('objects/decode_city.php');
+require_once('objects/utils.php');
 require_once('conf/constants.inc');
 
 class RequestService extends RestService {
@@ -79,6 +80,7 @@ class RequestService extends RestService {
 }
 
  function setRegion($arguments){
+  Utils::checkParams2($arguments, array('user_id'));
   $userid = $arguments['user_id'];
   $c =new UserCity();
   $city = $c->getCity($userid);
