@@ -16,7 +16,7 @@ class ServiceFactory {
 		$this->uri = $uri;
 	}
 
-	public function serve(){
+	public function serve($sitearguments = null){
   $start_time = microtime(true);
 		Logger::bootup();
   Cache::init();
@@ -42,7 +42,15 @@ class ServiceFactory {
 // 			$arguments[] = $parts[$i];
 // 		}
 		
+  if(isset($parts[4]) && $parts[4] == 'site')
+   {
+     $arguments =  $sitearguments;
+			  Logger::do_log("arguments for site " . print_r($arguments,true));
+   }
+  else
+  {
 		$method = $_SERVER['REQUEST_METHOD'];
+  
 		switch ($method) {
 			case 'GET':
 			case 'HEAD':
@@ -55,6 +63,7 @@ class ServiceFactory {
 			case 'DELETE':
 				parse_str(file_get_contents('php://input'), $arguments);
 		}
+  }
 /*                if(!$this->authenticateRequest($function, $arguments))
 		{
 			Logger::do_log("Could not authenticate " . $function);
