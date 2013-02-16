@@ -108,7 +108,7 @@ class RequestService extends RestService {
   $GLOBALS['RADIUS_X'] = 112;
   $GLOBALS['RADIUS_Y'] = 105;
   $GLOBALS['THRESHOLD'] = 20;
-  $GLOBALS['TIME_THRESHOLD'] = 3600;
+  $GLOBALS['TIME_THRESHOLD'] = 3600*10;
  }
  
  function detect_region($arguments){

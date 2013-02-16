@@ -32,6 +32,8 @@ class Request extends dbclass {
 	}
 
  function checkTypeCompatibility($type1, $type2){
+  //HACK: Do not filter results based on 'type' for time being (management is crazy, isn't it?). Always return true
+  return TRUE;
   $ret = FALSE;
   switch($type1){
    case 0: 
@@ -61,6 +63,7 @@ class Request extends dbclass {
   if(count($matches)<5){
    $GLOBALS['RADIUS'] = $GLOBALS['RADIUS'] + 100;
    $GLOBALS['RADIUS2'] = $GLOBALS['RADIUS2'] + 0.001;
+   $GLOBALS['TIME_THRESHOLD'] = $GLOBALS['TIME_THRESHOLD'] + 900*$ntry;
    return false;
   }
   return true;
@@ -76,12 +79,46 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
  $y1 = ($route->lon_src - $step_y);
  $y2 = ($route->lon_src + $step_y);
  $matches = array();
- $sql = "select user_id from request where src_latitude>=$x1 AND src_latitude<=$x2 AND src_longitude>=$y1 AND src_longitude<=$y2";
+ $details = array(); 
+ $sql = "select * from request where src_latitude>=$x1 AND src_latitude<=$x2 AND src_longitude>=$y1 AND src_longitude<=$y2";
  $results = parent::execute($sql);
  while($row = $results->fetch_assoc()) {
 		$matches[]=$row['user_id'];
+  $details[$row['user_id']] = $row;
  }
  //$matches = $this->match($coords, $GLOBALS['src_table']);
+
+ $fbarray = array();
+ foreach($matches as $match){
+  if(empty($match)) continue;
+  $sql = "select fbid from user_details where user_id = $match";
+  $result = parent::execute($sql);
+  if($result->num_rows > 0) {
+   while($row = $result->fetch_assoc()) {
+    if(empty($row['fbid']) || $row['fbid']==NULL){
+     $fbarray['nofbid-' . $match] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
+     Logger::do_log("No fbid for $match");
+     continue;
+    }
+    if(array_key_exists($row['fbid'], $fbarray)){
+     Logger::do_log("comparing time- " . strtotime($fbarray[$row['fbid']]['lastupd']) . " and " . strtotime($details[$match]['lastupd']));
+     Logger::do_log("comparing time- " . $fbarray[$row['fbid']]['lastupd'] . " and " . $details[$match]['lastupd']);
+     if(strtotime($fbarray[$row['fbid']]['lastupd']) < strtotime($details[$match]['lastupd'])){
+      Logger::do_log("Updating  " . $fbarray[$row['fbid']]['match'] . " to $match for fbid " . $row['fbid']);
+      $fbarray[$row['fbid']] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
+     }else{
+      Logger::do_log("NOT updating  " . $fbarray[$row['fbid']]['match'] . " to $match for fbid " . $row['fbid']);
+     }
+    }else{
+     $fbarray[$row['fbid']] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
+     Logger::do_log("Got new user_id, fbid as $match, " . $row['fbid']);
+    }
+   }
+  }else{
+   $fbarray['nofbid-' . $match] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
+   Logger::do_log("No fbid for $match");
+  }
+ }
 
  $matches = array_unique($matches);
  if(($key = array_search($user_id, $matches)) !== FALSE) {
@@ -92,8 +129,13 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
    unset($matches[$key]);
   }
  }
+
  $routes=array();
- foreach($matches as $match){
+ foreach($fbarray as $fbrow){
+  $match = $fbrow['match'];
+  if(($key = array_search($match, $matches)) === FALSE) {
+   continue;
+  }
   if(empty($match)) continue;
   $sql = "select * from request where user_id = $match";
   $result = parent::execute($sql);
