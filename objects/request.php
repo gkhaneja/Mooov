@@ -498,7 +498,8 @@ function showCarpoolMatches($matches){
    $result = parent::execute($sql);
    if($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-     $user_array = array("user_id" => $match, "first_name" => stripslashes($row['first_name']), "last_name" => stripslashes($row['last_name']));    }
+     $user_array = array("user_id" => $match, "username" => stripslashes($row['username']));    
+    }
    }                            
    $sql = "select * from carpool where user_id =" . $match;
    $result = parent::execute($sql);
