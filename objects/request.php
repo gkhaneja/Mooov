@@ -9,6 +9,7 @@ require_once('objects/location_info.php');
 require_once('objects/facebook_info.php');
  require_once("conf/constants.inc");
 require_once("utils/revgeo.php");
+
 class Request extends dbclass {
 
 	var $fields;
@@ -71,6 +72,12 @@ class Request extends dbclass {
 
 function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $users = array()){
  $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst,strtotime($ttime));
+ $user_details = mysqli_fetch_assoc(parent::execute("select * from user_details where user_id = $user_id"));
+ $temp = mysqli_fetch_assoc(parent::execute("select filters from request_filters where user_id = $user_id"));
+ $filters = array();
+ if(isset($temp)){
+  $filters = unserialize($temp['filters']);
+ }
  //$coords = $this->getSearchCoords($route);	
  $step_x = $GLOBALS['RADIUS2'];
  $step_y = $GLOBALS['RADIUS2'];
@@ -97,26 +104,26 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
    while($row = $result->fetch_assoc()) {
     if(empty($row['fbid']) || $row['fbid']==NULL){
      $fbarray['nofbid-' . $match] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
-     Logger::do_log("No fbid for $match");
+     //Logger::do_log("No fbid for $match");
      continue;
     }
     if(array_key_exists($row['fbid'], $fbarray)){
-     Logger::do_log("comparing time- " . strtotime($fbarray[$row['fbid']]['lastupd']) . " and " . strtotime($details[$match]['lastupd']));
-     Logger::do_log("comparing time- " . $fbarray[$row['fbid']]['lastupd'] . " and " . $details[$match]['lastupd']);
+     //Logger::do_log("comparing time- " . strtotime($fbarray[$row['fbid']]['lastupd']) . " and " . strtotime($details[$match]['lastupd']));
+     //Logger::do_log("comparing time- " . $fbarray[$row['fbid']]['lastupd'] . " and " . $details[$match]['lastupd']);
      if(strtotime($fbarray[$row['fbid']]['lastupd']) < strtotime($details[$match]['lastupd'])){
-      Logger::do_log("Updating  " . $fbarray[$row['fbid']]['match'] . " to $match for fbid " . $row['fbid']);
+      //Logger::do_log("Updating  " . $fbarray[$row['fbid']]['match'] . " to $match for fbid " . $row['fbid']);
       $fbarray[$row['fbid']] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
      }else{
-      Logger::do_log("NOT updating  " . $fbarray[$row['fbid']]['match'] . " to $match for fbid " . $row['fbid']);
+      //Logger::do_log("NOT updating  " . $fbarray[$row['fbid']]['match'] . " to $match for fbid " . $row['fbid']);
      }
     }else{
      $fbarray[$row['fbid']] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
-     Logger::do_log("Got new user_id, fbid as $match, " . $row['fbid']);
+     //Logger::do_log("Got new user_id, fbid as $match, " . $row['fbid']);
     }
    }
   }else{
    $fbarray['nofbid-' . $match] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
-   Logger::do_log("No fbid for $match");
+   //Logger::do_log("No fbid for $match");
   }
  }
 
@@ -139,18 +146,68 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
   if(empty($match)) continue;
   $sql = "select * from request where user_id = $match";
   $result = parent::execute($sql);
+  $req_match=0;
   if($result->num_rows > 0) {
-   while($row = $result->fetch_assoc()) {
-    if($this->checkTypeCompatibility($type,$row['type'])==FALSE || $this->checkTimeCompatibility(strtotime($ttime),strtotime($row['time']))==FALSE){
-     continue;
-    }
-    $route2 = new Route($match, $row['src_latitude'], $row['src_longitude'], $row['dst_latitude'], $row['dst_longitude'],strtotime($row['time']));
-    $routes[] = $route2;
+   $row = $result->fetch_assoc();
+   if($this->checkTypeCompatibility($type,$row['type'])==TRUE && 
+      $this->checkTimeCompatibility(strtotime($ttime),strtotime($row['time']))==TRUE) { 
+    $req_match = 1;
    }
+  }
+  
+  $user_details2 = mysqli_fetch_assoc(parent::execute("select * from user_details where user_id = $match"));
+  $temp2 = mysqli_fetch_assoc(parent::execute("select filters from request_filters where user_id = $match"));
+  $filters2 = array();
+  if(isset($temp2)){
+   $filters2 = unserialize($temp2['filters']);
+  }
+  $filter_match = $this->apply_filters($user_details, $filters, $user_details2, $filters2); 
+  
+  if($req_match==1 && $filter_match==1){
+   $route2=new Route($match,$row['src_latitude'],$row['src_longitude'],$row['dst_latitude'],$row['dst_longitude'],strtotime($row['time']));
+   $routes[] = $route2; 
   }  
  }
  $ret = $route->matchRoutes($route,$routes);
 	return $ret;
+}
+
+function apply_filters($details, $filters, $details2, $filters2){
+ $ret=1;
+ if(isset($filters)){
+  foreach($filters as $filter => $value){
+   if(!isset($details2) || !isset($details2[$filter]) || $details2[$filter]!=trim($value)){
+    Logger::do_log("Removing on $filter " . $details2[$filter] . "== " . $value);
+    $ret=0;
+   }
+  }
+ }
+ if(isset($filters2)){
+  foreach($filters2 as $filter => $value){
+   if(!isset($details) || !isset($details[$filter]) || $details[$filter]!=trim($value)){
+    Logger::do_log("Removing2 on $filter " . $details[$filter] . "== " . $value);
+    $ret=0;
+   }
+  }
+ }
+ return $ret; 
+}
+
+function setFilters($arguments, $table = "request_filters"){
+ Utils::checkParams2($arguments, array('user_id'));
+ $filters = array();
+ $user_id = $arguments['user_id'];
+ foreach($arguments as $argument => $value){
+  if(trim($argument)=='user_id' || trim($argument)=='url') continue;
+  $filters[$argument] = $value;
+ }
+ $filter_str = serialize($filters);
+ $result = mysqli_fetch_assoc(parent::execute("Select id from $table where user_id = $user_id"));
+ if(isset($result) && isset($result['id'])){
+  parent::execute("Update $table set filters = '$filter_str' where user_id=$user_id");
+ }else{ 
+  parent::execute("Insert INTO $table (user_id, filters) VALUES ($user_id, '$filter_str')");
+ }
 }
 
  function getRandomMatches($arguments){

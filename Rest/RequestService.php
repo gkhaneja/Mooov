@@ -8,6 +8,11 @@ require_once('objects/utils.php');
 require_once('conf/constants.inc');
 
 class RequestService extends RestService {
+ 
+ public function setFilters($arguments){
+		$request = new Request();
+   $request->setFilters($arguments,'request_filters'); 
+ }
 
 	public function addRequest($arguments){
   Logger::do_log("Deleting from cache, key " . $arguments['user_id']);
@@ -142,6 +147,7 @@ class RequestService extends RestService {
   }
   return false;
  }
+
 
 }
 

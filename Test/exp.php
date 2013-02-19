@@ -74,5 +74,9 @@ $subject = "[2013-02-04 22-02-15][rid=1359997330][RequestService][setRegionVaria
 echo preg_match($pattern,$subject,&$matches) . "\n";
 print_r($matches);*/
 
-echo mail('gourav.khaneja@gmail.com',"Test","Test") . "\n";
+//echo mail('gourav.khaneja@gmail.com',"Test","Test") . "\n";
+
+$filter = array('gender' => 'male');
+echo serialize($filter);
+echo "\n";
 ?>
