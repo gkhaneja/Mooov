@@ -336,7 +336,7 @@ function showMatches($matches){
      $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get());
 			 }
    }
-   $merg_array = array_merge($user_array , $loc_array);
+   $merg_array = array_merge($user_array, $other_info);
    $sql = "select * from user_details where user_id = " . $match['user_id'];
    $result = parent::execute($sql);
    if($result->num_rows > 0) {
@@ -349,7 +349,7 @@ function showMatches($matches){
    if(!isset($fb_array['fb_info_available'])){
      $fb_array['fb_info_available'] = 0; 
    }
-   $resp[] = array("loc_info" => $merg_array,  "fb_info" => $fb_array, "other_info" => $other_info);
+   $resp[] = array("loc_info" => $loc_array,  "fb_info" => $fb_array, "other_info" => $merg_array);
 		}                
   $json_msg = new JSONMessage();
   $json_msg->setBody (array("NearbyUsers" => $resp)); 
