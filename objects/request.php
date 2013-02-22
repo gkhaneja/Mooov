@@ -391,7 +391,8 @@ function showMatches($matches){
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
 		}
-		if(!isset($arguments['src_latitude'])){
+  //CHANGE: Coordinates are no longer comulsary. If not present, user reverse geo coding.
+		/*if(!isset($arguments['src_latitude'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'src_latitude' ,'error' => 'Required Fields are not set'));
 		}
 		if(!isset($arguments['src_longitude'])){
@@ -402,7 +403,7 @@ function showMatches($matches){
 		}
 		if(!isset($arguments['dst_longitude'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'dst_longitude' ,'error' => 'Required Fields are not set'));
-		}
+		}*/
 		if(!isset($arguments['src_address'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'src_address' ,'error' => 'Required Fields are not set'));
 		}
@@ -418,6 +419,15 @@ function showMatches($matches){
 		if(!isset($result[0]['id'])){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
 		}
+  $geocoding = new GeoCoding();
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
+   $src_coord = $geocoding->geocode($arguments['src_address']); 
+   $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon'];  
+  }
+  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
+   $dst_coord = $geocoding->geocode($arguments['dst_address']); 
+   $arguments['dst_latitude']=$dst_coord['lat']; $arguments['dst_longitude']=$dst_coord['lon'];
+  }
 
   if($unrecognized == 0){
  	 $city = new City();
