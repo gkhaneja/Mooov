@@ -448,9 +448,9 @@ function showMatches($matches){
 		}else{
 			parent::insert('request',$this->fields);
 		}
-		$result = parent::select('request',array('id'),array('user_id' => $arguments['user_id']));
+		$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
 		$json_msg = new JSONMessage();
-		$json_msg->setBody(array("request_id" => $result[0]['id']));
+		$json_msg->setBody($result[0]);
 		echo $json_msg->getMessage();
 	}	
 
@@ -514,9 +514,9 @@ function showMatches($matches){
    $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address, time) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, \"$src_add\", \"$dst_add\", \"$ttime\")";
   }
   parent::execute($sql);
-		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
+		$result = parent::select('carpool',array('*'),array('user_id' => $arguments['user_id']));
 		$json_msg = new JSONMessage();
-		$json_msg->setBody(array("request_id" => $result[0]['id']));
+		$json_msg->setBody($result[0]);
 		echo $json_msg->getMessage();
  }
 
