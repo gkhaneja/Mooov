@@ -521,22 +521,37 @@ function showMatches($matches){
  }
 
  function getCarpoolMatches($arguments){
-		if(!isset($arguments['src_address'])){
-			throw new APIException(array("code" =>"3" , 'field'=>'src_address' ,'error' => 'Required Fields are not set'));
-		}
-		if(!isset($arguments['dst_address'])){
-			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
-		}
-  $geocoding = new GeoCoding();
-  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
-   $src_coord = $geocoding->geocode($arguments['src_address']); $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];
+  if($GLOBALS['site']==1 || !isset($arguments['user_id'])){
+		 if(!isset($arguments['src_address'])){
+			 throw new APIException(array("code" =>"3" , 'field'=>'src_address' ,'error' => 'Required Fields are not set'));
+		 }
+		 if(!isset($arguments['dst_address'])){
+			 throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
+		 }
+   $geocoding = new GeoCoding();
+   if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
+    $src_coord = $geocoding->geocode($arguments['src_address']); $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];
+   }else{
+    $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude'];  
+   }
+   if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
+    $dst_coord = $geocoding->geocode($arguments['dst_address']); $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
+   }else{
+    $dst_lat=$arguments['dst_latitude']; $dst_lon=$arguments['dst_longitude'];  
+   }
   }else{
-   $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude'];  
-  }
-  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
-   $dst_coord = $geocoding->geocode($arguments['dst_address']); $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
-  }else{
-   $dst_lat=$arguments['dst_latitude']; $dst_lon=$arguments['dst_longitude'];  
+		 if(!isset($arguments['user_id'])){
+			 throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
+		 }   
+			$result = parent::select('carpool',array('*'),array('user_id' => $arguments['user_id']));
+		 if(count($result)==0){
+		  throw new APIException(array("code" =>"5" , 'error' => 'Request does not exist.'));
+		 }
+   $user_id = $result[0]['user_id'];
+   $src_lat = $result[0]['src_latitude'];
+   $src_lon = $result[0]['src_longitude'];
+   $dst_lat = $result[0]['dst_latitude'];
+   $dst_lon = $result[0]['dst_longitude'];
   }
   $sql = "SELECT user_id from carpool WHERE ABS(src_latitude-$src_lat)<0.004 AND ABS(src_longitude-$src_lon)<0.004 AND ABS(dst_latitude-$dst_lat)<0.004 AND (dst_longitude-$dst_lon)<0.004";
   $result = parent::execute($sql);
