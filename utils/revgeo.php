@@ -23,11 +23,12 @@ public function geocode($address){
 	$data = curl_exec($ch);
 	$results = json_decode($data,true);
 	curl_close($ch);
+ $ret = array();
  if($results['status'] != 'OK'){
    Logger::do_log("Google geocoding call failed");
-			throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
+   return false;  
+			//throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
  }
- $ret = array();
  $ret['lat'] = $results['results'][0]['geometry']['location']['lat'];
  $ret['lon'] = $results['results'][0]['geometry']['location']['lng'];
  $addrs = $results['results'][0]['address_components'];
@@ -47,8 +48,10 @@ public function reverseGeo($lat,$lng)
 
  $results = json_decode(file_get_contents($geoCodeURL), true); 
  $resp = array();
- if($results['status'] != 'OK')
-   return;
+ if($results['status'] != 'OK'){
+   Logger::do_log("Google geocoding call failed");
+   return false;
+ }
  $results = $results['results'];
  foreach ($results as $subresult){
   $resp = array();

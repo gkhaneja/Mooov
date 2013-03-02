@@ -22,7 +22,7 @@ class RequestService extends RestService {
   if($GLOBALS['city']=='unrecognized_region'){
    $request->add($arguments,1);
   }else{
- 		$request->add($arguments);
+ 		$request->add($arguments,1);
   }
 	}
 

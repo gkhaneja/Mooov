@@ -404,10 +404,10 @@ function showMatches($matches){
 		if(!isset($arguments['dst_longitude'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'dst_longitude' ,'error' => 'Required Fields are not set'));
 		}*/
-		if(!isset($arguments['src_address'])){
+		if(!isset($arguments['src_address']) && (!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']))){
 			throw new APIException(array("code" =>"3" , 'field'=>'src_address' ,'error' => 'Required Fields are not set'));
 		}
-		if(!isset($arguments['dst_address'])){
+		if(!isset($arguments['dst_address']) && (!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude']))){
 			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
 		}
 		if(!isset($arguments['time'])){
@@ -420,16 +420,52 @@ function showMatches($matches){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
 		}
   $geocoding = new GeoCoding();
-  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['src_locality'])){
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
    $src_coord = $geocoding->geocode($arguments['src_address']); 
-   $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon']; 
-   $arguments['src_locality']=$src_coord['sublocality'];
+   if($src_coord != false){
+    $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon']; 
+    $arguments['src_locality']=$src_coord['sublocality'];
+   }else{
+    throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
+   }
   }
-  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude']) || !isset($arguments['dst_locality'])){
+  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
    $dst_coord = $geocoding->geocode($arguments['dst_address']); 
-   $arguments['dst_latitude']=$dst_coord['lat']; $arguments['dst_longitude']=$dst_coord['lon'];
-   $arguments['dst_locality']=$dst_coord['sublocality'];
+   if($dst_coord != false){
+    $arguments['dst_latitude']=$dst_coord['lat']; $arguments['dst_longitude']=$dst_coord['lon'];
+    $arguments['dst_locality']=$dst_coord['sublocality'];
+   }else{
+    throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
+   }
   }
+  if(!isset($arguments['src_address'])){
+   $address = $geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']);
+   if($address != false){
+    Logger::do_log(print_r($geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']),true));
+    $arguments['src_address'] = $address[0]['formatted_address'];
+    $arguments['src_locality'] = $address[0]['sublocality_longname'];
+   }
+  }
+  if(!isset($arguments['dst_address'])){
+   $address = $geocoding->reverseGeo($arguments['dst_latitude'],$arguments['dst_longitude']);
+   if($address != false){
+    $arguments['dst_address'] = $address[0]['formatted_address'];
+    $arguments['dst_locality'] = $address[0]['sublocality_longname'];
+   }
+  }
+  if(!isset($arguments['src_locality'])){
+   $address = $geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']);
+   if($address != false){
+    $arguments['src_locality'] = $address[0]['sublocality_longname'];
+   }
+  }
+  if(!isset($arguments['dst_locality'])){
+   $address = $geocoding->reverseGeo($arguments['dst_latitude'],$arguments['dst_longitude']);
+   if($address != false){
+    $arguments['dst_locality'] = $address[0]['sublocality_longname'];
+   }
+  }
+  //Logger::do_log(print_r($geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']),true));
 
   if($unrecognized == 0){
  	 $city = new City();
@@ -478,10 +514,10 @@ function showMatches($matches){
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
 		}
-		if(!isset($arguments['src_address'])){
+		if(!isset($arguments['src_address']) && (!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']))){
 			throw new APIException(array("code" =>"3" , 'field'=>'src_address' ,'error' => 'Required Fields are not set'));
 		}
-		if(!isset($arguments['dst_address'])){
+		if(!isset($arguments['dst_address']) && (!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude']))){
 			throw new APIException(array("code" =>"3" , 'field'=>'dst_address' ,'error' => 'Required Fields are not set'));
 		}
 		if(!isset($arguments['time'])){
@@ -495,24 +531,57 @@ function showMatches($matches){
 		}
 
   $geocoding = new GeoCoding();
-  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['src_locality']) ){
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
    $src_coord = $geocoding->geocode($arguments['src_address']); 
-   $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon']; 
-   $src_locality=$src_coord['sublocality']; 
-  }else{
-   $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude']; 
-   $src_locality=$arguments['src_locality'];
+   if($src_coord != false){
+    $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon']; 
+    $arguments['src_locality']=$src_coord['sublocality'];
+   }else{
+    throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
+   }
   }
-  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude']) || !isset($arguments['dst_locality'])){
+  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
    $dst_coord = $geocoding->geocode($arguments['dst_address']); 
-   $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
-   $dst_locality=$dst_coord['sublocality']; 
-  }else{
-   $dst_lat=$arguments['dst_latitude']; $dst_lon=$arguments['dst_longitude'];  
-   $dst_locality=$arguments['dst_locality'];
+   if($dst_coord != false){
+    $arguments['dst_latitude']=$dst_coord['lat']; $arguments['dst_longitude']=$dst_coord['lon'];
+    $arguments['dst_locality']=$dst_coord['sublocality'];
+   }else{
+    throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
+   }
   }
-
-		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
+  if(!isset($arguments['src_address'])){
+   $address = $geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']);
+   if($address != false){
+    Logger::do_log(print_r($geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']),true));
+    $arguments['src_address'] = $address[0]['formatted_address'];
+    $arguments['src_locality'] = $address[0]['sublocality_longname'];
+   }
+  }
+  if(!isset($arguments['dst_address'])){
+   $address = $geocoding->reverseGeo($arguments['dst_latitude'],$arguments['dst_longitude']);
+   if($address != false){
+    $arguments['dst_address'] = $address[0]['formatted_address'];
+    $arguments['dst_locality'] = $address[0]['sublocality_longname'];
+   }
+  }
+  if(!isset($arguments['src_locality'])){
+   $address = $geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']);
+   if($address != false){
+    $arguments['src_locality'] = $address[0]['sublocality_longname'];
+   }
+  }
+  if(!isset($arguments['dst_locality'])){
+   $address = $geocoding->reverseGeo($arguments['dst_latitude'],$arguments['dst_longitude']);
+   if($address != false){
+    $arguments['dst_locality'] = $address[0]['sublocality_longname'];
+   }
+  }
+  $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude']; 
+  $src_address=$arguments['src_address'];$src_locality=$arguments['src_locality'];
+  $dst_lat=$arguments['dst_latitude']; $dst_lon=$arguments['dst_longitude']; 
+  $dst_address=$arguments['dst_address'];$dst_locality=$arguments['dst_locality'];
+		
+  $result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
   $user_id=$arguments['user_id']; $src_add=$arguments['src_address']; $dst_add=$arguments['dst_address']; $ttime=$arguments['time'];
   if(isset($result[0]['id'])){
    $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=\"$src_add\", dst_address=\"$dst_add\", time=\"$ttime\", src_locality=\"$src_locality\", dst_locality=\"$dst_locality\" WHERE user_id=$user_id";
