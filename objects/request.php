@@ -423,12 +423,12 @@ function showMatches($matches){
   if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['src_locality'])){
    $src_coord = $geocoding->geocode($arguments['src_address']); 
    $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon']; 
-   $arguments['src_locality']=$src_coord['locality'];
+   $arguments['src_locality']=$src_coord['sublocality'];
   }
   if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude']) || !isset($arguments['dst_locality'])){
    $dst_coord = $geocoding->geocode($arguments['dst_address']); 
    $arguments['dst_latitude']=$dst_coord['lat']; $arguments['dst_longitude']=$dst_coord['lon'];
-   $arguments['dst_locality']=$dst_coord['locality'];
+   $arguments['dst_locality']=$dst_coord['sublocality'];
   }
 
   if($unrecognized == 0){
@@ -495,25 +495,29 @@ function showMatches($matches){
 		}
 
   $geocoding = new GeoCoding();
-  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['src_locality']) ){
    $src_coord = $geocoding->geocode($arguments['src_address']); 
-   $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon'];  
+   $src_lat=$src_coord['lat']; $src_lon=$src_coord['lon']; 
+   $src_locality=$src_coord['sublocality']; 
   }else{
-   $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude'];  
+   $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude']; 
+   $src_locality=$arguments['src_locality'];
   }
-  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
+  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude']) || !isset($arguments['dst_locality'])){
    $dst_coord = $geocoding->geocode($arguments['dst_address']); 
    $dst_lat=$dst_coord['lat']; $dst_lon=$dst_coord['lon'];
+   $dst_locality=$dst_coord['sublocality']; 
   }else{
    $dst_lat=$arguments['dst_latitude']; $dst_lon=$arguments['dst_longitude'];  
+   $dst_locality=$arguments['dst_locality'];
   }
 
 		$result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
   $user_id=$arguments['user_id']; $src_add=$arguments['src_address']; $dst_add=$arguments['dst_address']; $ttime=$arguments['time'];
   if(isset($result[0]['id'])){
-   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=\"$src_add\", dst_address=\"$dst_add\", time=\"$ttime\" WHERE user_id=$user_id";
+   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=\"$src_add\", dst_address=\"$dst_add\", time=\"$ttime\", src_locality=\"$src_locality\", dst_locality=\"$dst_locality\" WHERE user_id=$user_id";
   }else{
-   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address, time) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, \"$src_add\", \"$dst_add\", \"$ttime\")";
+   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address, time, src_locality, dst_locality) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, \"$src_add\", \"$dst_add\", \"$ttime\", \"$src_locality\", \"$dst_locality\")";
   }
   parent::execute($sql);
 		$result = parent::select('carpool',array('*'),array('user_id' => $arguments['user_id']));
@@ -711,8 +715,12 @@ function showCarpoolMatches($matches){
     while($row = $result->fetch_assoc()) {
      $fbinfo = new FBInfo($row);
      $fb_array = $fbinfo->getData();
+     $fb_array['fb_info_available'] = 1;
     }
 	  }
+   if(!isset($fb_array['fb_info_available'])){
+     $fb_array['fb_info_available'] = 0; 
+   }
    $resp[] = array("loc_info" => $loc_array,  "fb_info" => $fb_array, "other_info" => $other_array);
 		}                
   $json_msg = new JSONMessage();

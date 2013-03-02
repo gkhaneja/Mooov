@@ -30,9 +30,9 @@ public function geocode($address){
  $ret = array();
  $ret['lat'] = $results['results'][0]['geometry']['location']['lat'];
  $ret['lon'] = $results['results'][0]['geometry']['location']['lng'];
- $addrs = $result['results'][0]['address_components'];
+ $addrs = $results['results'][0]['address_components'];
  foreach($addrs as $addr){
-  if(in_array('locality',$addr['types'])){ $ret['locality'] = $addr['long_name']; break;}
+  if(in_array('sublocality',$addr['types'])){ $ret['sublocality'] = $addr['long_name']; break;}
  }
  return $ret;
 }
