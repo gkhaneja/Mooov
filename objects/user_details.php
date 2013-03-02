@@ -56,7 +56,7 @@ class UserDetails extends dbclass{
 		}
 		$id = parent::insert('user_details',$this->fields);
 		$json_msg = new JSONMessage();
-		$json_msg->setBody(array("Success" => "Success"));
+		$json_msg->setBody(array("Status" => "Success"));
 		echo $json_msg->getMessage();
                 include('facebook_details.php');
                
