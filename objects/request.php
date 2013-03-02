@@ -420,13 +420,15 @@ function showMatches($matches){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
 		}
   $geocoding = new GeoCoding();
-  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['src_locality'])){
    $src_coord = $geocoding->geocode($arguments['src_address']); 
-   $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon'];  
+   $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon']; 
+   $arguments['src_locality']=$src_coord['locality'];
   }
-  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
+  if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude']) || !isset($arguments['dst_locality'])){
    $dst_coord = $geocoding->geocode($arguments['dst_address']); 
    $arguments['dst_latitude']=$dst_coord['lat']; $arguments['dst_longitude']=$dst_coord['lon'];
+   $arguments['dst_locality']=$dst_coord['locality'];
   }
 
   if($unrecognized == 0){
