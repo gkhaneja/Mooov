@@ -333,7 +333,7 @@ function showMatches($matches){
      $locinfo_dst = new LocationInfo('dst',$row);
 		   $type= $row['type'];
      $other_info = array('type' => $type, 'percent_match' => $match['percent']);
-     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get());
+     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "time_info" => $row['time']);
 			 }
    }
    $merg_array = array_merge($user_array, $other_info);
@@ -782,7 +782,7 @@ function showCarpoolMatches($matches){
      $locinfo_src = new LocationInfo('src',$row);
      $locinfo_dst = new LocationInfo('dst',$row);
 		   $type= $row['type'];
-     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get());
+     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "time_info" => $row['time']);
 			 }
    }
    $other_array = array_merge($user_array, array('type' => $type));
