@@ -372,14 +372,22 @@ function showMatches($matches){
 		 $city = new City();
 		 $city->deleteRequest($arguments['user_id']);
   }
-		
-		$result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
-		if(count($result)>0){
-   $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], strtotime($result[0]['time']));
-   $route->delete();
-			$sql = "DELETE FROM request WHERE user_id = " . $arguments['user_id'];
-			parent::execute($sql);
-		}
+	
+  if(isset($arguments['insta']) && $arguments['insta']==0){
+		 $result = parent::select('carpool',array('*'),array('user_id' => $arguments['user_id']));
+		 if(count($result)>0){
+			 $sql = "DELETE FROM carpool WHERE user_id = " . $arguments['user_id'];
+			 parent::execute($sql);
+   }
+  }else{	
+		 $result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
+		 if(count($result)>0){
+    $route = new Route($user_id, $result[0]['src_latitude'], $result[0]['src_longitude'], $result[0]['dst_latitude'], $result[0]['dst_longitude'], strtotime($result[0]['time']));
+    $route->delete();
+			 $sql = "DELETE FROM request WHERE user_id = " . $arguments['user_id'];
+			 parent::execute($sql);
+		 }
+  }
 
 		$json_msg = new JSONMessage();
 		$json_msg->setBody("status:0");

@@ -22,7 +22,7 @@ class UserDetailsService extends RestService
   if(!isset($arguments['user_id'])){
    throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
   }
-  if(isset($arguments['carpool']) && $arguments['carpool']==1){
+  if(isset($arguments['insta']) && $arguments['insta'] == 0){
    $request->showCarpoolMatches(array($arguments['user_id']));
   }else{
    $request->showMatches(array(array('user_id' => $arguments['user_id'], 'percent' => 0)));
