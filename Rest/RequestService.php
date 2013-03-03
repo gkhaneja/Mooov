@@ -74,7 +74,7 @@ class RequestService extends RestService {
   if($GLOBALS['city']=='unrecognized_region'){
    $request->delete($arguments,1);
 		}else{
-   $request->delete($arguments);
+   $request->delete($arguments,1);
   }
 	}
 	
