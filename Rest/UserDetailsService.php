@@ -10,6 +10,11 @@ class UserDetailsService extends RestService
 		$user_details = new UserDetails();
 		$user_details->add($arguments);
 	}
+
+ public function getFBInfo($arguments){
+		$user_details = new UserDetails();
+		$user_details->get($arguments); 
+ }
 	
 	
 	

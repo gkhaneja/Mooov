@@ -61,5 +61,24 @@ class UserDetails extends dbclass{
                 include('facebook_details.php');
                
 	}
+
+function get($arguments){
+ if(!isset($arguments['user_id'])){
+		throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
+ }
+ $sql = "select * from user_details where user_id = " . $arguments['user_id'];
+ $result = parent::execute($sql);
+ $fb_array = array('fb_info_available' => 0);
+ if($result->num_rows > 0) {
+  while($row = $result->fetch_assoc()) {
+   $fbinfo = new FBInfo($row);
+   $fb_array = $fbinfo->getData();
+   $fb_array['fb_info_available'] = 1;
+  }
+	}
+ $json_msg = new JSONMessage();
+ $json_msg->setBody (array("fbinfo" => $fb_array)); 
+	echo $json_msg->getMessage();
+}
 	
 }
