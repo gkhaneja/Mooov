@@ -432,45 +432,50 @@ function showMatches($matches){
    $src_coord = $geocoding->geocode($arguments['src_address']); 
    if($src_coord != false){
     $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon']; 
-    $arguments['src_locality']=$src_coord['sublocality'];
+    if(isset($src_coord['sublocality'])) $arguments['src_locality']=$src_coord['sublocality'];
    }else{
     throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
    }
   }
   if(!isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
    $dst_coord = $geocoding->geocode($arguments['dst_address']); 
+   //Logger::do_log("Calculating dst lat lon: " . print_r($dst_coord,true));
    if($dst_coord != false){
     $arguments['dst_latitude']=$dst_coord['lat']; $arguments['dst_longitude']=$dst_coord['lon'];
-    $arguments['dst_locality']=$dst_coord['sublocality'];
+    if(isset($dst_coord['sublocality'])) $arguments['dst_locality']=$dst_coord['sublocality'];
    }else{
     throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
    }
   }
-  if(!isset($arguments['src_address'])){
+  if(!isset($arguments['src_address']) || empty($arguments['src_address'])){
    $address = $geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']);
+   //Logger::do_log("Calculating src address: " . print_r($address,true));
    if($address != false){
-    Logger::do_log(print_r($geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']),true));
-    $arguments['src_address'] = $address[0]['formatted_address'];
-    $arguments['src_locality'] = $address[0]['sublocality_longname'];
+    //Logger::do_log(print_r($geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']),true));
+    $arguments['src_address'] = $address['formatted_address'];
+    $arguments['src_locality'] = $address['sublocality'];
    }
   }
-  if(!isset($arguments['dst_address'])){
+  if(!isset($arguments['dst_address']) || empty($arguments['dst_address'])){
    $address = $geocoding->reverseGeo($arguments['dst_latitude'],$arguments['dst_longitude']);
+   //Logger::do_log("Calculating dst address: " . print_r($address,true));
    if($address != false){
-    $arguments['dst_address'] = $address[0]['formatted_address'];
-    $arguments['dst_locality'] = $address[0]['sublocality_longname'];
+    $arguments['dst_address'] = $address['formatted_address'];
+    $arguments['dst_locality'] = $address['sublocality'];
    }
   }
   if(!isset($arguments['src_locality'])){
    $address = $geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']);
+   //Logger::do_log("Calculating src locality: " . print_r($address,true));
    if($address != false){
-    $arguments['src_locality'] = $address[0]['sublocality_longname'];
+    $arguments['src_locality'] = $address['sublocality'];
    }
   }
   if(!isset($arguments['dst_locality'])){
    $address = $geocoding->reverseGeo($arguments['dst_latitude'],$arguments['dst_longitude']);
+   //Logger::do_log("Calculating dst locality: " . print_r($address,true));
    if($address != false){
-    $arguments['dst_locality'] = $address[0]['sublocality_longname'];
+    $arguments['dst_locality'] = $address['sublocality'];
    }
   }
   //Logger::do_log(print_r($geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']),true));
@@ -543,7 +548,7 @@ function showMatches($matches){
    $src_coord = $geocoding->geocode($arguments['src_address']); 
    if($src_coord != false){
     $arguments['src_latitude']=$src_coord['lat']; $arguments['src_longitude']=$src_coord['lon']; 
-    $arguments['src_locality']=$src_coord['sublocality'];
+    if(isset($src_coord['sublocality'])) $arguments['src_locality']=$src_coord['sublocality'];
    }else{
     throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
    }
@@ -552,36 +557,36 @@ function showMatches($matches){
    $dst_coord = $geocoding->geocode($arguments['dst_address']); 
    if($dst_coord != false){
     $arguments['dst_latitude']=$dst_coord['lat']; $arguments['dst_longitude']=$dst_coord['lon'];
-    $arguments['dst_locality']=$dst_coord['sublocality'];
+    if(isset($dst_coord['sublocality'])) $arguments['dst_locality']=$dst_coord['sublocality'];
    }else{
     throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
    }
   }
-  if(!isset($arguments['src_address'])){
+  if(!isset($arguments['src_address']) || empty($arguments['src_address'])){
    $address = $geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']);
    if($address != false){
-    Logger::do_log(print_r($geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']),true));
-    $arguments['src_address'] = $address[0]['formatted_address'];
-    $arguments['src_locality'] = $address[0]['sublocality_longname'];
+    //Logger::do_log(print_r($geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']),true));
+    $arguments['src_address'] = $address['formatted_address'];
+    $arguments['src_locality'] = $address['sublocality'];
    }
   }
-  if(!isset($arguments['dst_address'])){
+  if(!isset($arguments['dst_address']) || empty($arguments['dst_address'])){
    $address = $geocoding->reverseGeo($arguments['dst_latitude'],$arguments['dst_longitude']);
    if($address != false){
-    $arguments['dst_address'] = $address[0]['formatted_address'];
-    $arguments['dst_locality'] = $address[0]['sublocality_longname'];
+    $arguments['dst_address'] = $address['formatted_address'];
+    $arguments['dst_locality'] = $address['sublocality'];
    }
   }
   if(!isset($arguments['src_locality'])){
    $address = $geocoding->reverseGeo($arguments['src_latitude'],$arguments['src_longitude']);
    if($address != false){
-    $arguments['src_locality'] = $address[0]['sublocality_longname'];
+    $arguments['src_locality'] = $address['sublocality'];
    }
   }
   if(!isset($arguments['dst_locality'])){
    $address = $geocoding->reverseGeo($arguments['dst_latitude'],$arguments['dst_longitude']);
    if($address != false){
-    $arguments['dst_locality'] = $address[0]['sublocality_longname'];
+    $arguments['dst_locality'] = $address['sublocality'];
    }
   }
   $src_lat=$arguments['src_latitude']; $src_lon=$arguments['src_longitude']; 
@@ -664,7 +669,7 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
   unset($matches[$key]);
  }
  foreach($users as $user){
-  if(($key = array_search($user['user_id'], $matches)) !== FALSE){
+  if(($key = array_search($user, $matches)) !== FALSE){
    unset($matches[$key]);
   }
  }

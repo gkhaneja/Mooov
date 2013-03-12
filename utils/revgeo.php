@@ -1,5 +1,6 @@
 <?php
 require_once('conf/google.conf');
+require_once('objects/utils.php');
 class  GeoCoding
 {
 
@@ -29,12 +30,23 @@ public function geocode($address){
    return false;  
 			//throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
  }
- $ret['lat'] = $results['results'][0]['geometry']['location']['lat'];
- $ret['lon'] = $results['results'][0]['geometry']['location']['lng'];
- $addrs = $results['results'][0]['address_components'];
+ $max=0;
+ $winner=array();
+ foreach($results['results'] as $result){
+  similar_text($address, $result['formatted_address'],&$percent);
+  if($max <= $percent){
+   $max=$percent;
+   $winner=$result;
+  }
+ }
+ //Logger::do_log("Winner: " . print_r($winner,true));
+ $ret['lat'] = $winner['geometry']['location']['lat'];
+ $ret['lon'] = $winner['geometry']['location']['lng'];
+ $addrs = $winner['address_components'];
  foreach($addrs as $addr){
   if(in_array('sublocality',$addr['types'])){ $ret['sublocality'] = $addr['long_name']; break;}
  }
+ //if(!isset($ret['sublocality'])) $ret['sublocality'] = "na";
  return $ret;
 }
 
@@ -48,11 +60,30 @@ public function reverseGeo($lat,$lng)
 
  $results = json_decode(file_get_contents($geoCodeURL), true); 
  $resp = array();
+ $ret = array();
  if($results['status'] != 'OK'){
    Logger::do_log("Google geocoding call failed");
    return false;
  }
- $results = $results['results'];
+ $min=100000000;
+ $winner=array();
+ foreach($results['results'] as $result){
+  $dist = Utils::geo2distance($lat,$lng,$result['geometry']['location']['lat'], $result['geometry']['location']['lng']);
+  if($min >= $dist){
+   $min=$dist;
+   $winner=$result;
+  }
+ }
+ //Logger::do_log("Winner: " . print_r($winner,true));
+ $ret['formatted_address'] = $winner['formatted_address'];
+ $addrs = $winner['address_components'];
+ foreach($addrs as $addr){
+  if(in_array('sublocality',$addr['types'])){ $ret['sublocality'] = $addr['long_name']; break;}
+ }
+ //if(!isset($ret['sublocality'])) $ret['sublocality'] = "na";
+ return $ret;
+
+ /*$results = $results['results'];
  foreach ($results as $subresult){
   $resp = array();
   $resp['formatted_address'] = $subresult['formatted_address'];
@@ -84,7 +115,7 @@ public function reverseGeo($lat,$lng)
   }
   $this->addresses[] =$resp;
  } 
- return $this->addresses;
+ return $this->addresses;*/
 }
 
 
