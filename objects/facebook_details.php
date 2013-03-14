@@ -1,10 +1,18 @@
 <?php
 
+require_once('objects/logger.php');
+require_once('objects/dbclass.php');
+
 
 function getFBquery($id,$token)
 {
 $fbURL = "https://graph.facebook.com/";
 return $fbURL . $id . "?access_token=" . $token;
+}
+
+function getFriendsquery($id, $token){
+ $fbURL = "https://graph.facebook.com/";
+ return $fbURL . $id . "?fields=friends&access_token=" . $token;
 }
 
 function get_data($url)
@@ -28,20 +36,34 @@ if(empty($array) || (!empty($array) && !empty($array->error)))
 else
   return $array;
 }
+		Logger::bootup();
+		Logger::do_log("facebook details: ");
+		$dbobject = new dbclass();
+		$dbobject->connect();
+  //Logger::do_log( getcwd() . "exiting"); exit(0);
+  //Logger::do_log(print_r($argv,true)); exit(0);
+//while(1){Logger::do_log("waiting.."); sleep(5);}
+ $userid = $argv[1];
+ $fbid = $argv[2];
+ $fbtoken = $argv[3];
 
-if(!isset($arguments['user_id'])| !isset($arguments['fbtoken'])  || !isset($arguments['fbid']))
-   return;
+if(!isset($userid) || !isset($fbtoken)  || !isset($fbid)){
+   Logger::do_log("Not enough params. Returning.");
+   exit(0);
+}
+
  
- $userid =  $arguments['user_id'];
- $fbid =  $arguments['fbid'];
- $fbtoken =  $arguments['fbtoken'];
  $fburl  =   getFBquery($fbid,$fbtoken);
  Logger::do_log("== $fburl ==");
  $resp =  get_data($fburl);
  $data  = parseResponse($resp);
  if($data == "NULL") return;
- error_log("======");
- error_log(print_r($data,true)); 
+ if(!isset($data['first_name'])){
+  Logger::do_log("Cannot fetch FB Info " . print_r($data,true));
+  exit(0);
+ }
+ //error_log("======");
+ //Logger::do_log(print_r($data,true)); 
  $workplace  = serialize($data['work']);
  $fname =  $data['first_name'];
  $lname = $data['last_name'];
@@ -53,6 +75,36 @@ if(!isset($arguments['user_id'])| !isset($arguments['fbtoken'])  || !isset($argu
  $location =  serialize($data['location']);
  $query = "UPDATE user_details SET  workplace = '$workplace', firstname = '$fname' , lastname = '$lname' , username ='$uname', gender='$gender' , email='$email', location = '$location', hometown = '$hometown', education ='$education'  WHERE  user_id = $userid "; 
  //Logger::do_log($query);
- parent::execute($query);
+ $dbobject->execute($query);
+
+ $fburl  =   getFriendsquery($fbid,$fbtoken);
+ Logger::do_log("== $fburl ==");
+ $resp =  get_data($fburl);
+ $data  = parseResponse($resp);
+ if($data == "NULL") return;
+ //error_log("======");
+ //Logger::do_log(print_r($data,true)); 
+ $friends = $data['friends']['data'];
+ if(!isset($friends) || empty($friends)){
+  Logger::do_log("Cannot fetch friends " . print_r($data,true));
+  exit(0);
+ }
+ if(count($friends)==0) exit(0);
+ //$dbobject->execute("Delete from friends");
+ $sql = "Insert IGNORE into friends (fbid1, fbid2, name1, name2) values"; 
+ $first=1;
+ foreach($friends as $friend){
+  $fbid2 = $friend['id'];
+  $name2 = $friend['name'];
+  $name = $fname . " " . $lname;
+  if($first==1){
+   $sql .= " ($fbid, $fbid2, '$name', '$name2')";
+   $first=0; 
+  }else{
+   $sql .= ", ($fbid, $fbid2, '$name', '$name2')"; 
+  }
+ }
+  //Logger::do_log($sql);
+ $dbobject->execute($sql);
 
 ?>

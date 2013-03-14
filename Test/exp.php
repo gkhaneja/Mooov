@@ -2,6 +2,7 @@
 require_once("objects/cache.php");
 require_once("conf/constants.inc");
 require_once("objects/utils.php");
+require_once("objects/facebook_details.php");
 
 //Cache::bootup();
 /*Cache::init();
@@ -76,7 +77,21 @@ print_r($matches);*/
 
 //echo mail('gourav.khaneja@gmail.com',"Test","Test") . "\n";
 
-$filter = array('gender' => 'male');
-echo serialize($filter);
-echo "\n";
+//$filter = array(5,1);
+//echo serialize($filter);
+//echo "\n";
+
+/*$pid = pcntl_fork();
+if($pid==-1){
+ echo "Parent: failed generating child process\n"; 
+ }
+if($pid!=0){
+ echo "Parent: Generated child process successfully\n"; 
+}
+if($pid!=0){
+ echo "Child: I am the child process\n"; 
+}*/
+
+exec("php facebook_details.php &");
+echo "Wow\n";
 ?>

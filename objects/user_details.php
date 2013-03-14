@@ -28,26 +28,30 @@ class UserDetails extends dbclass{
 			throw new APIException(array("code" =>"3", 'field'=>'user_id', 'error' => 'Field user_id is not set'));
 		}
 		$result = parent::select('user_details', array('id'),array('user_id' => $arguments['user_id'])); // check if incoming user if exists
-		if(isset($result[0]['id']))
-		{
-                      $toupdate  = 0;
-                      foreach($this->fields as $field){
-                        if($field->readonly == 0 && isset($arguments[$field->name])){
-                                $this->fields[$field->name]->value = $arguments[$field->name];
-                                $toupdate = 1;
-                             }
-                          }
-                        if($toupdate ==1 ) 
-                        {
-                        	parent::update('user_details',$this->fields,array('id' => $result[0]['id']));
-                                 include('facebook_details.php');
-		               
-                        }
-                        $json_msg = new JSONMessage();
-                        $json_msg->setBody(array("Status" => "Success"));
-                        echo $json_msg->getMessage();
-                        return;
-
+		if(isset($result[0]['id'])){
+   $toupdate  = 0;
+   foreach($this->fields as $field){
+    if($field->readonly == 0 && isset($arguments[$field->name])){
+     $this->fields[$field->name]->value = $arguments[$field->name];
+     $toupdate = 1;
+    }
+   }
+   if($toupdate ==1 ) {
+    parent::update('user_details',$this->fields,array('id' => $result[0]['id']));
+		 }
+   $json_msg = new JSONMessage();
+   $json_msg->setBody(array("Status" => "Success"));
+   echo $json_msg->getMessage();
+   if($toupdate==1){
+     Logger::do_log("Calling facebook_details.php");    
+     $user_id = $arguments['user_id'];
+     $fbid = $arguments['fbid'];
+     $fbtoken = $arguments['fbtoken'];
+     $cmd = "/usr/bin/php objects/facebook_details.php $user_id $fbid $fbtoken > /dev/null &";
+     exec($cmd , &$output, &$ret);
+     Logger::do_log("$cmd => Retured: $ret");
+   }
+   return;
 		}
 		foreach($this->fields as $field){
 			if($field->readonly == 0 && isset($arguments[$field->name])){
@@ -58,8 +62,12 @@ class UserDetails extends dbclass{
 		$json_msg = new JSONMessage();
 		$json_msg->setBody(array("Status" => "Success"));
 		echo $json_msg->getMessage();
-                include('facebook_details.php');
-               
+     $user_id = $arguments['user_id'];
+     $fbid = $arguments['fbid'];
+     $fbtoken = $arguments['fbtoken'];
+     $cmd = "/usr/bin/php objects/facebook_details.php $user_id $fbid $fbtoken > /dev/null &";
+     exec($cmd , &$output, &$ret);
+     Logger::do_log("$cmd => Retured: $ret");
 	}
 
 function get($arguments){
