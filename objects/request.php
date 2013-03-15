@@ -248,7 +248,13 @@ function setFilters($arguments, $table = "request_filters"){
 		 $matches = array_merge($matches, $this->matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $matches));	
    $ntry++;
   }
-  $resp = $this->showMatches($matches);
+  $fbid=0;
+  $result = parent::execute("select fbid from user_details where user_id = $user_id");
+  if($result->num_rows>0){
+   $row = $result->fetch_assoc();
+   $fbid = $row['fbid'];
+  }
+  $resp = $this->showMatches($matches,$fbid);
   if($GLOBALS['site']==0){
    Logger::do_log("Caching the result, key $user_id");
    $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
@@ -297,7 +303,13 @@ function setFilters($arguments, $table = "request_filters"){
 		 $matches = array_merge($matches, $city->matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $matches));	
    $ntry++;
   }
-  $resp = $this->showMatches($matches);
+  $fbid=0;
+  $result = parent::execute("select fbid from user_details where user_id = $user_id");
+  if($result->num_rows>0){
+   $row = $result->fetch_assoc();
+   $fbid = $row['fbid'];
+  }
+  $resp = $this->showMatches($matches,$fbid);
   if($GLOBALS['site']==0){
    Logger::do_log("Caching the result, key $user_id");
    $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
@@ -306,7 +318,7 @@ function setFilters($arguments, $table = "request_filters"){
 }
 
 
-function showMatches($matches){ 
+function showMatches($matches,$fbid){ 
   $match_str="";
   foreach($matches as $match){
    $match_str .= $match['user_id'] . "(" . $match['percent'] . "),";
@@ -344,6 +356,13 @@ function showMatches($matches){
      $fbinfo = new FBInfo($row);
      $fb_array = $fbinfo->getData();
      $fb_array['fb_info_available'] = 1;
+     $fbid2 = $row['fbid'];
+     $friends = parent::execute("select * from friends where (fbid1=$fbid AND fbid2=$fbid2) OR (fbid1=$fbid2 AND fbid2=$fbid)");
+     if($friends->num_rows > 0){
+      $fb_array['is_friend']=1;
+     }else{
+      $fb_array['is_friend']=0;
+     }
     }
 	  }
    if(!isset($fb_array['fb_info_available'])){
@@ -758,10 +777,16 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
     //$matches[]=$row['user_id'];
    //}
   //}
-  $this->showCarpoolMatches($matches);
+  $fbid=0;
+  $result = parent::execute("select fbid from user_details where user_id = $user_id");
+  if($result->num_rows>0){
+   $row = $result->fetch_assoc();
+   $fbid = $row['fbid'];
+  }
+  $this->showCarpoolMatches($matches,$fbid);
 }
 
-function showCarpoolMatches($matches){
+function showCarpoolMatches($matches,$fbid){
   $match_str="";
   foreach($matches as $match){
    $match_str .= $match . ", ";
@@ -798,6 +823,13 @@ function showCarpoolMatches($matches){
      $fbinfo = new FBInfo($row);
      $fb_array = $fbinfo->getData();
      $fb_array['fb_info_available'] = 1;
+     $fbid2 = $row['fbid'];
+     $friends = parent::execute("select * from friends where (fbid1=$fbid AND fbid2=$fbid2) OR (fbid1=$fbid2 AND fbid2=$fbid)");
+     if($friends->num_rows > 0){
+      $fb_array['is_friend']=1;
+     }else{
+      $fb_array['is_friend']=0;
+     }
     }
 	  }
    if(!isset($fb_array['fb_info_available'])){
