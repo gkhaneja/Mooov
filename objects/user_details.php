@@ -71,10 +71,14 @@ class UserDetails extends dbclass{
 	}
 
 function get($arguments){
- if(!isset($arguments['user_id'])){
+ if(!isset($arguments['user_id']) && !isset($arguments['fbid'])){
 		throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
  }
- $sql = "select * from user_details where user_id = " . $arguments['user_id'];
+ if(isset($arguments['user_id'])){
+  $sql = "select * from user_details where user_id = " . $arguments['user_id'];
+ }else{
+  $sql = "select * from user_details where fbid = " . $arguments['fbid'];
+ }
  $result = parent::execute($sql);
  $fb_array = array('fb_info_available' => 0);
  if($result->num_rows > 0) {
@@ -85,7 +89,7 @@ function get($arguments){
   }
 	}
  $json_msg = new JSONMessage();
- $json_msg->setBody (array("fbinfo" => $fb_array)); 
+ $json_msg->setBody (array("fb_info" => $fb_array)); 
 	echo $json_msg->getMessage();
 }
 	
