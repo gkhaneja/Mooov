@@ -318,7 +318,7 @@ function setFilters($arguments, $table = "request_filters"){
 }
 
 
-function showMatches($matches,$fbid){ 
+function showMatches($matches,$fbid=0){ 
   $match_str="";
   foreach($matches as $match){
    $match_str .= $match['user_id'] . "(" . $match['percent'] . "),";
@@ -786,7 +786,7 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
   $this->showCarpoolMatches($matches,$fbid);
 }
 
-function showCarpoolMatches($matches,$fbid){
+function showCarpoolMatches($matches,$fbid=0){
   $match_str="";
   foreach($matches as $match){
    $match_str .= $match . ", ";
