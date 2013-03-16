@@ -357,7 +357,7 @@ function showMatches($matches,$fbid=0){
      $fb_array = $fbinfo->getData();
      $fb_array['fb_info_available'] = 1;
      $fbid2 = $row['fbid'];
-     $friends = parent::execute("select * from friends where (fbid1=$fbid AND fbid2=$fbid2) OR (fbid1=$fbid2 AND fbid2=$fbid)");
+     $friends = parent::execute("select * from connections where (fbid1=$fbid AND fbid2=$fbid2)");
      if($friends->num_rows > 0){
       $fb_array['is_friend']=1;
      }else{
@@ -824,7 +824,7 @@ function showCarpoolMatches($matches,$fbid=0){
      $fb_array = $fbinfo->getData();
      $fb_array['fb_info_available'] = 1;
      $fbid2 = $row['fbid'];
-     $friends = parent::execute("select * from friends where (fbid1=$fbid AND fbid2=$fbid2) OR (fbid1=$fbid2 AND fbid2=$fbid)");
+     $friends = parent::execute("select * from connections where (fbid1=$fbid AND fbid2=$fbid2)");
      if($friends->num_rows > 0){
       $fb_array['is_friend']=1;
      }else{

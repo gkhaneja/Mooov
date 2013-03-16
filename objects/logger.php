@@ -16,7 +16,7 @@ class Logger {
 
 	public static function do_log($logstr, $level=0){
 		$logger = new Logger();
-		if(strlen($logstr)>10000) $logstr = substr($logstr,0,1000) . "..."; 
+		if(strlen($logstr)>1000) $logstr = substr($logstr,0,1000) . "..."; 
 		if(!$logger->checkLevel($level)) $level=10;
 		if(!isset(Logger::$file_handle)) return;
 		$datetime = date("Y-m-d H-m-s");
