@@ -359,9 +359,14 @@ function showMatches($matches,$fbid=0){
      $fbid2 = $row['fbid'];
      $friends = parent::execute("select * from connections where (fbid1=$fbid AND fbid2=$fbid2)");
      if($friends->num_rows > 0){
-      $fb_array['is_friend']=1;
+      $row = $friends->fetch_assoc();
+      $fb_array['is_friend']=$row['friends'];
+      $fb_array['mutual_friends'] = unserialize($row['path']);
+      $fb_array['mutual_friends_count'] = $row['mutual_friends_count'];
      }else{
       $fb_array['is_friend']=0;
+      $fb_array['mutual_friends'] = array();
+      $fb_array['mutual_friends_count'] = 0;
      }
     }
 	  }
@@ -826,9 +831,14 @@ function showCarpoolMatches($matches,$fbid=0){
      $fbid2 = $row['fbid'];
      $friends = parent::execute("select * from connections where (fbid1=$fbid AND fbid2=$fbid2)");
      if($friends->num_rows > 0){
-      $fb_array['is_friend']=1;
+      $row = $friends->fetch_assoc();
+      $fb_array['is_friend']=$row['friends'];
+      $fb_array['mutual_friends'] = unserialize($row['path']);
+      $fb_array['mutual_friends_count'] = $row['mutual_friends_count'];
      }else{
       $fb_array['is_friend']=0;
+      $fb_array['mutual_friends'] = array();
+      $fb_array['mutual_friends_count'] = 0;
      }
     }
 	  }
