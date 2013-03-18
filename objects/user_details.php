@@ -74,10 +74,10 @@ function get($arguments){
  if(!isset($arguments['user_id']) && !isset($arguments['fbid'])){
 		throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
  }
- if(isset($arguments['user_id'])){
-  $sql = "select * from user_details where user_id = " . $arguments['user_id'];
- }else{
+ if(isset($arguments['fbid'])){
   $sql = "select * from user_details where fbid = " . $arguments['fbid'];
+ }else{
+  $sql = "select * from user_details where user_id = " . $arguments['user_id'];
  }
  $result = parent::execute($sql);
  $fb_array = array('fb_info_available' => 0);
