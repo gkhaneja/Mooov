@@ -37,6 +37,7 @@ class RequestService extends RestService {
   }else{
    $GLOBALS['site']=0;
   }
+  $this->initializeRegion($arguments);
 		$request = new Request();
 		$request->getCarpoolMatches($arguments);
  }
@@ -44,8 +45,6 @@ class RequestService extends RestService {
 	public function getMatches($arguments){
   if(isset($arguments['site']) && $arguments['site']==1){
    $GLOBALS['site']=1;
-   $this->initializeRegion($arguments);
-		$request = new Request();
   }else{
    $GLOBALS['site']=0;
    $val = Cache::getValueArray($arguments['user_id']);
@@ -60,6 +59,7 @@ class RequestService extends RestService {
    }
 	  $this->setRegion($arguments);
   }
+  $this->initializeRegion($arguments);
 		$request = new Request();
   if($GLOBALS['city']=='unrecognized_region'){
    $request->getRandomMatches($arguments);
@@ -110,7 +110,7 @@ class RequestService extends RestService {
   $GLOBALS['EAST'] = constant($region . '_EAST');
   $GLOBALS['WEST'] = constant($region . '_WEST');
   $GLOBALS['RADIUS'] = 500;
-  $GLOBALS['RADIUS2'] = 0.005;
+  $GLOBALS['RADIUS2'] = 0.01;
   $GLOBALS['DEGSTEP'] = 0.001;
   $GLOBALS['RADIUS_X'] = 112;
   $GLOBALS['RADIUS_Y'] = 105;
