@@ -30,6 +30,8 @@ class Request extends dbclass {
 		$this->fields['type'] = new Field('type','type',0);
 		$this->fields['time'] = new Field('time','time',0);
 		$this->fields['city'] = new Field('city','city',0);
+		$this->fields['women'] = new Field('women','women',0);
+		$this->fields['facebook'] = new Field('facebook','facebook',0);
 	}
 
  function checkTypeCompatibility($type1, $type2){
@@ -70,13 +72,19 @@ class Request extends dbclass {
   return true;
  }
 
-function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $users = array()){
+function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $women, $facebook, $users = array()){
  $route = new Route($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst,strtotime($ttime));
- $user_details = mysqli_fetch_assoc(parent::execute("select * from user_details where user_id = $user_id"));
- $temp = mysqli_fetch_assoc(parent::execute("select filters from request_filters where user_id = $user_id"));
- $filters = array();
- if(isset($temp)){
-  $filters = unserialize($temp['filters']);
+ $gender='dunno';
+ $fbid='nofbid';
+ $user_details = parent::execute("select * from user_details where user_id = $user_id");
+ if($user_details->num_rows > 0){
+  $detail_row = $user_details->fetch_assoc();
+  if(isset($detail_row['gender']) && $detail_row['gender']!=NULL){
+   $gender=$detail_row['gender'];
+  }
+  if(isset($detail_row['fbid']) && $detail_row['fbid']!=NULL){
+   $fbid=$detail_row['fbid'];
+  }
  }
  //$coords = $this->getSearchCoords($route);	
  $step_x = $GLOBALS['RADIUS2'];
@@ -138,7 +146,7 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
  }
 
  $routes=array();
- foreach($fbarray as $fbrow){
+ foreach($fbarray as $fbid2 => $fbrow){
   $match = $fbrow['match'];
   if(($key = array_search($match, $matches)) === FALSE) {
    continue;
@@ -147,23 +155,45 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
   $sql = "select * from request where user_id = $match";
   $result = parent::execute($sql);
   $req_match=0;
+  $women_match=1;
+  $facebook_match=1;
   if($result->num_rows > 0) {
    $row = $result->fetch_assoc();
    if($this->checkTypeCompatibility($type,$row['type'])==TRUE && 
       $this->checkTimeCompatibility(strtotime($ttime),strtotime($row['time']))==TRUE) { 
     $req_match = 1;
    }
+   if($women==1){
+    $gender2='dunno';
+    $result2 = parent::execute("select * from user_details where user_id = $match");
+    if($result2->num_rows > 0){
+     $row2 = $result2->fetch_assoc();
+     if(!isset($row2['gender']) && $row2['gender']!=NULL){
+      $gender2=$row2['gender'];
+     }
+    }
+    if($row2['gender']!='female'){
+     $women_match=0;
+    }
+   }
+   if($row['women']==1 && $gender!='female'){
+    $women_match=0;
+   }
+   if($facebook==1 || $row['facebook']==1){
+    $facebook_match=0;
+    if($fbid!='nofbid' && substr($fbid2,0,6)!='nofbid'){
+     $friends = parent::execute("select * from connections where (fbid1='$fbid' AND fbid2='$fbid2')");
+     if($friends->num_rows > 0){
+      $row2 = $friends->fetch_assoc();
+      if($row2['friends']==1 || $row2['mutual_friends_count']>0){
+       $facebook_match=1;
+      }
+     }
+    }
+   }
   }
   
-  $user_details2 = mysqli_fetch_assoc(parent::execute("select * from user_details where user_id = $match"));
-  $temp2 = mysqli_fetch_assoc(parent::execute("select filters from request_filters where user_id = $match"));
-  $filters2 = array();
-  if(isset($temp2)){
-   $filters2 = unserialize($temp2['filters']);
-  }
-  $filter_match = $this->apply_filters($user_details, $filters, $user_details2, $filters2); 
-  
-  if($req_match==1 && $filter_match==1){
+  if($req_match==1 && $facebook_match==1 && $women_match==1){
    $route2=new Route($match,$row['src_latitude'],$row['src_longitude'],$row['dst_latitude'],$row['dst_longitude'],strtotime($row['time']));
    $routes[] = $route2; 
   }  
@@ -230,6 +260,8 @@ function setFilters($arguments, $table = "request_filters"){
    $dst_lon = $result[0]['dst_longitude'];
    $type = $result[0]['type'];
    $time = $result[0]['time'];
+   $women = $result[0]['women'];
+   $facebook = $result[0]['facebook'];
   }else{
    if(Utils::checkParams($arguments, array('src_latitude','src_longitude','dst_latitude','dst_longitude'))==0){
 			 throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
@@ -241,11 +273,13 @@ function setFilters($arguments, $table = "request_filters"){
    $dst_lon = $arguments['dst_longitude'];
    $type = (isset($arguments['type'])) ? $arguments['type'] : 0;
    $time = (isset($arguments['time'])) ? date('Y-m-d', time()) . " " . $arguments['time']  . ":00" : date('Y-m-d H:i:s', time()); 
+   $women =(isset($arguments['women'])) ? $arguments['women'] : 0;
+   $facebook =(isset($arguments['facebook'])) ? $arguments['facebook'] : 0;
   }
   $ntry=0;
   $matches = array();
   while($this->satisfaction($matches,$ntry)==false){
-		 $matches = array_merge($matches, $this->matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $matches));	
+		 $matches = array_merge($matches, $this->matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $women, $facebook, $matches));	
    $ntry++;
   }
   $fbid=0;
@@ -447,6 +481,12 @@ function showMatches($matches,$fbid=0){
 		}else{
    $arguments['time'] = $arguments['time'];
   }
+  if(!isset($arguments['women'])){
+   $arguments['women']=0;
+  }
+  if(!isset($arguments['facebook'])){
+   $arguments['facebook']=0;
+  }
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
@@ -562,6 +602,12 @@ function showMatches($matches,$fbid=0){
 		}else{
    $arguments['time'] = $arguments['time'];
   }
+  if(!isset($arguments['women'])){
+   $arguments['women'] = 0;
+  }
+  if(!isset($arguments['facebook'])){
+   $arguments['facebook'] = 0;
+  }
 		$result = parent::select('user',array('id'),array('id' => $arguments['user_id']));
 		if(!isset($result[0]['id'])){
 			throw new APIException(array("code" =>"5",'entity'=>'user', 'error' => 'User does not exist'));
@@ -620,10 +666,11 @@ function showMatches($matches,$fbid=0){
 		
   $result = parent::select('carpool',array('id'),array('user_id' => $arguments['user_id']));
   $user_id=$arguments['user_id']; $src_add=$arguments['src_address']; $dst_add=$arguments['dst_address']; $ttime=$arguments['time'];
+  $women = $arguments['women']; $facebook = $arguments['facebook'];
   if(isset($result[0]['id'])){
-   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=\"$src_add\", dst_address=\"$dst_add\", time=\"$ttime\", src_locality=\"$src_locality\", dst_locality=\"$dst_locality\" WHERE user_id=$user_id";
+   $sql = "UPDATE carpool SET src_latitude=$src_lat, src_longitude=$src_lon, dst_latitude=$dst_lat, dst_longitude=$dst_lon, src_address=\"$src_add\", dst_address=\"$dst_add\", time=\"$ttime\", src_locality=\"$src_locality\", dst_locality=\"$dst_locality\", women=$women, facebook=$facebook WHERE user_id=$user_id";
   }else{
-   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address, time, src_locality, dst_locality) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, \"$src_add\", \"$dst_add\", \"$ttime\", \"$src_locality\", \"$dst_locality\")";
+   $sql = "INSERT INTO carpool (user_id, src_latitude, src_longitude, dst_latitude, dst_longitude, src_address, dst_address, time, src_locality, dst_locality, women, facebook) VALUES ($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, \"$src_add\", \"$dst_add\", \"$ttime\", \"$src_locality\", \"$dst_locality\", $women, $facebook)";
   }
   parent::execute($sql);
 		$result = parent::select('carpool',array('*'),array('user_id' => $arguments['user_id']));
@@ -632,12 +679,18 @@ function showMatches($matches,$fbid=0){
 		echo $json_msg->getMessage();
  }
 
-function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $users = array()){
- $user_details = mysqli_fetch_assoc(parent::execute("select * from user_details where user_id = $user_id"));
- $temp = mysqli_fetch_assoc(parent::execute("select filters from request_filters where user_id = $user_id"));
- $filters = array();
- if(isset($temp)){
-  $filters = unserialize($temp['filters']);
+function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $women, $facebook, $users = array()){
+ $gender='dunno';
+ $fbid='nofbid';
+ $user_details = parent::execute("select * from user_details where user_id = $user_id");
+ if($user_details->num_rows > 0){
+  $detail_row = $user_details->fetch_assoc();
+  if(isset($detail_row['gender']) && $detail_row['gender']!=NULL){
+   $gender=$detail_row['gender'];
+  }
+  if(isset($detail_row['fbid']) && $detail_row['fbid']!=NULL){
+   $fbid=$detail_row['fbid'];
+  }
  }
  //$coords = $this->getSearchCoords($route);	
  $step_x = $GLOBALS['RADIUS2'];
@@ -699,7 +752,7 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
  }
 
  $ret=array();
- foreach($fbarray as $fbrow){
+ foreach($fbarray as $fbid2 => $fbrow){
   $match = $fbrow['match'];
   if(($key = array_search($match, $matches)) === FALSE) {
    continue;
@@ -708,24 +761,46 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
   $sql = "select * from carpool where user_id = $match";
   $result = parent::execute($sql);
   $req_match=1;
+  $filter_match=1; 
+  $facebook_match=1;
   if($result->num_rows > 0) {
    $row = $result->fetch_assoc();
    if($this->checkTypeCompatibility($type,$row['type'])==TRUE && 
       $this->checkTimeCompatibility(strtotime($ttime),strtotime($row['time']))==TRUE) { 
     $req_match = 1;
    }
+   if($women==1){
+    $gender2='dunno';
+    $result2 = parent::execute("select * from user_details where user_id = $match");
+    if($result2->num_rows > 0){
+     $row2 = $result2->fetch_assoc();
+     if(!isset($row2['gender']) && $row2['gender']!=NULL){
+      $gender2=$row2['gender'];
+     }
+    }
+    if($row2['gender']!='female'){
+     $filter_match=0;
+    }
+   }
+   if($row['women']==1 && $gender!='female'){
+    $filter_match=0;
+   }
+   if($facebook==1 || $row['facebook']==1){
+    $facebook_match=0;
+    if($fbid!='nofbid' && substr($fbid2,0,6)!='nofbid'){
+     $friends = parent::execute("select * from connections where (fbid1='$fbid' AND fbid2='$fbid2')");
+     if($friends->num_rows > 0){
+      $row2 = $friends->fetch_assoc();
+      if($row2['friends']==1 || $row2['mutual_friends_count']>0){
+       $facebook_match=1;
+      }
+     }
+    }
+   }
   }
-  
-  $user_details2 = mysqli_fetch_assoc(parent::execute("select * from user_details where user_id = $match"));
-  $temp2 = mysqli_fetch_assoc(parent::execute("select filters from request_filters where user_id = $match"));
-  $filters2 = array();
-  if(isset($temp2)){
-   $filters2 = unserialize($temp2['filters']);
-  }
-  $filter_match = $this->apply_filters($user_details, $filters, $user_details2, $filters2); 
-  
-  if($req_match==1 && $filter_match==1){
-   $ret[] = $match; 
+ 
+  if($req_match==1 && $filter_match==1 && $facebook_match==1){
+   $ret[] = $match;
   }  
  }
 	return $ret;
@@ -752,6 +827,8 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
    }
    $type = (isset($arguments['type'])) ? $arguments['type'] : 0;
    $time = (isset($arguments['time'])) ? date('Y-m-d', time()) . " " . $arguments['time']  . ":00" : date('Y-m-d H:i:s', time());    
+   $women= (isset($arguments['women'])) ? $arguments['women'] : 0;
+   $facebook = (isset($arguments['facebook'])) ? $arguments['facebook'] : 0;
   }else{
 		 if(!isset($arguments['user_id'])){
 			 throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
@@ -767,11 +844,13 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
    $dst_lon = $result[0]['dst_longitude'];
    $time = $result[0]['time'];
    $type = $result[0]['type'];
+   $women=$result[0]['women'];
+   $facebook = $result[0]['facebook'];
   }
   $ntry=0;
   $matches = array();
   while($this->satisfaction($matches,$ntry)==false){
-		 $matches = array_merge($matches, $this->matchCarpoolRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $matches));	
+		 $matches = array_merge($matches, $this->matchCarpoolRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $women, $facebook, $matches));	
    $ntry++;
   }
   //$sql = "SELECT user_id from carpool WHERE ABS(src_latitude-$src_lat)<0.004 AND ABS(src_longitude-$src_lon)<0.004 AND ABS(dst_latitude-$dst_lat)<0.004 AND (dst_longitude-$dst_lon)<0.004";
