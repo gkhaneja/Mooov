@@ -820,7 +820,7 @@ function showCarpoolMatches($matches,$fbid=0){
 		 $type= $match_row['request']['type'];
    $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "time_info" => $match_row['request']['time']);
    $other_array = array_merge($user_array, array('type' => $type));
-
+   if(isset($match_row['details'])){
      $fbinfo = new FBInfo($match_row['details']);
      $fb_array = $fbinfo->getData();
      $fb_array['fb_info_available'] = 1;
@@ -836,6 +836,7 @@ function showCarpoolMatches($matches,$fbid=0){
       $fb_array['mutual_friends'] = array();
       $fb_array['mutual_friends_count'] = 0;
      }
+   }
    if(!isset($fb_array['fb_info_available'])){
      $fb_array['fb_info_available'] = 0; 
    }
