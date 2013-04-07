@@ -654,7 +654,6 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
  }
 
  $matches_str = implode(",",$matches);
- //Logger::do_log("Debug: $matches_str");
  $details = array();
  $sql = "select * from user_details where user_id in ($matches_str)";
  $result = parent::execute($sql);
@@ -706,10 +705,9 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
    }
    if($women==1){
     $gender2='dunno';
-     if(!isset($uniq['details']['gender']) && $uniq['details']['gender']!=NULL){
-      $gender2=$uniq['details']['gender'];
-     }
-    //}
+    if(!isset($uniq['details']['gender']) && $uniq['details']['gender']!=NULL){
+     $gender2=$uniq['details']['gender'];
+    }
     if($gender2!='female'){
      $filter_match=0;
     }
@@ -729,10 +727,9 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
      }
     }
    }
-  //}
  
   if($req_match==1 && $filter_match==1 && $facebook_match==1){
-   $ret[] = $match;
+   $ret[$match] = $uniq;
   }  
  }
 	return $ret;
@@ -780,9 +777,13 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
    $facebook = $result[0]['facebook'];
   }
   $ntry=0;
+  $match_ids = array();
   $matches = array();
+  $matches_new = array();
   while($this->satisfaction($matches,$ntry)==false){
-		 $matches = array_merge($matches, $this->matchCarpoolRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $women, $facebook, $matches));	
+		 $matches_new = ($this->matchCarpoolRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $women, $facebook, $match_ids));
+   $match_ids = array_merge($match_ids, array_keys($matches_new));	
+   $matches = array_merge($matches, $matches_new);
    $ntry++;
   }
   $fbid=0;
@@ -797,12 +798,13 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
 function showCarpoolMatches($matches,$fbid=0){
   $match_str="";
   foreach($matches as $match){
-   $match_str .= $match . ", ";
+   $match_str .= $match['match'] . ", ";
   } 
   Logger::do_log("Matches: $match_str");	
 
   $resp = array();
-  foreach($matches as $match){
+  foreach($matches as $match_row){
+   $match = $match_row['match'];
    $fb_array = array();
    $user_array = array();
    $other_info = array();
@@ -813,25 +815,16 @@ function showCarpoolMatches($matches,$fbid=0){
      $user_array = array("user_id" => $match, "username" => stripslashes($row['username']));    
     }
    }                            
-   $sql = "select * from carpool where user_id =" . $match;
-   $result = parent::execute($sql);
-   if($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-     $locinfo_src = new LocationInfo('src',$row);
-     $locinfo_dst = new LocationInfo('dst',$row);
-		   $type= $row['type'];
-     $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "time_info" => $row['time']);
-			 }
-   }
+   $locinfo_src = new LocationInfo('src',$match_row['request']);
+   $locinfo_dst = new LocationInfo('dst',$match_row['request']);
+		 $type= $match_row['request']['type'];
+   $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "time_info" => $match_row['request']['time']);
    $other_array = array_merge($user_array, array('type' => $type));
-   $sql = "select * from user_details where user_id = " . $match;
-   $result = parent::execute($sql);
-   if($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-     $fbinfo = new FBInfo($row);
+
+     $fbinfo = new FBInfo($match_row['details']);
      $fb_array = $fbinfo->getData();
      $fb_array['fb_info_available'] = 1;
-     $fbid2 = $row['fbid'];
+     $fbid2 = $match_row['details']['fbid'];
      $friends = parent::execute("select * from connections where (fbid1=$fbid AND fbid2=$fbid2)");
      if($friends->num_rows > 0){
       $row = $friends->fetch_assoc();
@@ -843,11 +836,10 @@ function showCarpoolMatches($matches,$fbid=0){
       $fb_array['mutual_friends'] = array();
       $fb_array['mutual_friends_count'] = 0;
      }
-    }
-	  }
    if(!isset($fb_array['fb_info_available'])){
      $fb_array['fb_info_available'] = 0; 
    }
+
    $resp[] = array("loc_info" => $loc_array,  "fb_info" => $fb_array, "other_info" => $other_array);
 		}                
   $json_msg = new JSONMessage();

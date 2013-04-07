@@ -1,8 +1,8 @@
 <?php
-require_once("objects/cache.php");
+/*require_once("objects/cache.php");
 require_once("conf/constants.inc");
 require_once("objects/utils.php");
-require_once("objects/facebook_details.php");
+require_once("objects/facebook_details.php");*/
 
 //Cache::bootup();
 /*Cache::init();
@@ -92,6 +92,13 @@ if($pid!=0){
  echo "Child: I am the child process\n"; 
 }*/
 
-exec("php facebook_details.php &");
-echo "Wow\n";
+//exec("php facebook_details.php &");
+//echo "Wow\n";
+
+$uniq = array();
+$match = array();
+$uniq[0] = 'this is zero';
+$match[2] = 'this is one';
+print_r((array_merge($uniq,$match)));
+
 ?>
