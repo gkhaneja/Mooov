@@ -60,12 +60,12 @@ class Request extends dbclass {
   if($ntry==0){
    return false;
   }
-  if($ntry>1){
+  if($ntry>=1){
    return true;
   }
   if(count($matches)<5){
    $GLOBALS['RADIUS'] = $GLOBALS['RADIUS'] + 100;
-   $GLOBALS['RADIUS2'] = $GLOBALS['RADIUS2'] + 0.001;
+   $GLOBALS['RADIUS2'] = $GLOBALS['RADIUS2'] + 0.01;
    $GLOBALS['TIME_THRESHOLD'] = $GLOBALS['TIME_THRESHOLD'] + 900*$ntry;
    return false;
   }
@@ -295,61 +295,6 @@ function setFilters($arguments, $table = "request_filters"){
    Cache::setValueArray($user_id, $cache_arr);
   }
  }
-
-	function getMatches($arguments){
-  if($GLOBALS['site']==0){
-   if(!isset($arguments['user_id']) && !isset($arguments['id'])){
-			 throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
-		 }
-		 if(!isset($arguments['id'])){
-			 $result = parent::select('request',array('*'),array('user_id' => $arguments['user_id']));
-		 }else{
-    $result = parent::select('request',array('*'),array('id' => $arguments['id']));
-	  }	
-		 if(count($result)==0){
-		  throw new APIException(array("code" =>"5" , 'error' => 'Request does not exist.'));
-		 }
-   $user_id = $result[0]['user_id'];
-   $src_lat = $result[0]['src_latitude'];
-   $src_lon = $result[0]['src_longitude'];
-   $dst_lat = $result[0]['dst_latitude'];
-   $dst_lon = $result[0]['dst_longitude'];
-   $type = $result[0]['type'];
-   $time = $result[0]['time'];
-  }else{
-   if(Utils::checkParams($arguments, array('src_latitude','src_longitude','dst_latitude','dst_longitude'))==0){
-			 throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
-   }
-   $user_id = 0;
-   $src_lat = $arguments['src_latitude'];
-   $src_lon = $arguments['src_longitude'];
-   $dst_lat = $arguments['dst_latitude'];
-   $dst_lon = $arguments['dst_longitude'];
-   $type = (isset($arguments['type'])) ? $arguments['type'] : 0;
-   $time = (isset($arguments['time'])) ? date('Y-m-d', time()) . " " . $arguments['time']  . ":00" : date('Y-m-d H:i:s', time());
-   //Logger::do_log("Time: $time");
-  }
-		$city = new City();
-  $ntry=0;
-  $matches = array();
-  while($this->satisfaction($matches,$ntry)==false){
-   //Logger::do_log("Calling: matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $matches)");
-		 $matches = array_merge($matches, $city->matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $matches));	
-   $ntry++;
-  }
-  $fbid=0;
-  $result = parent::execute("select fbid from user_details where user_id = $user_id");
-  if($result->num_rows>0){
-   $row = $result->fetch_assoc();
-   $fbid = $row['fbid'];
-  }
-  $resp = $this->showMatches($matches,$fbid);
-  if($GLOBALS['site']==0){
-   Logger::do_log("Caching the result, key $user_id");
-   $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
-   Cache::setValueArray($user_id, $cache_arr);
-  }
-}
 
 
 function showMatches($matches,$fbid=0){ 
@@ -700,44 +645,38 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
  $y1 = ($lon_src - $step_y);
  $y2 = ($lon_src + $step_y);
  $matches = array();
- $details = array(); 
+ $requests = array(); 
  $sql = "select * from carpool where src_latitude>=$x1 AND src_latitude<=$x2 AND src_longitude>=$y1 AND src_longitude<=$y2";
  $results = parent::execute($sql);
  while($row = $results->fetch_assoc()) {
 		$matches[]=$row['user_id'];
-  $details[$row['user_id']] = $row;
+  $requests[$row['user_id']] = $row;
  }
- //$matches = $this->match($coords, $GLOBALS['src_table']);
 
- $fbarray = array();
+ $matches_str = implode(",",$matches);
+ //Logger::do_log("Debug: $matches_str");
+ $details = array();
+ $sql = "select * from user_details where user_id in ($matches_str)";
+ $result = parent::execute($sql);
+ if($result->num_rows > 0) {
+  while($row = $result->fetch_assoc()) {
+   $details[$row['user_id']] = $row;
+  }
+ }
+
+ $unique = array();
  foreach($matches as $match){
-  if(empty($match)) continue;
-  $sql = "select fbid from user_details where user_id = $match";
-  $result = parent::execute($sql);
-  if($result->num_rows > 0) {
-   while($row = $result->fetch_assoc()) {
-    if(empty($row['fbid']) || $row['fbid']==NULL){
-     $fbarray['nofbid-' . $match] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
-     //Logger::do_log("No fbid for $match");
-     continue;
-    }
-    if(array_key_exists($row['fbid'], $fbarray)){
-     //Logger::do_log("comparing time- " . strtotime($fbarray[$row['fbid']]['lastupd']) . " and " . strtotime($details[$match]['lastupd']));
-     //Logger::do_log("comparing time- " . $fbarray[$row['fbid']]['lastupd'] . " and " . $details[$match]['lastupd']);
-     if(strtotime($fbarray[$row['fbid']]['lastupd']) < strtotime($details[$match]['lastupd'])){
-      //Logger::do_log("Updating  " . $fbarray[$row['fbid']]['match'] . " to $match for fbid " . $row['fbid']);
-      $fbarray[$row['fbid']] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
-     }else{
-      //Logger::do_log("NOT updating  " . $fbarray[$row['fbid']]['match'] . " to $match for fbid " . $row['fbid']);
+  if(isset($details[$match]['fbid']) && !empty($details[$match]['fbid'])){
+    $fbid2 = $details[$match]['fbid'];
+    if(array_key_exists($fbid2, $unique)){
+     if(strtotime($unique[$fbid2]['lastupd']) < strtotime($requests[$match]['lastupd'])){
+      $unique[$fbid2]=array('match'=>$match,'lastupd'=>$requests[$match]['lastupd'],'request'=>$requests[$match],'details'=>$details[$match]);
      }
     }else{
-     $fbarray[$row['fbid']] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
-     //Logger::do_log("Got new user_id, fbid as $match, " . $row['fbid']);
+     $unique[$fbid2]=array('match'=>$match,'lastupd'=>$requests[$match]['lastupd'],'request'=>$requests[$match],'details'=>$details[$match]);
     }
-   }
   }else{
-   $fbarray['nofbid-' . $match] = array('match' => $match, 'lastupd' => $details[$match]['lastupd']);
-   //Logger::do_log("No fbid for $match");
+   $unique['nofbid-'.$match]=array('match'=>$match,'lastupd'=>$requests[$match]['lastupd'],'request'=>$requests[$match],'details'=>$details[$match]);
   }
  }
 
@@ -752,40 +691,33 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
  }
 
  $ret=array();
- foreach($fbarray as $fbid2 => $fbrow){
-  $match = $fbrow['match'];
+ foreach($unique as $fbid2 => $uniq){
+  $match = $uniq['match'];
   if(($key = array_search($match, $matches)) === FALSE) {
    continue;
   }
   if(empty($match)) continue;
-  $sql = "select * from carpool where user_id = $match";
-  $result = parent::execute($sql);
   $req_match=1;
   $filter_match=1; 
   $facebook_match=1;
-  if($result->num_rows > 0) {
-   $row = $result->fetch_assoc();
-   if($this->checkTypeCompatibility($type,$row['type'])==TRUE && 
-      $this->checkTimeCompatibility(strtotime($ttime),strtotime($row['time']))==TRUE) { 
+   if($this->checkTypeCompatibility($type,$uniq['request']['type'])==TRUE && 
+      $this->checkTimeCompatibility(strtotime($ttime),strtotime($uniq['request']['time']))==TRUE) { 
     $req_match = 1;
    }
    if($women==1){
     $gender2='dunno';
-    $result2 = parent::execute("select * from user_details where user_id = $match");
-    if($result2->num_rows > 0){
-     $row2 = $result2->fetch_assoc();
-     if(!isset($row2['gender']) && $row2['gender']!=NULL){
-      $gender2=$row2['gender'];
+     if(!isset($uniq['details']['gender']) && $uniq['details']['gender']!=NULL){
+      $gender2=$uniq['details']['gender'];
      }
-    }
-    if($row2['gender']!='female'){
+    //}
+    if($gender2!='female'){
      $filter_match=0;
     }
    }
-   if($row['women']==1 && $gender!='female'){
+   if($uniq['request']['women']==1 && $gender!='female'){
     $filter_match=0;
    }
-   if($facebook==1 || $row['facebook']==1){
+   if($facebook==1 || $uniq['request']['facebook']==1){
     $facebook_match=0;
     if($fbid!='nofbid' && substr($fbid2,0,6)!='nofbid'){
      $friends = parent::execute("select * from connections where (fbid1='$fbid' AND fbid2='$fbid2')");
@@ -797,7 +729,7 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
      }
     }
    }
-  }
+  //}
  
   if($req_match==1 && $filter_match==1 && $facebook_match==1){
    $ret[] = $match;
@@ -853,14 +785,6 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
 		 $matches = array_merge($matches, $this->matchCarpoolRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $women, $facebook, $matches));	
    $ntry++;
   }
-  //$sql = "SELECT user_id from carpool WHERE ABS(src_latitude-$src_lat)<0.004 AND ABS(src_longitude-$src_lon)<0.004 AND ABS(dst_latitude-$dst_lat)<0.004 AND (dst_longitude-$dst_lon)<0.004";
-  //$result = parent::execute($sql);
-  //$matches=array();
-  //if($result->num_rows > 0) {
-   //while($row = $result->fetch_assoc()) {
-    //$matches[]=$row['user_id'];
-   //}
-  //}
   $fbid=0;
   $result = parent::execute("select fbid from user_details where user_id = $user_id");
   if($result->num_rows>0){
