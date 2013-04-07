@@ -74,6 +74,7 @@ class ServiceFactory {
                 }		*/
   try{
    dbclass::$connection->autocommit(false);
+   Logger::do_log(print_r($arguments,true));
 		 call_user_func(array($service,$function),$arguments);
    dbclass::$connection->commit();
   }catch(APIException $e){
