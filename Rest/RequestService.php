@@ -110,7 +110,7 @@ class RequestService extends RestService {
   $GLOBALS['EAST'] = constant($region . '_EAST');
   $GLOBALS['WEST'] = constant($region . '_WEST');
   $GLOBALS['RADIUS'] = 500;
-  $GLOBALS['RADIUS2'] = 0.01;
+  $GLOBALS['RADIUS2'] = 0.02;
   $GLOBALS['DEGSTEP'] = 0.001;
   $GLOBALS['RADIUS_X'] = 112;
   $GLOBALS['RADIUS_Y'] = 105;
