@@ -690,14 +690,15 @@ function showCarpoolMatches($matches,$fbid=0){
    $match_ids[] = $match['match'];
   } 
   Logger::do_log("Matches: $match_str");	
-  
- $matches_str = implode(",",$match_ids);
- $users = array();
- $sql = "select * from user where id in ($matches_str)";
- $result = parent::execute($sql);
- if($result->num_rows > 0) {
-  while($row = $result->fetch_assoc()) {
-   $users[$row['id']] = $row;
+  $users = array();
+ if(count($match_ids)>0){
+  $matches_str = implode(",",$match_ids);
+  $sql = "select * from user where id in ($matches_str)";
+  $result = parent::execute($sql);
+  if($result->num_rows > 0) {
+   while($row = $result->fetch_assoc()) {
+    $users[$row['id']] = $row;
+   }
   }
  }
   $resp = array();
