@@ -80,8 +80,12 @@ function matchRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttim
    $route2=new Route($match,$match_row['request']['src_latitude'],$match_row['request']['src_longitude'],$match_row['request']['dst_latitude'],$match_row['request']['dst_longitude'],strtotime($match_row['request']['time']));
    $routes[] = $route2; 
  }  
-
- $ret = $route->matchRoutes($route,$routes);
+ 
+ $percents = $route->matchRoutes($route,$routes);
+ $ret = array();
+ foreach($percents as $percent){
+  $ret[] = array('match' => $percent['user_id'], 'percent' => $percent['percent'], 'request'=>$matches[$percent['user_id']]['request'], 'details' => $matches[$percent['user_id']]['details']);
+ }
 	return $ret;
 }
 
@@ -161,8 +165,12 @@ function setFilters($arguments, $table = "request_filters"){
   }
   $ntry=0;
   $matches = array();
+  $match_ids = array();
+  $matches_new = array();
   while($this->satisfaction($matches,$ntry)==false){
-		 $matches = array_merge($matches, $this->matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $women, $facebook, $matches));	
+		 $matches_new = ($this->matchRequest($user_id, $src_lat, $src_lon, $dst_lat, $dst_lon, $type, $time, $women, $facebook, $match_ids));
+	  $match_ids = array_merge($match_ids, array_keys($matches_new));
+   $matches = array_merge($matches, $matches_new);
    $ntry++;
   }
   $fbid=0;
@@ -171,7 +179,7 @@ function setFilters($arguments, $table = "request_filters"){
    $row = $result->fetch_assoc();
    $fbid = $row['fbid'];
   }
-  $resp = $this->showMatches($matches,$fbid);
+  $resp = $this->showMatches($matches,$fbid,0);
   if($GLOBALS['site']==0){
    Logger::do_log("Caching the result, key $user_id");
    $cache_arr = array('user_id' => $user_id, 'resp' => $resp, 'time' => time());
@@ -180,7 +188,7 @@ function setFilters($arguments, $table = "request_filters"){
  }
 
 
-function showMatches($matches,$fbid=0){ 
+function showMatchesOld($matches,$fbid=0){ 
   $match_str="";
   foreach($matches as $match){
    $match_str .= $match['user_id'] . "(" . $match['percent'] . "),";
@@ -679,14 +687,18 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
    $row = $result->fetch_assoc();
    $fbid = $row['fbid'];
   }
-  $this->showCarpoolMatches($matches,$fbid);
+  $this->showMatches($matches,$fbid,1);
 }
 
-function showCarpoolMatches($matches,$fbid=0){
+function showMatches($matches,$fbid=0,$carpool = 1){
   $match_str="";
   $match_ids = array();
   foreach($matches as $match){
-   $match_str .= $match['match'] . ", ";
+   if($carpool ==1){
+    $match_str .= $match['match'] . ", ";
+   }else{
+    $match_str .= $match['match'] . "(" . $match['percent'] . "),";
+   }
    $match_ids[] = $match['match'];
   } 
   Logger::do_log("Matches: $match_str");	
@@ -712,7 +724,11 @@ function showCarpoolMatches($matches,$fbid=0){
    $locinfo_dst = new LocationInfo('dst',$match_row['request']);
 		 $type= $match_row['request']['type'];
    $loc_array = array("src_info" => $locinfo_src->get(), "dst_info" => $locinfo_dst->get(), "time_info" => $match_row['request']['time']);
-   $other_array = array_merge($user_array, array('type' => $type));
+   if($carpool==1){
+    $other_array = array_merge($user_array, array('type' => $type));
+   }else{
+     $other_array = array_merge($user_array ,array('type' => $type, 'percent_match' => $match_row['percent']));
+   }
    if(isset($match_row['details'])){
      $fbinfo = new FBInfo($match_row['details']);
      $fb_array = $fbinfo->getData();
