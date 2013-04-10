@@ -9,6 +9,7 @@ require_once('objects/location_info.php');
 require_once('objects/facebook_info.php');
  require_once("conf/constants.inc");
 require_once("utils/revgeo.php");
+require_once('Rest/RequestService.php');
 
 class Request extends dbclass {
 
@@ -127,6 +128,60 @@ function setFilters($arguments, $table = "request_filters"){
  }
 }
 
+function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
+ $service = new RequestService();
+ $region = $service->detect_region($geos);
+ $matches = array();
+ $hopheads = array();
+ $result = parent::execute("select * from user_details where fbid=649462845");
+ if($result->num_rows>0){
+  $hopheads['arpit'] = $result->fetch_assoc();
+ }
+ $result = parent::execute("select * from user_details where fbid=1134022647");
+ if($result->num_rows>0){
+  $hopheads['abhijeet'] = $result->fetch_assoc();
+ }
+ $result = parent::execute("select * from $request where user_id = $user_id");
+ if($result->num_rows>0){
+  $request = $result->fetch_assoc();
+ }else{
+  return $matches;
+ }
+ if((!isset($hopheads['abhijeet']) && !isset($hopheads['arpit'])) || $women==1){
+  return $matches;
+ }
+  
+ if($region=='mumbai' && isset($hopheads['arpit'])){
+  $hopid = $hopheads['arpit']['user_id'];
+  $request['user_id'] = $hopid;
+  $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['arpit']); 
+ }
+ if($region=='mumbai' && !isset($hopheads['arpit'])){
+  $hopid = $hopheads['abhijeet']['user_id'];
+  $request['user_id'] = $hopid;
+  $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['abhijeet']); 
+ }
+ if($region=='bangalore' && isset($hopheads['abhijeet'])){
+  $hopid = $hopheads['abhijeet']['user_id'];
+  $request['user_id'] = $hopid;
+  $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['abhijeet']); 
+ }
+ if($region=='bangalore' && !isset($hopheads['abhijeet'])){
+  $hopid = $hopheads['arpit']['user_id'];
+  $request['user_id'] = $hopid;
+  $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['arpit']); 
+ }
+ if($region!='bangalore' && $region!='mumbai'){
+  $hopid = $hopheads['arpit']['user_id'];
+  $request['user_id'] = $hopid;
+  $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['arpit']); 
+  $hopid = $hopheads['abhijeet']['user_id'];
+  $request['user_id'] = $hopid;
+  $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['abhijeet']); 
+ }
+ return $matches;
+}
+
  function getRandomMatches($arguments){
   if($GLOBALS['site']==0){
    if(!isset($arguments['user_id']) && !isset($arguments['id'])){
@@ -178,6 +233,10 @@ function setFilters($arguments, $table = "request_filters"){
   if($result->num_rows>0){
    $row = $result->fetch_assoc();
    $fbid = $row['fbid'];
+  }
+  if(count($matches)==0){
+   $geos = array('src_latitude'=>$src_lat,'src_longitude'=>$src_lon,'dst_latitude'=>$dst_lat,'dst_longitude'=>$dst_lon);
+   $matches = $this->getHopheads($geos,$user_id,'request',$women);
   }
   $resp = $this->showMatches($matches,$fbid,0);
   if($GLOBALS['site']==0){
@@ -686,6 +745,10 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
   if($result->num_rows>0){
    $row = $result->fetch_assoc();
    $fbid = $row['fbid'];
+  }
+  if(count($matches)==0){
+   $geos = array('src_latitude'=>$src_lat,'src_longitude'=>$src_lon,'dst_latitude'=>$dst_lat,'dst_longitude'=>$dst_lon);
+   $matches = $this->getHopheads($geos,$user_id,'carpool',$women);
   }
   $this->showMatches($matches,$fbid,1);
 }

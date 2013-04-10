@@ -119,7 +119,7 @@ class RequestService extends RestService {
  }
  
  function detect_region($arguments){
-  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['src_latitude']) || !isset($arguments['src_longitude'])){
+  if(!isset($arguments['src_latitude']) || !isset($arguments['src_longitude']) || !isset($arguments['dst_latitude']) || !isset($arguments['dst_longitude'])){
    return 'unrecognized_region';
   }
   $regions = explode(",",constant('RECOGNIZED_CITIES'));
