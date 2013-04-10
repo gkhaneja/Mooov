@@ -133,11 +133,11 @@ function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
  $region = $service->detect_region($geos);
  $matches = array();
  $hopheads = array();
- $result = parent::execute("select * from user_details where fbid=649462845");
+ $result = parent::execute("select * from user_details where fbid=649462845 limit 1");
  if($result->num_rows>0){
   $hopheads['arpit'] = $result->fetch_assoc();
  }
- $result = parent::execute("select * from user_details where fbid=1134022647");
+ $result = parent::execute("select * from user_details where fbid=1134022647 limit 1");
  if($result->num_rows>0){
   $hopheads['abhijeet'] = $result->fetch_assoc();
  }
