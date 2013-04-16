@@ -95,10 +95,12 @@ if($pid!=0){
 //exec("php facebook_details.php &");
 //echo "Wow\n";
 
-$uniq = array();
+/*$uniq = array();
 $match = array();
 $uniq[0] = 'this is zero';
 $match[2] = 'this is one';
-print_r((array_merge($uniq,$match)));
+print_r((array_merge($uniq,$match)));*/
+
+echo date('Y-m-d') . " 00:00:00\n";
 
 ?>
