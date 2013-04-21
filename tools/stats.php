@@ -19,7 +19,7 @@ function WriteData(){
 
 function DailyStats(){
  $date1 = date('Y-m-d', time() - 7*24*60*60) . " 00:00:00";
- $date2 = date('Y-m-d', time() - 1*24860*60) . " 23:59:59";
+ $date2 = date('Y-m-d', time() - 1*24*60*60) . " 23:59:59";
  //$date = date('Y-m-d', time() - 24*60*60);
  
  $sql = "select * from user where lastupd>'$date1' and lastupd<'$date2'";
@@ -38,36 +38,38 @@ function DailyStats(){
  }
  $fbcount=0;
  if(count($users)>0){
-  $sql = "select user_id, fbid, firstname, lastname, hometown from user_details where user_id in ($users_str)";
+  $sql = "select distinct fbid, firstname, lastname, location from user_details where user_id in ($users_str)";
   $result = parent::execute($sql);
   $fbcount = $result->num_rows; 
   $details = "";
   while(($row = $result->fetch_assoc())!=NULL){
-   $hometown = unserialize($row['hometown']);
-   $details .= $row['user_id'] . "\t" . $row['fbid']."\t".$row['firstname']."\t".$row['lastname']."\t".$hometown['name'].'\n';
+   $hometown = unserialize($row['location']);
+   $details .= $row['fbid']."\t\t".$row['firstname']."\t\t".$row['lastname']."\t\t".$hometown['name']."\n";
   }  
  }
 
- $sql = "select count(*) from request where lastupd>'$date1' and lastupd<'$date2'";
+ $sql = "select * from request where lastupd>'$date1' and lastupd<'$date2'";
  $result = parent::execute($sql);
  $requestcount = $result->num_rows;
  
- $sql = "select count(*) from carpool where lastupd>'$date1' and lastupd<'$date2'";
+ $sql = "select * from carpool where lastupd>'$date1' and lastupd<'$date2'";
  $result = parent::execute($sql);
  $carpoolcount = $result->num_rows;
 
- $body = "A total of " . count($users) . " users installed the App, out of which $fbcount logged in through facebook";
- if($fbcount > 0) $body .= " as follows:\n" . $details;
+ $body = "A total of " . count($users) . " users installed the App, out of which $fbcount logged in through facebook (removing duplicates)";
+ if($fbcount > 0) $body .= " as follows:\n\n" . $details;
  $body .= "\n\n";
  $body .= "Total Insta   Requests: $requestcount\n";
  $body .= "Total Carpool Requests: $carpoolcount\n";
  $body .= "\n\nAuto-generated email. Do not reply.\n";
- echo $body; 
+ //echo $body; 
  $subject = "Weekly Stats: $date1 - $date2";
- echo $subject . "\n";
+ //echo $subject . "\n";
+ $this->SendMail($subject, $body, 'strangerbuddy@googlegroups.com');
 }
 
 function SendMail($subject, $body, $to = 'gourav.khaneja@gmail.com'){
+ mail($to,$subject,$body);
 }
 
  
