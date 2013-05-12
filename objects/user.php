@@ -54,10 +54,17 @@ class User extends dbclass {
 	}	
 
  function get($arguments){
-  if(!isset($arguments['uuid'])){
-		 throw new APIException(array("code" =>"3" ,'field'=>'uuid', 'error' => 'Field uuid is not set'));
+  $primary='uuid';
+  if(!isset($arguments['uuid']) && !isset($arguments['fbid'])){
+		 throw new APIException(array("code" =>"3" ,'field'=>'uuid/fbid', 'error' => 'Field uuid/fbid is not set'));
   }
-  $result = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
+		if(!isset($arguments['uuid']) && isset($arguments['fbid'])){
+   $primary = 'fbid'; 
+		}
+		if(isset($arguments['uuid']) && !isset($arguments['fbid'])){
+   $primary = 'uuid';
+  }
+  $result = parent::select('user', array('id'),array($primary => $arguments[$primary]));
   if(isset($result[0]['id'])){
    $json_msg = new JSONMessage();
    $json_msg->setBody(array("user_id" => $result[0]['id']));
