@@ -19,7 +19,7 @@ class User extends dbclass {
 	function add($arguments){
   $primary = 'uuid';
 		if(!isset($arguments['uuid']) && !isset($arguments['fbid'])){
-			throw new APIException(array("code" =>"3" ,'field'=>'uuid/fbid', 'error' => 'Field uuid is not set'));
+			throw new APIException(array("code" =>"3" ,'field'=>'uuid/fbid', 'error' => 'Field uuid/fbid is not set'));
 		}
 		if(!isset($arguments['uuid']) && isset($arguments['fbid'])){
    $primary = 'fbid'; 
@@ -30,7 +30,7 @@ class User extends dbclass {
 		if(isset($arguments['uuid']) && isset($arguments['fbid'])){
 		 //$uuid = parent::select('user', array('id'),array('uuid' => $arguments['uuid']));
 		 //$fbid = parent::select('user', array('id'),array('fbid' => $arguments['fbid']));
-			throw new APIException(array("code" =>"3" ,'field'=>'uuid and fbid', 'error' => 'Too many fields set :P'));
+			throw new APIException(array("code" =>"3" ,'field'=>'uuid and fbid', 'error' => 'Too many fields set uuid as well as fbid'));
   }
 
 		$result = parent::select('user', array('id'),array($primary => $arguments[$primary]));
