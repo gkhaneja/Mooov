@@ -218,6 +218,7 @@ function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
    $women =(isset($arguments['women'])) ? $arguments['women'] : 0;
    $facebook =(isset($arguments['facebook'])) ? $arguments['facebook'] : 0;
   }
+  Logger::do_log("Debug $user_id");
   $ntry=0;
   $matches = array();
   $match_ids = array();
@@ -605,11 +606,13 @@ function matchAnyRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $t
 
  $matches_str = implode(",",$matches);
  $details = array();
- $sql = "select * from user_details where user_id in ($matches_str)";
- $result = parent::execute($sql);
- if($result->num_rows > 0) {
-  while($row = $result->fetch_assoc()) {
-   $details[$row['user_id']] = $row;
+ if(count($matches)>0){
+  $sql = "select * from user_details where user_id in ($matches_str)";
+  $result = parent::execute($sql);
+  if($result->num_rows > 0) {
+   while($row = $result->fetch_assoc()) {
+    $details[$row['user_id']] = $row;
+   }
   }
  }
 
