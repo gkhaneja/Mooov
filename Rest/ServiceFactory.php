@@ -64,14 +64,14 @@ class ServiceFactory {
 				parse_str(file_get_contents('php://input'), $arguments);
 		}
   }
-/*                if(!$this->authenticateRequest($function, $arguments))
+                if(!$this->authenticateRequest($function, $arguments))
 		{
 			Logger::do_log("Could not authenticate " . $function);
                         $error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Access Denied'));
                         echo $error_m->m_error->getMessage();
                         return;
 		
-                }		*/
+                }		
   try{
    dbclass::$connection->autocommit(false);
    Logger::do_log(print_r($arguments,true));
@@ -108,9 +108,9 @@ class ServiceFactory {
          $uuid = $arguments['uuid'];
          $userid = $arguments['user_id'];
          error_log("UUID recieved : $function  $uuid -" . MASTER_UUID);
-         if( $function == 'addUser'  || $uuid == MASTER_UUID)
+         if( $function == 'addUser'  || $function == 'createUser' || $uuid == MASTER_UUID)
           return true;	
-
+         Logger::do_log("Debug: userid - $userid");
          $query  = "select id from user where uuid ='$uuid'";
          $db = new dbclass();
          $result = $db->execute($query);

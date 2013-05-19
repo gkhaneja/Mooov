@@ -2,18 +2,23 @@
 
 copier()
 {
-  local PASSED=$1
-  if [ -d "${PASSED}" ] ; then
-    files=`ls $PASSED`
+  local SRC=$1
+  if [ -d "${SRC}" ] ; then
+    files=`ls $SRC`
     for file in $files 
     do
-     copier $PASSED/$file
+     copier $SRC/$file $2/$file
     done
   else
-    if [ -f "${PASSED}" ]; then
-        echo "${PASSED} is a file";
+    if [ -f "${SRC}" ]; then
+        #echo "${SRC} is a file";
+        if [ -f "${2}" ]; then
+         difference=`diff $SRC $2`
+         echo "diff $SRC $2 > ../diff"
+         echo $difference
+        fi
     else
-        echo "${PASSED} is not valid";
+        echo "${SRC} is not valid";
         exit 1
     fi
   fi
@@ -24,6 +29,6 @@ prod=$2
 files=`ls $code`
 for file in $files 
 do
- copier $code/$file
+ copier $code/$file $prod/$file
 done
 
