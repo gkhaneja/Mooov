@@ -13,9 +13,13 @@ copier()
     if [ -f "${SRC}" ]; then
         #echo "${SRC} is a file";
         if [ -f "${2}" ]; then
-         difference=`diff $SRC $2`
-         echo "diff $SRC $2 > ../diff"
-         echo $difference
+         if cmp -s "$SRC" "$2"; then
+          TEMP='do nothing'
+         else
+          difference=`diff $SRC $2`
+          echo "diff $SRC $2"
+          #echo "$difference"
+         fi
         fi
     else
         echo "${SRC} is not valid";
