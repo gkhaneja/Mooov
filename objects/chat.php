@@ -51,7 +51,7 @@ if(!isset($userid) || !isset($username))
  	 return;
 }
 
-$result = parent::select('chat',array('userid','username','password'),array('userid' => $userid ));
+$result = parent::select('chat',array('userid','username','password'),array('username' => $username ));
 if(isset($result[0]['userid'])){
                  $username = $result[0]['username'];
                  $password  = $result[0]['password'];
@@ -61,15 +61,30 @@ if(isset($result[0]['userid'])){
   return;
 }
 
+//get name of the user
+$name='';
+$result = parent::select('user_details',array('firstname','username','lastname'),array('fbid' => $username ));
+if(count($result) >  0){
+ $user = $result[0];
+ $fname= $user['firstname'];
+ $lname= $user['lastname'];
+ $uname= $user['username'];
+if(empty($fname) && empty($lname))
+  $name  = $username;
+ else
+  $name = $fname . " " . $lname;
+
+}
+$name = urlencode($name);
 $password  = $this->generatePassword();
 //$group = $arguments['city'];
 
 
-$url = CHAT_SERVER_URL . "plugins/userService/userservice?type=add" . "&secret=". CHAT_SERVER_SECRET . "&username=" . $username ."&password=".$password;
+$url = CHAT_SERVER_URL . "plugins/userService/userservice?type=add" . "&secret=". CHAT_SERVER_SECRET . "&username=" . $username ."&password=".$password . "&name=".$name;
+error_log("======= $url === ");
 $response = $this->get_data($url);
 
 error_log(print_r($response,true));
-
 $oXML = new SimpleXMLElement($response);
 
 // get the root element 
@@ -78,7 +93,7 @@ error_log($code);
 if($code  ==  'ok')
 {
 		// Create user in database
-		parent::execute("insert into chat (userid,username,password) values ('$userid','$username','$password')");                     
+		parent::execute("insert into chat (userid,username,password,name) values ('$userid','$username','$password', '$name')");                     
 
 		 $json_msg = new JSONMessage();
                  $json_msg->setBody (array('user_id' => $userid, 'username'=> $username , 'password' => $password));
@@ -91,7 +106,7 @@ else
    // If user already exists on Chat server delete it and create new
    if($code == 'UserAlreadyExistsException')
    {
-     $this->deleteUser($arguments);
+     $this->deleteUser($arguments,false);
      $this->createUser($arguments);
    }
 	  $error_m = new ExceptionHandler(array("code" =>"3" , 'error' => $code));
@@ -102,7 +117,7 @@ else
 
 }
 
-public function deleteUser($arguments){
+public function deleteUser($arguments,$print=true){
 
 $username = $arguments['username'];
 $userid = $arguments['user_id'];
@@ -114,6 +129,7 @@ $oXML = new SimpleXMLElement($response);
 // get the root element 
 $code = $oXML[0];
 error_log($code);
+if($print){
 if($code  ==  'ok')
 {
                 // Create user in database
@@ -135,7 +151,7 @@ else
 
 
 }
-
+}
 }
 
 
