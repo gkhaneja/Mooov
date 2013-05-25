@@ -79,15 +79,15 @@ if(!isset($userid) || !isset($fbtoken)  || !isset($fbid)){
  }
  //error_log("======");
  //Logger::do_log(print_r($data,true)); 
- $workplace  = serialize($data['work']);
- $fname =  $data['first_name'];
- $lname = $data['last_name'];
- $uname = $data['username'];
+ $workplace  = addslashes(serialize($data['work']));
+ $fname =  addslashes($data['first_name']);
+ $lname = addslashes($data['last_name']);
+ $uname = addslashes($data['username']);
  $gender = $data['gender'];
  $email = $data['email'];
  $education  =addslashes(serialize ($data['education'])); 
- $hometown  =  serialize($data['hometown']);
- $location =  serialize($data['location']);
+ $hometown  =  addslashes(serialize($data['hometown']));
+ $location =  addslashes(serialize($data['location']));
  $query = "UPDATE user_details SET  workplace = '$workplace', firstname = '$fname' , lastname = '$lname' , username ='$uname', gender='$gender' , email='$email', location = '$location', hometown = '$hometown', education ='$education'  WHERE  user_id = $userid "; 
  //Logger::do_log($query);
  $dbobject->execute($query);
@@ -110,8 +110,8 @@ if(!isset($userid) || !isset($fbtoken)  || !isset($fbid)){
  $friends_ids = array();
  foreach($friends as $friend){
   $fbid2 = $friend['id'];
-  $name2 = $friend['name'];
-  $name = $fname . " " . $lname;
+  $name2 = addslashes($friend['name']);
+  $name = addslashes($fname . " " . $lname);
   $friends_ids[] = $fbid2;
   if($first==1){
    $sql .= " ($fbid, $fbid2, '$name', '$name2')";
