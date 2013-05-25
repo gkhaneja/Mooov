@@ -801,12 +801,18 @@ function showMatches($matches,$fbid=0,$carpool = 1){
      $fb_array = $fbinfo->getData();
      $fb_array['fb_info_available'] = 1;
      $fbid2 = $match_row['details']['fbid'];
-     $friends = parent::execute("select * from connections where (fbid1=$fbid AND fbid2=$fbid2)");
-     if($friends->num_rows > 0){
-      $row = $friends->fetch_assoc();
-      $fb_array['is_friend']=$row['friends'];
-      $fb_array['mutual_friends'] = unserialize($row['path']);
-      $fb_array['mutual_friends_count'] = $row['mutual_friends_count'];
+     if(isset($fbid2)){
+      $friends = parent::execute("select * from connections where (fbid1=$fbid AND fbid2=$fbid2)");
+      if($friends->num_rows > 0){
+       $row = $friends->fetch_assoc();
+       $fb_array['is_friend']=$row['friends'];
+       $fb_array['mutual_friends'] = unserialize($row['path']);
+       $fb_array['mutual_friends_count'] = $row['mutual_friends_count'];
+      }else{
+       $fb_array['is_friend']=0;
+       $fb_array['mutual_friends'] = array();
+       $fb_array['mutual_friends_count'] = 0;
+      }
      }else{
       $fb_array['is_friend']=0;
       $fb_array['mutual_friends'] = array();
