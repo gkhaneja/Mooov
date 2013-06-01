@@ -9,6 +9,7 @@ var $pass;
 public function UserServiceTest($tester) {
  echo "Testing UserService: \n";
  $this->tester = $tester;
+ $this->pass=$this->fail=0;
  echo "Add User: "; ($this->addUserTest() == 1) ? $this->pass++ : $this->fail++; echo "\n";
  echo $this->pass ."/". ($this->pass+$this->fail) . " tests passed\n";
  echo "\n";

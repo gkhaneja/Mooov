@@ -695,6 +695,7 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
 
  function getCarpoolMatches($arguments){
   if($GLOBALS['site']==1 || !isset($arguments['user_id'])){
+   $user_id=0;
 		 if(!isset($arguments['src_address'])){
 			 throw new APIException(array("code" =>"3" , 'field'=>'src_address' ,'error' => 'Required Fields are not set'));
 		 }

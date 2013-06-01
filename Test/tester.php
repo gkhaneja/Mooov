@@ -4,6 +4,7 @@
 
 require_once('Test/UserServiceTest.php');
 require_once('Test/UserDetailsServiceTest.php');
+require_once('Test/RequestServiceTest.php');
 
 class Tester extends mysqli {
 
@@ -18,6 +19,7 @@ function tester($domain, $dbhost, $dbuser, $dbpass, $dbname, $fbtoken){
  echo "Start Testing Hopin API for domain $domain \n\n";
  new UserServiceTest($this);
  new UserDetailsServiceTest($this, $this->fbtoken);
+ new RequestServiceTest($this);
 }
 
 
@@ -38,9 +40,9 @@ function Api($service, $method, $arguments){
  foreach($arguments as $argument => $val){
   if($first==1){
    $first=0;
-   $url .= "$argument=$val";
+   $url .= "$argument=" . urlencode($val);
   }else{
-   $url .= "&$argument=$val";
+   $url .= "&$argument=" . urlencode($val);
   }
  }
  error_log("calling $url \n");
