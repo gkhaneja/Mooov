@@ -1,8 +1,7 @@
-mkdir -p /var/www/html
+#mkdir -p /var/www/html
 
 cp api.php /var/www/html/
-cp getmatches.php /var/www/html/
-cp index.php /var/www/html/
+#cp getmatches.php /var/www/html/
 
 cp -R conf/ /var/www/html/
 cp -R objects/ /var/www/html/
