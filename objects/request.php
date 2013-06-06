@@ -10,6 +10,7 @@ require_once('objects/facebook_info.php');
  require_once("conf/constants.inc");
 require_once("utils/revgeo.php");
 require_once('Rest/RequestService.php');
+require_once('objects/presence.php');
 
 class Request extends dbclass {
 
@@ -796,6 +797,11 @@ function showMatches($matches,$fbid=0,$carpool = 1){
     $other_array = array_merge($user_array, array('type' => $type));
    }else{
      $other_array = array_merge($user_array ,array('type' => $type, 'percent_match' => $match_row['percent']));
+   }
+   if(getUserPresence($match)=="Available"){
+    $other_array['is_available']=1;
+   }else{
+    $other_array['is_available']=0;
    }
    if(isset($match_row['details'])){
      $fbinfo = new FBInfo($match_row['details']);
