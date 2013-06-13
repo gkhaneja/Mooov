@@ -9,6 +9,7 @@ cp -R Rest/ /var/www/html/
 cp -R tools/ /var/www/html/
 cp -R utils/ /var/www/html/
 cp -R Test/ /var/www/html/
+cp dashboard.php /var/www/html/
 
 touch /tmp/mooov.log
 chmod 644 /tmp/mooov.log
