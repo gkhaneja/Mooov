@@ -64,17 +64,17 @@ class ServiceFactory {
 				parse_str(file_get_contents('php://input'), $arguments);
 		}
   }
-                if(!$this->authenticateRequest($function, $arguments))
+  Logger::do_log(print_r($arguments,true));
+  if(!$this->authenticateRequest($function, $arguments))
 		{
 			Logger::do_log("Could not authenticate " . $function);
                         $error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Access Denied'));
                         echo $error_m->m_error->getMessage();
                         return;
 		
-                }		
+  }		
   try{
    dbclass::$connection->autocommit(false);
-   Logger::do_log(print_r($arguments,true));
 		 call_user_func(array($service,$function),$arguments);
    dbclass::$connection->commit();
   }catch(APIException $e){

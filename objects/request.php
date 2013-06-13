@@ -798,7 +798,7 @@ function showMatches($matches,$fbid=0,$carpool = 1){
    }else{
      $other_array = array_merge($user_array ,array('type' => $type, 'percent_match' => $match_row['percent']));
    }
-   if(getUserPresence($match)=="Available"){
+   if(isset($match_row['details']['fbid']) && getUserPresence($match_row['details']['fbid'])  == 1){
     $other_array['is_available']=1;
    }else{
     $other_array['is_available']=0;
