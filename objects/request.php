@@ -140,10 +140,10 @@ function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
   $hopheads['arpit']['firstname'] = 'Hopin';
   $hopheads['arpit']['lastname'] = 'Admin';
  }
- /*$result = parent::execute("select * from user_details where fbid=1134022647 limit 1");
+ $result = parent::execute("select * from user_details where fbid=742258029 limit 1");
  if($result->num_rows>0){
   $hopheads['abhijeet'] = $result->fetch_assoc();
- }*/
+ }
  $result = parent::execute("select * from $request where user_id = $user_id");
  if($result->num_rows>0){
   $request = $result->fetch_assoc();
@@ -164,7 +164,7 @@ function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
   $request['user_id'] = $hopid;
   $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['abhijeet']); 
  }*/
- if($region=='bangalore' && isset($hopheads['abhijeet'])){
+ /*if($region=='bangalore' && isset($hopheads['abhijeet'])){
   $hopid = $hopheads['abhijeet']['user_id'];
   $request['user_id'] = $hopid;
   $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['abhijeet']); 
@@ -173,14 +173,14 @@ function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
   $hopid = $hopheads['arpit']['user_id'];
   $request['user_id'] = $hopid;
   $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['arpit']); 
- }
+ }*/
  if($region!='bangalore' && $region!='mumbai'){
   $hopid = $hopheads['arpit']['user_id'];
   $request['user_id'] = $hopid;
   $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['arpit']); 
-  /*$hopid = $hopheads['abhijeet']['user_id'];
+  $hopid = $hopheads['abhijeet']['user_id'];
   $request['user_id'] = $hopid;
-  $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['abhijeet']); */
+  $matches[$hopid]=array('match'=>$hopid,'percent'=>100,'request'=>$request,'details'=>$hopheads['abhijeet']);
  }
  return $matches;
 }

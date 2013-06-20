@@ -15,9 +15,10 @@ while(($row=$result->fetch_assoc())!=NULL){
  echo $row['email'] . "\n";
  $email = $row['email'];
  try { 
-  if(isset($email) && trim($email)!="") $dbobject->execute("Insert IGNORE into emails (email) values ('$email')"); 
+  $sql = "Insert IGNORE into emails (email) values ('$email')";
+  if(isset($email) && trim($email)!="") $dbobject->execute($sql); 
  }catch(Exception $e){ 
-  echo "Exception " . $e->getMessage();
+  echo "Exception in the DB statement: $sql \n";
  }
  $data = json_decode(get_data(getFriendsQuery($row['fbid'],$row['fbtoken'])),1); 
  //print_r($data);
@@ -61,7 +62,7 @@ while(($row=$result->fetch_assoc())!=NULL){
     try { 
         $dbobject->execute($sql);
     }catch(Exception $e){ 
-      echo "Exception " . $e->getMessage();
+      echo "Exception in the db statement: $sql\n";
     }
    }else{
      echo "\tFriend's emails are not public\n";
