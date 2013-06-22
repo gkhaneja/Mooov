@@ -46,7 +46,7 @@ class dbclass extends mysqli {
 	}
 
  function util_execute($query){
-		Logger::do_log($query);
+		//Logger::do_log($query);
 		$result = dbclass::$util_conn->query($query);
 		if (!$result) {
    Logger::do_log('Invalid query: ' . dbclass::$util_conn->error);
