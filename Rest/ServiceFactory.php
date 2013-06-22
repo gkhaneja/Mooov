@@ -98,7 +98,11 @@ class ServiceFactory {
   $serve_time = ($end_time-$start_time)*1000;
   $dbobj = new dbclass();
   $url = $this->uri;
-  $dbobj->util_execute("Insert into rlog (service, method, arguments, url, response, serve_time) values ('$service_str', '$function', '$arg_str', '$url', '$response', $serve_time)");
+  $ip_addr = $_SERVER['REMOTE_ADDR'];
+  $user_agent = $_SERVER['HTTP_USER_AGENT'];
+  //isset($user_agent->platform) ? $platform = $user_agent->platform : $platform = "No platform";
+  //isset($user_agent->browser) ? $browser = $user_agent->browser : $browser = "No browser";
+  $dbobj->util_execute("Insert into rlog (service, method, arguments, url, response, serve_time, address, platform) values ('$service_str', '$function', '$arg_str', '$url', '$response', $serve_time, '$ip_addr', '$user_agent')");
   Logger::do_log("Serve Time: $serve_time milliseconds");
   return;
  }
