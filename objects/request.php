@@ -251,6 +251,7 @@ function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
 
 
 function showMatchesOld($matches,$fbid=0){ 
+  global $response;
   $match_str="";
   foreach($matches as $match){
    $match_str .= $match['user_id'] . "(" . $match['percent'] . "),";
@@ -310,6 +311,7 @@ function showMatchesOld($matches,$fbid=0){
   $json_msg = new JSONMessage();
   $json_msg->setBody (array("NearbyUsers" => $resp)); 
 		echo $json_msg->getMessage();
+  $response .= $json_msg->getMessage(); 
   return $resp;
 	}
 
@@ -317,6 +319,7 @@ function showMatchesOld($matches,$fbid=0){
  }
 
 	function delete($arguments, $unrecognized=0){
+  global $response;
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set', 'field'=>'user_id'));
 		}
@@ -348,10 +351,12 @@ function showMatchesOld($matches,$fbid=0){
 		$json_msg = new JSONMessage();
 		$json_msg->setBody("status:0");
 		echo $json_msg->getMessage();
+  $response .= $json_msg->getMessage(); 
 	}
 
 	
 	function add($arguments, $unrecognized=0){
+  global $response;
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
 		}
@@ -465,9 +470,11 @@ function showMatchesOld($matches,$fbid=0){
 		$json_msg = new JSONMessage();
 		$json_msg->setBody($result[0]);
 		echo $json_msg->getMessage();
+  $response .= $json_msg->getMessage(); 
 	}	
 
  function get($arguments){
+  global $response;
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'user_id', 'error' => 'Required Fields are not set'));
 		}
@@ -480,12 +487,14 @@ function showMatchesOld($matches,$fbid=0){
 		 $json_msg = new JSONMessage();
 		 $json_msg->setBody($result[0]);
 		 echo $json_msg->getMessage();
+   $response .= $json_msg->getMessage(); 
   }else{
 			throw APIException(array("code" =>"5" , 'entity'=>'request', 'error' => 'Request does not exist.'));
   }
  }
 
  function addCarpoolRequest($arguments){
+  global $response;
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3" , 'field'=>'user_id' ,'error' => 'Required Fields are not set'));
 		}
@@ -575,6 +584,7 @@ function showMatchesOld($matches,$fbid=0){
 		$json_msg = new JSONMessage();
 		$json_msg->setBody($result[0]);
 		echo $json_msg->getMessage();
+  $response .= $json_msg->getMessage(); 
  }
 
 function matchAnyRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type, $ttime, $women, $facebook, $users, $request_type = 'request'){
@@ -760,6 +770,7 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
 }
 
 function showMatches($matches,$fbid=0,$carpool = 1){
+  global $response;
   $match_str="";
   $match_ids = array();
   foreach($matches as $match){
@@ -835,6 +846,7 @@ function showMatches($matches,$fbid=0,$carpool = 1){
   $json_msg = new JSONMessage();
   $json_msg->setBody (array("NearbyUsers" => $resp)); 
 		echo $json_msg->getMessage();
+  $response .= $json_msg->getMessage(); 
  }
 
 }

@@ -17,6 +17,7 @@ class ServiceFactory {
 	}
 
 	public function serve($sitearguments = null){
+  global $response;
   $start_time = microtime(true);
 		Logger::bootup();
   Cache::init();
@@ -27,51 +28,53 @@ class ServiceFactory {
 		if(count($parts)<4 || class_exists($parts[2],true)==false){
 			$error_m = new ExceptionHandler(array("code" =>"1" , 'error' => 'Service not Found'));
 			echo $error_m->m_error->getMessage();
+   $response .= $error_m->m_error->getMessage();
+   $this->exitService($start_time, $parts[2]);
 			return;
 		}    
 		$service = new $parts[2]();
+  $service_str = $parts[2];
 		$function = $parts[3];
 		if(method_exists($service,$function)==false){
 			Logger::do_log("Method not found: " . $function);
 			$error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Method not Found'));
 			echo $error_m->m_error->getMessage();
+   $response .= $error_m->m_error->getMessage();
+   $this->exitService($start_time, $service_str, $function);
 			return;
 		}
-// 		$arguments = array();
-// 		for($i=3;$i<count($parts);$i++){
-// 			$arguments[] = $parts[$i];
-// 		}
 		
-  if(isset($parts[4]) && $parts[4] == 'site')
-   {
+  if(isset($parts[4]) && $parts[4] == 'site') {
      $arguments =  $sitearguments;
 			  Logger::do_log("arguments for site " . print_r($arguments,true));
-   }
-  else
-  {
-		$method = $_SERVER['REQUEST_METHOD'];
+  } else {
+		 $method = $_SERVER['REQUEST_METHOD'];
   
-		switch ($method) {
-			case 'GET':
-			case 'HEAD':
-				$arguments = $_GET;
-				break;
-			case 'POST':
-				$arguments = $this->getPostArguments();
-				break;
-			case 'PUT':
-			case 'DELETE':
+	 	switch ($method) {
+		 	case 'GET':
+			 case 'HEAD':
+				 $arguments = $_GET;
+			 	break;
+			 case 'POST':
+			 	$arguments = $this->getPostArguments();
+				 break;
+			 case 'PUT':
+			 case 'DELETE':
 				parse_str(file_get_contents('php://input'), $arguments);
-		}
+		 }
   }
-  Logger::do_log(print_r($arguments,true));
-  if(!$this->authenticateRequest($function, $arguments))
-		{
+  $arg_str="";
+  foreach($arguments as $arg => $val){
+   $arg_str .= "&$arg=$val";
+  }
+  Logger::do_log($arg_str);
+  if(!$this->authenticateRequest($function, $arguments)){
 			Logger::do_log("Could not authenticate " . $function);
-                        $error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Access Denied'));
-                        echo $error_m->m_error->getMessage();
-                        return;
-		
+   $error_m = new ExceptionHandler(array("code" =>"2" , 'error' => 'Access Denied'));
+   echo $error_m->m_error->getMessage();
+   $response .= $error_m->m_error->getMessage();
+   $this->exitService($start_time, $service_str, $function, $arg_str);
+   return;
   }		
   try{
    dbclass::$connection->autocommit(false);
@@ -83,11 +86,22 @@ class ServiceFactory {
 		 $m_error = new JSONMessage();
 	  $m_error->setError($e->exception);
 			echo $m_error->getMessage();
+   $response .= $m_error->getMessage();
   }
-  $end_time = microtime(true);
-  Logger::do_log("Serve Time: " . ($end_time-$start_time)*1000 . " milliseconds");
+  $this->exitService($start_time, $service_str, $function, $arg_str);
 		return;
 	}
+
+ function exitService($start_time, $service_str="No service", $function="No method", $arg_str="No args"){
+  global $response;
+  $end_time = microtime(true);
+  $serve_time = ($end_time-$start_time)*1000;
+  $dbobj = new dbclass();
+  $url = $this->uri;
+  $dbobj->util_execute("Insert into rlog (service, method, arguments, url, response, serve_time) values ('$service_str', '$function', '$arg_str', '$url', '$response', $serve_time)");
+  Logger::do_log("Serve Time: $serve_time milliseconds");
+  return;
+ }
 	
 	function getPostArguments()
 	{

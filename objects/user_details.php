@@ -24,6 +24,7 @@ class UserDetails extends dbclass{
 	}
 
 	function add($arguments){
+  global $response;
 		if(!isset($arguments['user_id'])){
 			throw new APIException(array("code" =>"3", 'field'=>'user_id', 'error' => 'Field user_id is not set'));
 		}
@@ -42,6 +43,7 @@ class UserDetails extends dbclass{
    $json_msg = new JSONMessage();
    $json_msg->setBody(array("Status" => "Success"));
    echo $json_msg->getMessage();
+   $response .= $json_msg->getMessage(); 
    if($toupdate==1){
      Logger::do_log("Calling facebook_details.php");    
      $user_id = $arguments['user_id'];
@@ -62,6 +64,7 @@ class UserDetails extends dbclass{
 		$json_msg = new JSONMessage();
 		$json_msg->setBody(array("Status" => "Success"));
 		echo $json_msg->getMessage();
+  $response .= $json_msg->getMessage(); 
      $user_id = $arguments['user_id'];
      $fbid = $arguments['fbid'];
      $fbtoken = $arguments['fbtoken'];
@@ -71,6 +74,7 @@ class UserDetails extends dbclass{
 	}
 
 function get($arguments){
+ global $response;
  if(!isset($arguments['user_id']) && !isset($arguments['fbid'])){
 		throw new APIException(array("code" =>"3" , 'error' => 'Required Fields are not set.'));
  }
@@ -91,6 +95,7 @@ function get($arguments){
  $json_msg = new JSONMessage();
  $json_msg->setBody (array("fb_info" => $fb_array)); 
 	echo $json_msg->getMessage();
+ $response .= $json_msg->getMessage(); 
 }
 	
 }

@@ -8,6 +8,7 @@ require_once("conf/db.inc");
 class dbclass extends mysqli {
 
 	public static $connection;
+ public static $util_conn;
 
 	function __construct(){
 	}
@@ -17,10 +18,16 @@ class dbclass extends mysqli {
 		$DB_USER = DB_USER;
 		$DB_PASS = DB_PASS;
 		$DB_NAME = DB_NAME;
+  $UTIL_NAME = UTIL_NAME;
 		dbclass::$connection = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 		if (mysqli_connect_errno()) {
 			Logger::do_log("DB Connection failed: " . mysqli_connect_error());
 			throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
+		}
+		dbclass::$util_conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $UTIL_NAME);
+		if (mysqli_connect_errno()) {
+			Logger::do_log("Util DB Connection failed: " . mysqli_connect_error());
+			//throw new APIException(array("code" =>"1" ,'reference'=>Logger::$rid, 'error' => 'Internal Error'));
 		}
 		Logger::do_log("Connected to databse " . $DB_NAME);
 	}	
@@ -37,6 +44,15 @@ class dbclass extends mysqli {
 		}
 		return $result;
 	}
+
+ function util_execute($query){
+		Logger::do_log($query);
+		$result = dbclass::$util_conn->query($query);
+		if (!$result) {
+   Logger::do_log('Invalid query: ' . dbclass::$util_conn->error);
+		}
+		return $result;
+ }
 
 	function update($table, $fields, $equal_fields = array('id' => 1)){
 		$set_part = "";

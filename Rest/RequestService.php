@@ -43,6 +43,7 @@ class RequestService extends RestService {
  }
 
 	public function getMatches($arguments){
+  global $response;
   if(isset($arguments['site']) && $arguments['site']==1){
    $GLOBALS['site']=1;
   }else{
@@ -54,6 +55,7 @@ class RequestService extends RestService {
      $json_msg = new JSONMessage();
      $json_msg->setBody (array("NearbyUsers" => $val['resp'])); 
 		   echo $json_msg->getMessage();
+     $response .= $json_msg->getMessage(); 
      return;
     }
    }

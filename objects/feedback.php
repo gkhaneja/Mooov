@@ -18,6 +18,7 @@ class Feedback  extends dbclass{
 	}
 
 	function savefeedback($arguments){
+  global $response;
 		if(!isset($arguments['userid']) && !isset($arguments['username']) && !isset($arguments['email'])){
 			throw new APIException(array("code" =>"3", 'field'=>'user_id', 'error' => 'Any of the required fields not set'));
 		}
@@ -37,6 +38,7 @@ class Feedback  extends dbclass{
                  $json_msg = new JSONMessage();
                  $json_msg->setBody(array("code" =>"0" , 'Status' => 'Success'));
                  echo $json_msg->getMessage();
+                 $response .= $json_msg->getMessage(); 
 
 }
 }

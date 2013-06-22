@@ -17,6 +17,7 @@ class User extends dbclass {
 	}
 
 	function add($arguments){
+  global $response;
   $primary = 'uuid';
 		if(!isset($arguments['uuid']) && !isset($arguments['fbid'])){
 			throw new APIException(array("code" =>"3" ,'field'=>'uuid/fbid', 'error' => 'Field uuid/fbid is not set'));
@@ -38,6 +39,7 @@ class User extends dbclass {
 			$json_msg = new JSONMessage();
 			$json_msg->setBody(array("user_id" => $result[0]['id']));
 			echo $json_msg->getMessage();
+   $response .= $json_msg->getMessage(); 
 		}else{	
 		 foreach($this->fields as $field){
 			 if($field->readonly == 0 && isset($arguments[$field->name])){
@@ -49,11 +51,13 @@ class User extends dbclass {
 		 $json_msg = new JSONMessage();
 		 $json_msg->setBody(array("user_id" => $result[0]['id']));
 		 echo $json_msg->getMessage();
+   $response .= $json_msg->getMessage(); 
   }
   return;
 	}	
 
  function get($arguments){
+  global $response;
   $primary='uuid';
   if(!isset($arguments['uuid']) && !isset($arguments['fbid'])){
 		 throw new APIException(array("code" =>"3" ,'field'=>'uuid/fbid', 'error' => 'Field uuid/fbid is not set'));
@@ -69,6 +73,7 @@ class User extends dbclass {
    $json_msg = new JSONMessage();
    $json_msg->setBody(array("user_id" => $result[0]['id']));
    echo $json_msg->getMessage();
+   $response .= $json_msg->getMessage(); 
    return;
   }else{
 		  throw new APIException(array("code" =>"5" ,'entity'=>'user', 'error' => 'User does not exist'));
