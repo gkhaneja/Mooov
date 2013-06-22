@@ -237,10 +237,10 @@ function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
    $row = $result->fetch_assoc();
    $fbid = $row['fbid'];
   }
-  if(count($matches)==0){
+  /*if(count($matches)==0){
    $geos = array('src_latitude'=>$src_lat,'src_longitude'=>$src_lon,'dst_latitude'=>$dst_lat,'dst_longitude'=>$dst_lon);
    $matches = $this->getHopheads($geos,$user_id,'request',$women);
-  }
+  }*/
   $resp = $this->showMatches($matches,$fbid,0);
   if($GLOBALS['site']==0){
    Logger::do_log("Caching the result, key $user_id");
@@ -762,10 +762,10 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
    $row = $result->fetch_assoc();
    $fbid = $row['fbid'];
   }
-  if(count($matches)==0){
+  /*if(count($matches)==0){
    $geos = array('src_latitude'=>$src_lat,'src_longitude'=>$src_lon,'dst_latitude'=>$dst_lat,'dst_longitude'=>$dst_lon);
    $matches = $this->getHopheads($geos,$user_id,'carpool',$women);
-  }
+  }*/
   $this->showMatches($matches,$fbid,1);
 }
 
