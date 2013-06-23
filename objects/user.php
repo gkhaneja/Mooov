@@ -82,6 +82,21 @@ class User extends dbclass {
 
 	}
 
+ function addRegID($arguments){
+  global $response;
+  if(!isset($arguments['user_id']) || !isset($arguments['reg_id'])){
+		 throw new APIException(array("code" =>"3" ,'field'=>'user_id/reg_id', 'error' => 'Field user_id/reg_id is not set'));
+  }
+  $reg_id = $arguments['reg_id'];
+  $user_id = $arguments['user_id'];
+  parent::execute("Update user set reg_id = '$reg_id' where id = $user_id");
+  $json_msg = new JSONMessage();
+  $json_msg->setBody(array("success" => 1));
+  echo $json_msg->getMessage();
+  $response .= $json_msg->getMessage(); 
+  return;
+ }
+
 }
 
 

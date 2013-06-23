@@ -11,6 +11,7 @@ require_once('objects/facebook_info.php');
 require_once("utils/revgeo.php");
 require_once('Rest/RequestService.php');
 require_once('objects/presence.php');
+require_once('objects/gcm.php');
 
 class Request extends dbclass {
 
@@ -241,6 +242,7 @@ function getHopheads($geos,$user_id, $request = 'carpool',$women=0){
    $geos = array('src_latitude'=>$src_lat,'src_longitude'=>$src_lon,'dst_latitude'=>$dst_lat,'dst_longitude'=>$dst_lon);
    $matches = $this->getHopheads($geos,$user_id,'request',$women);
   }*/
+  if($user_id != 0) $this->sendGCM($matches, $user_id,1);
   $resp = $this->showMatches($matches,$fbid,0);
   if($GLOBALS['site']==0){
    Logger::do_log("Caching the result, key $user_id");
@@ -766,7 +768,19 @@ function matchCarpoolRequest($user_id,$lat_src,$lon_src,$lat_dst,$lon_dst, $type
    $geos = array('src_latitude'=>$src_lat,'src_longitude'=>$src_lon,'dst_latitude'=>$dst_lat,'dst_longitude'=>$dst_lon);
    $matches = $this->getHopheads($geos,$user_id,'carpool',$women);
   }*/
+  if($user_id != 0) $this->sendGCM($matches,$user_id,0);
   $this->showMatches($matches,$fbid,1);
+}
+
+function sendGCM($matches, $user_id, $insta = 0){
+ $ids = array();
+ foreach($matches as $match){
+  $ids[] = $match['match'];
+ }
+ $message = json_encode(array('type'=>1, 'insta'=>$insta, 'user_id'=>$user_id));
+ $gcm = new GCM();
+ $gcm->sendMessage($ids, $message);
+ return;
 }
 
 function showMatches($matches,$fbid=0,$carpool = 1){
