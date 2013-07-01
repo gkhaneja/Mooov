@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hopin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+
+<script>
+var map;
+var src;
+var dst;
+var ids=1;
+var max_users = 10;
+var users = new Array();
+var count=0;
+var directionDisplay;
+var directionService;
+
+function initialize() {
+	var mapOptions = {
+    	zoom: 12,
+    	center: new google.maps.LatLng(19.10, 72.86),
+    	mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+	directionsDisplay = new google.maps.DirectionsRenderer();
+	directionsDisplay.setMap(map);
+	directionsService = new google.maps.DirectionsService();
+
+	google.maps.event.addListener(map, 'click', function(mevent) {
+		if(src===undefined){
+			src = new google.maps.Marker({position: mevent.latLng, map:map, title:"source"});
+			var status = document.getElementById("status");
+			status.innerHTML = "Click again to mark the destination";
+			status.setAttribute('style',"color:blue;position:relative;left:100px;top:40px");
+		}else if(dst===undefined){
+			dst = new google.maps.Marker({position: mevent.latLng, map:map, title:"destination"});
+			var request = {
+				origin: src.getPosition(),
+				destination: dst.getPosition(),
+				travelMode: google.maps.DirectionsTravelMode.DRIVING
+  			};
+  			directionsService.route(request, function(response, status) {
+    			if (status == google.maps.DirectionsStatus.OK) {
+      				directionsDisplay.setDirections(response);
+					directionsDisplay.setMap(map);
+					dst.setVisible(false);
+					src.setVisible(false);
+					var status = document.getElementById("status");
+					status.setAttribute('style',"color:blue;position:relative;left:100px;top:40px");
+					status.innerHTML = "Click on Add User button to add a user with this route. Or click Clear Map button to start over.";
+    			}
+  			});
+		}
+	});
+
+}
+
+function addUser(){
+	if(src===undefined || dst===undefined) return;
+	//if(count >= max_users) return;
+	var user = new Object();
+	user.id = ids;
+	user.enable = 1;
+	user.src = src.getPosition();
+	user.dst = dst.getPosition();
+	var src_icon = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=S" + ids.toString() + "|FF0000|000000";
+	var dst_icon = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=D" + ids.toString() + "|FF0000|000000";
+	var displayOptions = { suppressMarkers: true, markerOptions: { title: ids.toString(), icon: src_icon, clickable:false } };
+	user.display = new google.maps.DirectionsRenderer(displayOptions);
+	user.display.setMap(map);
+	var request = {
+		origin: src.getPosition(),
+		destination: dst.getPosition(),
+		travelMode: google.maps.DirectionsTravelMode.DRIVING
+  	};
+  	directionsService.route(request, function(response, status) {
+    	if (status == google.maps.DirectionsStatus.OK) {
+      		user.display.setDirections(response);
+			var leg = response.routes[ 0 ].legs[ 0 ];
+			user.src_marker=new google.maps.Marker({position:leg.start_location,icon:src_icon,title:"Source-"+ids.toString(),clickable:false});
+			user.dst_marker=new google.maps.Marker({position:leg.end_location,icon:dst_icon,title:"Destination-"+ids.toString(),clicable:false});
+			user.src_marker.setMap(map);
+			user.dst_marker.setMap(map);
+    		}
+  	});	
+	users.push(user);
+	var tbl = document.getElementById("users_table");
+	var row = document.createElement("TR");
+	//var row = tbl.insertRow(-1);
+	row.setAttribute('id',"row-"+ids);
+	tbl.appendChild(row);
+	var cell1 = row.insertCell(0);
+	var cell2 = row.insertCell(1);
+	var cell3 = row.insertCell(2);
+	cell1.innerHTML = ids;
+	var in1 = document.createElement("INPUT");
+	in1.setAttribute('id',"users-"+ids);
+	in1.setAttribute('type', "text"); 
+	cell2.appendChild(in1);
+	var btn1 = document.createElement("BUTTON");
+	btn1.setAttribute('id',ids);
+	btn1.setAttribute('type', "button");
+	btn1.setAttribute('class', "btn btn-danger btn-mini");
+	btn1.setAttribute('onclick', "deleteUser(this)");
+	btn1.innerHTML = "Remove";
+	cell3.appendChild(btn1);
+	count++; ids++;
+	directionsDisplay.setMap(null);
+	src.setMap(null); dst.setMap(null); 
+	src=undefined; dst=undefined;	
+	var status = document.getElementById("status");
+	status.setAttribute('style',"color:blue;position:relative;left:100px;top:40px");
+	status.innerHTML = "In a marker, 'S' stands for Source, 'D' stands for Destination. These letters are followed by 'Id' of the user. Enter comma seperated users (ids) which share this users' path and should be returned by the algorithm. Click on the map to add source for another user.";
+}
+
+function getIndex(id){
+	var i;
+	for(i=0; i<users.length; i++){
+		if(users[i].id==id) return i;
+	}
+	return -1;
+}
+
+function clearAll(){
+	var i;
+	for(i=users.length-1; i>=0; i--){
+		//if(users[i].enable==1){
+			users[i].enable=0;
+			users[i].display.setMap(null);
+			users[i].src_marker.setMap(null);
+			users[i].dst_marker.setMap(null);
+			//var id = d.getAttribute('id');
+			var row = document.getElementById("row-"+users[i].id);
+			row.parentNode.removeChild(row);
+			users.pop();
+		//}
+	}
+	//users = new Array();
+	ids=1;
+	count=0;
+	return;
+}
+
+function deleteUser(obj){
+	//alert("deleting " + obj.getAttribute('id'));
+	var index = getIndex(obj.getAttribute('id'));
+	if(index==-1) alert("Some error occured. Please refresh. Error code: 1");
+	users[index].enable=0;
+	users[index].display.setMap(null);
+	users[index].src_marker.setMap(null);
+	users[index].dst_marker.setMap(null);
+	var id = obj.getAttribute('id');
+	var row = document.getElementById("row-"+id);
+	row.parentNode.removeChild(row);
+	count--;
+}
+
+function clearMarkers(){
+	if(src!==undefined){  
+		src.setMap(null); 
+		src=undefined; 
+	}
+	if(dst!==undefined){
+		dst.setMap(null);
+		dst=undefined;
+	}
+	directionsDisplay.setMap(null);
+}
+
+function submitCase(){
+	var tbl = document.getElementById("table-users");
+	//var rows = tbl.children;
+	var testcase = "[";
+	var first=1;
+	var i;
+	for(i=0;i<users.length;i++){
+		if(users[i].enable==0) continue;
+		var id = users[i].id;
+		var matches_elm = document.getElementById("users-"+id);
+		var matches_str = matches_elm.value;
+		var matches = matches_str.split(",");
+		var j;
+		for(j=0;j<matches.length;j++){
+			var tofind = matches[j].trim();
+			if(tofind=="") continue;
+			var found=0;
+			var k;
+			for(k=0;k<users.length;k++){
+				var candi = users[k].id.toString();
+				if(tofind==candi){ found=1; break; }
+			}
+			if(found==0){
+				var status = document.getElementById("status");
+				status.setAttribute('style',"color:red;position:relative;left:100px;top:40px");
+				status.innerHTML = "There is a mismatch in the user ids and the ids entered in the Matches field. Please correct it.";
+				return;
+			}	
+		}
+		var part = "{";
+		part = part + "id:" + users[i].id;
+		part = part + ",src:" + users[i].src.toString();
+		part = part + ",dst:" + users[i].dst.toString();
+		part = part + ",matches:" + matches_str;
+		part = part + "}";
+		if(first==0){
+			testcase = testcase + ",";
+		}else{
+			first=0;
+		}
+		testcase = testcase + "" + part;
+	}
+	//JSON.stringify(testcase);
+	testcase = testcase + "]";
+	var name_elm = document.getElementById("name");
+	var name = name_elm.value;
+	if(name=="name" || name==""){ 
+		var status = document.getElementById("status");
+		status.setAttribute('style',"color:red;position:relative;left:100px;top:40px");
+		status.innerHTML = "Please enter your first name.";
+		return;
+	}
+	var email_elm = document.getElementById("email");
+	var email = email_elm.value;
+	if(email=="email" || email==""){
+		var status = document.getElementById("status");
+		status.setAttribute('style',"color:red;position:relative;left:100px;top:40px");
+		status.innerHTML = "Please enter your email.";
+		return;
+	}
+	var url = "testcase.php";
+	var arg = "testcase=" + testcase + "&name=" + name + "&email=" + email;
+	var xmlhttp=new XMLHttpRequest();
+	xmlhttp.open("POST",url,true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xmlhttp.send(arg);
+	//alert("Response: " + xmlhttp.responseText);
+	var status = document.getElementById("status");
+	status.setAttribute('style',"color:green;position:relative;left:100px;top:40px");
+	status.innerHTML = "Thank you. Keep on making tricky test cases. We really appreciate it.";
+	clearAll();
+	return;
+}
+
+function clearText(obj){
+	obj.setAttribute('value',"");
+}
+ 
+
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+    
+    <style>
+      #map-canvas {
+        margin: 10px;
+        padding: 0;
+        height: 450px;
+	width: 500px;
+      }
+      #buttons {
+        margin: 0;
+        padding: 0;
+        height: 80px;
+	width: 1000px;
+      }
+      #users {
+	position: absolute;
+	left: 600px;
+	top: 5px;
+        margin: 0;
+        padding: 0;
+        height: 80px;
+		width: 600px;
+      }
+    </style>
+
+</head>
+
+<body>
+  <h3 style="margin:10px">Test Case Maker</h3>
+  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+
+  <div id="map-canvas"></div>
+
+  <div id="buttons">
+    <button id="clear" type="button" style="position:relative;left:20px;top:10px" class="btn btn-warning" onclick="clearMarkers()">Clear Map</button>
+    <button id="add_user" type="button" style="position:relative;left:250px;top:10px" class="btn btn-primary" onclick="addUser()">Add User</button>	
+    <button id="submit" type="button" style="position:relative;left:900px;top:70px" class="btn btn-success btn-large" onclick="submitCase()">Submit</button>
+	<input type="text" id="name" value="name" style="position:relative;left:300px;top:4px" onclick="clearText(this)">
+	<input type="text" id="email" value="email" style="position:relative;left:400px;top:4px" onclick="clearText(this)">
+	<div id="status" style="color:blue;position:relative;left:100px;top:40px">
+		Click on the map to mark the source.
+	</div>
+	
+  </div>
+
+  <div id="users">
+	<table id="users_table" class="table table-striped">
+		<col width=100px>
+		<col width=400px>
+		<col width=100px>
+			
+	    <thead>	
+			<tr>
+				<th>Id</th>
+				<th>Matches (comma,seperated,ids)</th>
+				<th>Remove</th>
+				
+			</tr>
+		</thead>
+	</table>
+	
+  </div>
+  
+
+</body>
+
+</html>
