@@ -199,10 +199,10 @@ function submitCase(){
 			}	
 		}
 		var part = "{";
-		part = part + "id:" + users[i].id;
-		part = part + ",src:" + users[i].src.toString();
-		part = part + ",dst:" + users[i].dst.toString();
-		part = part + ",matches:" + matches_str;
+		part = part + "\\\"id\\\":" + "\\\"" + users[i].id + "\\\"";
+		part = part + ",\\\"src\\\":" + "\\\"" + users[i].src.toString() + "\\\"";
+		part = part + ",\\\"dst\\\":" + "\\\"" + users[i].dst.toString() + "\\\"";
+		part = part + ",\\\"matches\\\":" + "\\\"" + matches_str + "\\\"";
 		part = part + "}";
 		if(first==0){
 			testcase = testcase + ",";
