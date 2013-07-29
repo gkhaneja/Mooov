@@ -831,8 +831,11 @@ function showMatches($matches,$fbid=0,$carpool = 1){
    if(isset($match_row['details'])){
      $fbinfo = new FBInfo($match_row['details']);
      $fb_array = $fbinfo->getData();
-     $fb_array['fb_info_available'] = 1;
      $fbid2 = $match_row['details']['fbid'];
+     if(isset($fbid2))
+       $fb_array['fb_info_available'] = 1;
+     else
+       $fb_array['fb_info_available'] = 0;
      if(isset($fbid2)){
       $friends = parent::execute("select * from connections where (fbid1=$fbid AND fbid2=$fbid2)");
       if($friends->num_rows > 0){
